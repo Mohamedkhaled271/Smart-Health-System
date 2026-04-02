@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Static frontend for Azure App Service",
   "scripts": {
-    "start": "npx serve -s ."
+    "start": "npx serve -s . -l 8080"
   },
   "dependencies": {
     "serve": "^14.2.0"
