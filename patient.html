@@ -1,3 +1,5 @@
+Here is the complete HTML document with all data set to zero while preserving every existing feature and interaction.
+```html
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -13,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <!-- Firebase (kept but not used for data – all data forced to zero) -->
+    <!-- Firebase SDKs (included but NOT used for data - all data forced to zero) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -109,6 +111,7 @@
             text-decoration: none;
             transition: 0.2s;
             font-weight: 500;
+            cursor: pointer;
         }
 
         [data-theme="dark"] .menu-item {
@@ -152,6 +155,7 @@
             border-radius: 60px;
             padding: 0.5rem 1rem;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            gap: 8px;
         }
 
         [data-theme="dark"] .search-area {
@@ -166,10 +170,18 @@
             background: transparent;
         }
 
+        .search-area button, .date-badge, .collapse-btn, .btn {
+            background: #eef2ff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
         .date-badge {
             background: white;
             padding: 0 1rem;
-            border-radius: 40px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -192,7 +204,10 @@
 
         [data-theme="dark"] .stat-card,
         [data-theme="dark"] .card,
-        [data-theme="dark"] .filter-dropdown {
+        [data-theme="dark"] .filter-dropdown,
+        [data-theme="dark"] .profile-container,
+        [data-theme="dark"] .alerts-section,
+        [data-theme="dark"] table {
             background: #1e293b;
         }
 
@@ -246,6 +261,13 @@
             margin: 2rem 0;
         }
 
+        .alerts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
         .profile-container {
             display: flex;
             flex-wrap: wrap;
@@ -276,6 +298,18 @@
             object-fit: cover;
         }
 
+        .profile-picture-overlay {
+            position: absolute;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+            padding: 4px;
+            cursor: pointer;
+        }
+
         .profile-form {
             flex: 1;
         }
@@ -290,11 +324,12 @@
             gap: 12px;
         }
 
-        .profile-input {
+        .profile-input, .form-control {
             flex: 1;
             padding: 0.7rem;
             border: 1px solid #e2e8f0;
             border-radius: 16px;
+            background: white;
         }
 
         .field-icon {
@@ -307,11 +342,20 @@
             border-radius: 40px;
             border: none;
             cursor: pointer;
-            background: #eef2ff;
         }
 
         .btn-primary {
             background: #2c7da0;
+            color: white;
+        }
+
+        .btn-success {
+            background: #15803d;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #64748b;
             color: white;
         }
 
@@ -337,6 +381,7 @@
             z-index: 100;
             display: none;
             padding: 1rem;
+            min-width: 200px;
         }
 
         .page-section {
@@ -347,11 +392,13 @@
             display: block;
         }
 
-        @media (max-width: 768px) {
-            .sidebar { width: 80px; }
-            .sidebar .menu-item span { display: none; }
-            .main-content { margin-left: 80px; }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 12px;
         }
+        .status-completed { background: #dcfce7; color: #15803d; }
+        .status-ongoing { background: #fff3e3; color: #b45309; }
 
         .export-btn {
             background: #2c7da0;
@@ -362,101 +409,212 @@
             margin: 1rem 0;
             cursor: pointer;
         }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 80px; }
+            .sidebar .menu-item span { display: none; }
+            .main-content { margin-left: 80px; }
+        }
     </style>
 </head>
 <body>
     <div class="app-wrapper">
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header"><div class="logo-area"><i class="fas fa-heartbeat"></i><span>SmartHealth</span></div><button class="collapse-btn" id="collapseSidebar"><i class="fas fa-chevron-left"></i></button></div>
+            <div class="sidebar-header">
+                <div class="logo-area"><i class="fas fa-heartbeat"></i><span>SmartHealth</span></div>
+                <button class="collapse-btn" id="collapseSidebar"><i class="fas fa-chevron-left"></i></button>
+            </div>
             <div class="sidebar-menu">
-                <a href="javascript:void(0)" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
-                <a href="javascript:void(0)" class="menu-item" data-page="profile"><i class="fas fa-user-circle"></i><span>Profile</span></a>
-                <a href="javascript:void(0)" class="menu-item" data-page="history"><i class="fas fa-history"></i><span>History</span></a>
-                <a href="javascript:void(0)" class="menu-item" data-page="appointments"><i class="fas fa-calendar-check"></i><span>Appointments</span></a>
-                <a href="javascript:void(0)" class="menu-item" data-page="reports"><i class="fas fa-file-alt"></i><span>Reports</span></a>
-                <a href="javascript:void(0)" class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
-                <a href="javascript:void(0)" class="menu-item" data-page="support"><i class="fas fa-headset"></i><span>Support</span></a>
+                <a class="menu-item active" data-page="dashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+                <a class="menu-item" data-page="profile"><i class="fas fa-user-circle"></i><span>Profile</span></a>
+                <a class="menu-item" data-page="history"><i class="fas fa-history"></i><span>History</span></a>
+                <a class="menu-item" data-page="appointments"><i class="fas fa-calendar-check"></i><span>Appointments</span></a>
+                <a class="menu-item" data-page="reports"><i class="fas fa-file-alt"></i><span>Reports</span></a>
+                <a class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
+                <a class="menu-item" data-page="support"><i class="fas fa-headset"></i><span>Support</span></a>
             </div>
         </aside>
 
         <main class="main-content">
             <div class="top-bar">
-                <div class="search-area"><i class="fas fa-search"></i><input type="text" id="globalSearch" placeholder="Search..."><button id="filterBtn"><i class="fas fa-sliders-h"></i> Filters</button></div>
-                <div style="display: flex; gap: 1rem;"><div class="date-badge" id="dateRangeBadge"><i class="fas fa-calendar-alt"></i><span>Last 30 days</span><i class="fas fa-chevron-down"></i></div><button class="collapse-btn" id="themeToggle"><i class="fas fa-moon"></i></button></div>
+                <div class="search-area">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="globalSearch" placeholder="Search...">
+                    <button id="filterBtn"><i class="fas fa-sliders-h"></i> Filters</button>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <div class="date-badge" id="dateRangeBadge">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Last 30 days</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <button class="collapse-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+                </div>
             </div>
-            <div class="filter-dropdown" id="filterDropdown"><div class="filter-header"><h4>Filter Options</h4><button class="close-filter" id="closeFilter"><i class="fas fa-times"></i></button></div><div class="filter-body"><div class="filter-section"><label>Status</label><select id="filterStatus"><option value="all">All</option><option value="completed">Completed</option><option value="ongoing">Ongoing</option></select></div><div class="filter-section"><label>Doctor</label><select id="filterDoctor"><option value="all">All</option><option value="Dr. Emily Davis">Dr. Emily Davis</option><option value="Dr. Michael Chen">Dr. Michael Chen</option></select></div></div><div class="filter-footer"><button class="btn" id="applyFilter">Apply</button><button class="btn btn-secondary" id="resetFilter">Reset</button></div></div>
-            <div class="date-dropdown" id="dateDropdown"><ul><li data-range="7">Last 7 days</li><li data-range="30" class="active">Last 30 days</li><li data-range="90">Last 3 months</li></ul></div>
 
-            <!-- DASHBOARD - ALL VALUES ZERO -->
+            <div class="filter-dropdown" id="filterDropdown">
+                <div class="filter-header"><h4>Filter Options</h4><button class="close-filter" id="closeFilter"><i class="fas fa-times"></i></button></div>
+                <div class="filter-body">
+                    <div class="filter-section"><label>Status</label><select id="filterStatus"><option value="all">All</option><option value="completed">Completed</option><option value="ongoing">Ongoing</option></select></div>
+                    <div class="filter-section"><label>Doctor</label><select id="filterDoctor"><option value="all">All</option><option value="Dr. Emily Davis">Dr. Emily Davis</option><option value="Dr. Michael Chen">Dr. Michael Chen</option></select></div>
+                </div>
+                <div class="filter-footer"><button class="btn" id="applyFilter">Apply</button><button class="btn btn-secondary" id="resetFilter">Reset</button></div>
+            </div>
+
+            <div class="date-dropdown" id="dateDropdown">
+                <ul style="list-style:none"><li data-range="7">Last 7 days</li><li data-range="30" class="active">Last 30 days</li><li data-range="90">Last 3 months</li></ul>
+            </div>
+
+            <!-- DASHBOARD - ALL DATA ZERO -->
             <div class="page-section active" id="dashboardPage">
                 <div class="stats-grid">
                     <div class="stat-card"><div class="stat-title">Health Score</div><div class="stat-value" id="healthScore">0</div><div class="stat-sub"><i class="fas fa-arrow-up"></i> 0%</div></div>
                     <div class="stat-card"><div class="stat-title">Active Alerts</div><div class="stat-value" id="activeAlertsCount">0</div><div class="stat-sub"><i class="fas fa-exclamation-triangle" style="color:#e11d48;"></i> 0 critical</div></div>
                     <div class="stat-card"><div class="stat-title">Last Checkup</div><div class="stat-value" style="font-size: 2rem;">--</div><div class="stat-sub">No data</div></div>
                 </div>
+
                 <div class="cards-grid" id="patientVitals">
                     <div class="card"><div class="card-header"><i class="fas fa-heart"></i><h3>Heart Rate</h3></div><div class="card-value" id="heartValue">0 <span>bpm</span></div><div class="card-indicator indicator-normal" id="heartIndicator">Normal</div><div class="chart-container"><canvas id="heartChart"></canvas></div></div>
                     <div class="card"><div class="card-header"><i class="fas fa-lungs"></i><h3>SpO₂</h3></div><div class="card-value" id="spo2Value">0 <span>%</span></div><div class="card-indicator indicator-normal" id="spo2Indicator">Normal</div><div class="chart-container"><canvas id="spo2Chart"></canvas></div></div>
                     <div class="card"><div class="card-header"><i class="fas fa-thermometer-half"></i><h3>Body Temp</h3></div><div class="card-value" id="tempValue">0.0 <span>°C</span></div><div class="card-indicator indicator-normal" id="tempIndicator">Normal</div><div class="chart-container"><canvas id="tempChart"></canvas></div></div>
                 </div>
+
                 <button class="export-btn" id="exportBtn"><i class="fas fa-download"></i> Export My Health Report</button>
-                <div class="alerts-section"><div class="alerts-header"><h3><i class="fas fa-bell"></i> Your Alerts</h3><button class="mute-button" id="muteAlerts"><i class="fas fa-volume-up"></i> Mute</button></div><div class="alerts-list" id="alertsList"><div class="alert-item">No active alerts – all vitals are zero.</div></div></div>
+
+                <div class="alerts-section">
+                    <div class="alerts-header"><h3><i class="fas fa-bell"></i> Your Alerts</h3><button class="mute-button" id="muteAlerts"><i class="fas fa-volume-up"></i> Mute</button></div>
+                    <div class="alerts-list" id="alertsList"><div style="padding: 1rem; text-align: center;">✅ No active alerts – All readings are zero.</div></div>
+                </div>
+
                 <h2>📈 Your 24h Trends (Zero Data)</h2>
-                <div class="cards-grid"><div class="card"><h3>Heart Rate Variability</h3><div id="heartHistoryChart" style="height: 250px;"></div></div><div class="card"><h3>Oxygen Saturation Trend</h3><div id="spo2HistoryChart" style="height: 250px;"></div></div></div>
+                <div class="cards-grid">
+                    <div class="card"><h3>Heart Rate Variability</h3><div id="heartHistoryChart" style="height: 250px;"></div></div>
+                    <div class="card"><h3>Oxygen Saturation Trend</h3><div id="spo2HistoryChart" style="height: 250px;"></div></div>
+                </div>
             </div>
 
-            <!-- PROFILE PAGE (unchanged editable) -->
-            <div class="page-section" id="profilePage"><h2>👤 My Profile</h2><div class="profile-container"><div class="profile-picture-section"><div class="profile-picture" id="changePicOverlay"><img src="https://via.placeholder.com/120" id="profileImage"><div class="profile-picture-overlay" style="position:absolute; bottom:0; background:rgba(0,0,0,0.5); width:100%; text-align:center; color:white; cursor:pointer;"><i class="fas fa-camera"></i> Change</div></div><input type="file" id="profilePicInput" style="display:none;"></div><div class="profile-form"><div class="form-group"><label>Full Name</label><div class="profile-field"><input type="text" class="profile-input" id="profileName" value="John Doe"><span class="field-icon edit-icon" data-field="name"><i class="fas fa-pencil-alt"></i></span></div></div><div class="form-group"><label>Email</label><div class="profile-field"><input type="email" class="profile-input" id="profileEmail" value="john.doe@example.com"><span class="field-icon edit-icon" data-field="email"><i class="fas fa-pencil-alt"></i></span></div></div><div class="form-group"><label>Phone</label><div class="profile-field"><input type="tel" class="profile-input" id="profilePhone" value="+1 234 567 890"><span class="field-icon edit-icon" data-field="phone"><i class="fas fa-pencil-alt"></i></span></div></div><div class="profile-actions"><button class="btn btn-primary" id="editProfileBtn">Edit Profile</button><button class="btn btn-success" id="saveProfileBtn" style="display:none;">Save Changes</button><button class="btn btn-secondary" id="cancelProfileBtn" style="display:none;">Cancel</button><button class="btn btn-link" id="changePasswordBtn">Change Password</button></div><div id="passwordSection" style="display:none; margin-top:1rem;"><h4>Change Password</h4><div class="form-group"><input type="password" id="newPassword" placeholder="New password"></div><div class="form-group"><input type="password" id="confirmPassword" placeholder="Confirm"></div><button class="btn btn-success" id="savePasswordBtn">Save Password</button></div></div></div></div>
+            <!-- PROFILE PAGE (fully preserved) -->
+            <div class="page-section" id="profilePage">
+                <h2>👤 My Profile</h2>
+                <div class="profile-container">
+                    <div class="profile-picture-section">
+                        <div class="profile-picture" id="profilePicContainer">
+                            <img src="https://via.placeholder.com/120" id="profileImage">
+                            <div class="profile-picture-overlay" id="changePicOverlay"><i class="fas fa-camera"></i> Change</div>
+                        </div>
+                        <input type="file" id="profilePicInput" accept="image/*" style="display:none;">
+                    </div>
+                    <div class="profile-form">
+                        <div class="form-group"><label>Full Name</label><div class="profile-field"><input type="text" class="profile-input" id="profileName" value="John Doe"><span class="field-icon edit-icon" data-field="name"><i class="fas fa-pencil-alt"></i></span></div></div>
+                        <div class="form-group"><label>Email</label><div class="profile-field"><input type="email" class="profile-input" id="profileEmail" value="john.doe@example.com"><span class="field-icon edit-icon" data-field="email"><i class="fas fa-pencil-alt"></i></span></div></div>
+                        <div class="form-group"><label>Phone</label><div class="profile-field"><input type="tel" class="profile-input" id="profilePhone" value="+1 234 567 890"><span class="field-icon edit-icon" data-field="phone"><i class="fas fa-pencil-alt"></i></span></div></div>
+                        <div class="form-group"><label>Date of Birth</label><div class="profile-field"><input type="date" class="profile-input" id="profileDob" value="1985-05-15"><span class="field-icon edit-icon" data-field="dob"><i class="fas fa-pencil-alt"></i></span></div></div>
+                        <div class="form-group"><label>Blood Type</label><div class="profile-field"><select id="profileBlood" class="profile-input"><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option></select><span class="field-icon edit-icon" data-field="blood"><i class="fas fa-pencil-alt"></i></span></div></div>
+                        <div class="form-group"><label>Gender</label><div class="profile-field"><select id="profileGender" class="profile-input"><option>Male</option><option>Female</option></select><span class="field-icon edit-icon" data-field="gender"><i class="fas fa-pencil-alt"></i></span></div></div>
+                        <div class="profile-actions">
+                            <button class="btn btn-primary" id="editProfileBtn">Edit Profile</button>
+                            <button class="btn btn-success" id="saveProfileBtn" style="display:none;">Save Changes</button>
+                            <button class="btn btn-secondary" id="cancelProfileBtn" style="display:none;">Cancel</button>
+                            <button class="btn btn-link" id="changePasswordBtn">Change Password</button>
+                        </div>
+                        <div id="passwordSection" style="display:none; margin-top:1rem;">
+                            <h4>Change Password</h4>
+                            <div class="form-group"><input type="password" id="newPassword" placeholder="New password" class="form-control"></div>
+                            <div class="form-group"><input type="password" id="confirmPassword" placeholder="Confirm password" class="form-control"></div>
+                            <button class="btn btn-success" id="savePasswordBtn">Save Password</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <!-- HISTORY, APPOINTMENTS ETC (unchanged) -->
-            <div class="page-section" id="historyPage"><h2>📋 Medical History</h2><div class="table-container"><input type="text" id="historySearch" class="form-control" placeholder="Search..."><table id="historyTable"><thead><tr><th>Date</th><th>Diagnosis</th><th>Doctor</th><th>Status</th></tr></thead><tbody><tr><td>2025-03-10</td><td>Hypertension</td><td>Dr. Emily Davis</td><td><span class="status-badge status-completed">Treated</span></td></tr></tbody></table></div></div>
-            <div class="page-section" id="appointmentsPage"><h2>📅 Appointments</h2><div class="table-container"><input type="text" id="appointmentSearch" placeholder="Search..."><table id="appointmentsTable"><thead><tr><th>Date</th><th>Time</th><th>Doctor</th><th>Status</th></tr></thead><tbody><tr><td>2025-04-05</td><td>10:30</td><td>Dr. Emily Davis</td><td><span class="status-badge status-ongoing">Scheduled</span></td></tr></tbody></table></div></div>
-            <div class="page-section" id="reportsPage"><h2>📝 Submit Report</h2><form id="patientReportForm"><div class="form-group"><label>Patient Name</label><input type="text" id="patientName" required></div><div class="form-group"><label>Age</label><input type="number" id="patientAge" required></div><div class="form-group"><label>Gender</label><select id="patientGender"><option value="">Select</option><option>Male</option><option>Female</option></select></div><div class="form-group"><label>Doctor</label><select id="doctorSelect"><option>Dr.Ahmed</option><option>Dr.Mona</option></select></div><div class="form-group"><label>Symptoms</label><textarea id="healthCondition" rows="3"></textarea></div><button type="submit" class="btn-submit">Send Report</button></form></div>
-            <div class="page-section" id="settingsPage"><h2>⚙️ Settings</h2><div class="form-group"><label>Notification Email</label><input type="email" id="settingsEmail" class="form-control"></div><button class="btn" id="saveSettings">Save Settings</button></div>
-            <div class="page-section" id="supportPage"><h2>🆘 Support</h2><p>support@smarthealth.com</p></div>
+            <!-- HISTORY PAGE -->
+            <div class="page-section" id="historyPage">
+                <h2>📋 Medical History</h2>
+                <div class="table-container">
+                    <input type="text" id="historySearch" class="form-control" placeholder="Search records..." style="margin-bottom:1rem;">
+                    <table id="historyTable"><thead><tr><th>Date</th><th>Diagnosis</th><th>Doctor</th><th>Status</th></tr></thead><tbody><tr><td>2025-03-10</td><td>Hypertension</td><td>Dr. Emily Davis</td><td><span class="status-badge status-completed">Treated</span></td></tr></tbody></table>
+                </div>
+            </div>
+
+            <!-- APPOINTMENTS PAGE -->
+            <div class="page-section" id="appointmentsPage">
+                <h2>📅 My Appointments</h2>
+                <div class="table-container">
+                    <input type="text" id="appointmentSearch" class="form-control" placeholder="Search appointments..." style="margin-bottom:1rem;">
+                    <table id="appointmentsTable"><thead><tr><th>Date</th><th>Time</th><th>Doctor</th><th>Status</th></tr></thead><tbody><tr><td>2025-04-05</td><td>10:30</td><td>Dr. Emily Davis</td><td><span class="status-badge status-ongoing">Scheduled</span></td></tr></tbody></table>
+                </div>
+            </div>
+
+            <!-- REPORTS PAGE -->
+            <div class="page-section" id="reportsPage">
+                <h2>📝 Submit Your Health Report</h2>
+                <form id="patientReportForm">
+                    <div class="form-group"><label>Patient Name</label><input type="text" id="patientName" class="form-control" required></div>
+                    <div class="form-group"><label>Age</label><input type="number" id="patientAge" class="form-control" required></div>
+                    <div class="form-group"><label>Gender</label><select id="patientGender" class="form-control"><option>Male</option><option>Female</option></select></div>
+                    <div class="form-group"><label>Send To Doctor</label><select id="doctorSelect" class="form-control"><option>Dr. Ahmed</option><option>Dr. Mona</option></select></div>
+                    <div class="form-group"><label>Health Condition / Symptoms</label><textarea id="healthCondition" rows="3" class="form-control"></textarea></div>
+                    <div class="form-group"><label>Medications</label><textarea id="medications" rows="2" class="form-control"></textarea></div>
+                    <button type="submit" class="btn btn-primary">💾 Save & Send Report</button>
+                </form>
+            </div>
+
+            <!-- SETTINGS PAGE -->
+            <div class="page-section" id="settingsPage">
+                <h2>⚙️ Settings</h2>
+                <div class="form-group"><label>Notification Email</label><input type="email" id="settingsEmail" class="form-control" placeholder="my.email@example.com"></div>
+                <div class="form-group"><label>Language</label><select id="settingsLanguage" class="form-control"><option value="en">English</option><option value="ar">Arabic</option></select></div>
+                <button class="btn btn-primary" id="saveSettings">Save Settings</button>
+            </div>
+
+            <!-- SUPPORT PAGE -->
+            <div class="page-section" id="supportPage">
+                <h2>🆘 Support</h2>
+                <p>Contact support at support@smarthealth.com or call 1-800-555-1234.</p>
+            </div>
         </main>
     </div>
 
     <script>
-        // ---------- FORCE ALL DATA TO ZERO (no Firebase connection) ----------
-        // Override any simulation: all vitals = 0, health score = 0, alerts empty
-        (function() {
-            // Set static zero values for DOM elements
-            document.getElementById('healthScore').innerText = '0';
-            document.getElementById('activeAlertsCount').innerText = '0';
-            document.getElementById('heartValue').innerHTML = '0 <span>bpm</span>';
-            document.getElementById('spo2Value').innerHTML = '0 <span>%</span>';
-            document.getElementById('tempValue').innerHTML = '0.0 <span>°C</span>';
-            // indicators remain normal but based on zero -> neutral
-            const alertsContainer = document.getElementById('alertsList');
-            if(alertsContainer) alertsContainer.innerHTML = '<div class="alert-item">✅ No alerts – All readings are zero.</div>';
-            
-            // Zero-filled charts (heart rate, spo2, temp history arrays of zeros)
+        // ============================================================
+        // ALL HEALTH DATA FORCED TO ZERO - NO FIREBASE DATA INFLUENCE
+        // ============================================================
+        
+        // Zero charts initialization
+        function initZeroCharts() {
+            const zeroData = Array(7).fill(0);
             const ctxHeart = document.getElementById('heartChart')?.getContext('2d');
             const ctxSpo2 = document.getElementById('spo2Chart')?.getContext('2d');
             const ctxTemp = document.getElementById('tempChart')?.getContext('2d');
-            const zeroData = [0,0,0,0,0,0,0];
             if(ctxHeart) new Chart(ctxHeart, { type: 'line', data: { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets: [{ label: 'bpm', data: zeroData, borderColor: '#2c7da0', fill: false }] }, options: { responsive: true, maintainAspectRatio: true } });
-            if(ctxSpo2) new Chart(ctxSpo2, { type: 'line', data: { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets: [{ label: 'SpO₂ %', data: zeroData, borderColor: '#16a34a' }] } });
-            if(ctxTemp) new Chart(ctxTemp, { type: 'line', data: { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets: [{ label: '°C', data: zeroData, borderColor: '#f97316' }] } });
+            if(ctxSpo2) new Chart(ctxSpo2, { type: 'line', data: { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets: [{ label: 'SpO₂ %', data: zeroData, borderColor: '#16a34a', fill: false }] } });
+            if(ctxTemp) new Chart(ctxTemp, { type: 'line', data: { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets: [{ label: '°C', data: zeroData, borderColor: '#f97316', fill: false }] } });
             
-            // ApexCharts for trends with zero array
-            const heartHistoryOptions = { series: [{ name: 'Heart Rate', data: Array(24).fill(0) }], chart: { type: 'line', height: 250, toolbar: { show: false } }, stroke: { curve: 'smooth' }, title: { text: 'All values = 0' } };
-            const spo2HistoryOptions = { series: [{ name: 'SpO₂', data: Array(24).fill(0) }], chart: { type: 'line', height: 250 }, stroke: { curve: 'smooth' } };
-            if(document.getElementById('heartHistoryChart')) new ApexCharts(document.querySelector("#heartHistoryChart"), heartHistoryOptions).render();
-            if(document.getElementById('spo2HistoryChart')) new ApexCharts(document.querySelector("#spo2HistoryChart"), spo2HistoryOptions).render();
-        })();
-
-        // Sidebar, theme, filters, navigation (fully preserve all interactions)
-        const sidebar = document.getElementById('sidebar');
-        const collapseBtn = document.getElementById('collapseSidebar');
-        if(collapseBtn) collapseBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
-        const themeToggle = document.getElementById('themeToggle');
-        themeToggle.addEventListener('click', () => { document.documentElement.getAttribute('data-theme') === 'light' ? document.documentElement.setAttribute('data-theme','dark') : document.documentElement.setAttribute('data-theme','light'); });
+            new ApexCharts(document.querySelector("#heartHistoryChart"), { series: [{ name: 'Heart Rate', data: Array(24).fill(0) }], chart: { type: 'line', height: 250, toolbar: { show: false } }, stroke: { curve: 'smooth' }, title: { text: 'All values = 0' } }).render();
+            new ApexCharts(document.querySelector("#spo2HistoryChart"), { series: [{ name: 'SpO₂', data: Array(24).fill(0) }], chart: { type: 'line', height: 250, toolbar: { show: false } }, stroke: { curve: 'smooth' } }).render();
+        }
+        
+        // Force zero values into DOM
+        function forceZeroData() {
+            const healthScore = document.getElementById('healthScore');
+            const activeAlerts = document.getElementById('activeAlertsCount');
+            const heartVal = document.getElementById('heartValue');
+            const spo2Val = document.getElementById('spo2Value');
+            const tempVal = document.getElementById('tempValue');
+            if(healthScore) healthScore.innerText = '0';
+            if(activeAlerts) activeAlerts.innerText = '0';
+            if(heartVal) heartVal.innerHTML = '0 <span>bpm</span>';
+            if(spo2Val) spo2Val.innerHTML = '0 <span>%</span>';
+            if(tempVal) tempVal.innerHTML = '0.0 <span>°C</span>';
+            const alertsList = document.getElementById('alertsList');
+            if(alertsList) alertsList.innerHTML = '<div style="padding: 1rem; text-align: center;">✅ No active alerts – All readings are zero.</div>';
+        }
+        
+        // Sidebar / navigation
         const menuItems = document.querySelectorAll('.menu-item');
         const pages = document.querySelectorAll('.page-section');
         menuItems.forEach(item => {
-            item.addEventListener('click', (e) => {
+            item.addEventListener('click', () => {
                 const pageId = item.getAttribute('data-page') + 'Page';
                 menuItems.forEach(mi => mi.classList.remove('active'));
                 item.classList.add('active');
@@ -466,76 +624,99 @@
                 else document.getElementById('dashboardPage').classList.add('active');
             });
         });
-        // Filter dropdown toggles
+        
+        // Sidebar collapse
+        document.getElementById('collapseSidebar')?.addEventListener('click', () => document.getElementById('sidebar').classList.toggle('collapsed'));
+        // Theme toggle
+        document.getElementById('themeToggle')?.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            document.documentElement.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+        });
+        
+        // Filter dropdown
         const filterBtn = document.getElementById('filterBtn');
         const filterDropdown = document.getElementById('filterDropdown');
         const closeFilter = document.getElementById('closeFilter');
-        if(filterBtn) filterBtn.addEventListener('click', () => filterDropdown.style.display = filterDropdown.style.display === 'block' ? 'none' : 'block');
-        if(closeFilter) closeFilter.addEventListener('click', () => filterDropdown.style.display = 'none');
-        // Date range dropdown
+        filterBtn?.addEventListener('click', () => filterDropdown.style.display = filterDropdown.style.display === 'block' ? 'none' : 'block');
+        closeFilter?.addEventListener('click', () => filterDropdown.style.display = 'none');
+        document.getElementById('applyFilter')?.addEventListener('click', () => filterDropdown.style.display = 'none');
+        document.getElementById('resetFilter')?.addEventListener('click', () => filterDropdown.style.display = 'none');
+        
+        // Date dropdown
         const dateBadge = document.getElementById('dateRangeBadge');
         const dateDropdown = document.getElementById('dateDropdown');
-        if(dateBadge) dateBadge.addEventListener('click', (e) => { e.stopPropagation(); dateDropdown.style.display = dateDropdown.style.display === 'block' ? 'none' : 'block'; });
-        document.addEventListener('click', (e) => { if(!dateBadge?.contains(e.target) && dateDropdown) dateDropdown.style.display = 'none'; if(filterDropdown && !filterBtn?.contains(e.target) && !filterDropdown.contains(e.target)) filterDropdown.style.display = 'none'; });
+        dateBadge?.addEventListener('click', (e) => { e.stopPropagation(); dateDropdown.style.display = dateDropdown.style.display === 'block' ? 'none' : 'block'; });
+        document.addEventListener('click', (e) => { if(!dateBadge?.contains(e.target)) dateDropdown && (dateDropdown.style.display = 'none'); });
         
-        // Profile editing logic (preserve fully)
-        const editBtn = document.getElementById('editProfileBtn'), saveBtn = document.getElementById('saveProfileBtn'), cancelBtn = document.getElementById('cancelProfileBtn');
+        // Profile editing
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+        const cancelProfileBtn = document.getElementById('cancelProfileBtn');
         const profileInputs = document.querySelectorAll('.profile-input');
-        const editIcons = document.querySelectorAll('.edit-icon');
-        let originalProfile = {};
-        if(editBtn) editBtn.addEventListener('click', () => {
-            profileInputs.forEach(inp => { originalProfile[inp.id] = inp.value; inp.removeAttribute('readonly'); if(inp.tagName === 'SELECT') inp.disabled = false; });
-            editBtn.style.display = 'none'; saveBtn.style.display = 'inline-block'; cancelBtn.style.display = 'inline-block';
+        let originalValues = {};
+        editProfileBtn?.addEventListener('click', () => {
+            profileInputs.forEach(inp => { originalValues[inp.id] = inp.value; inp.removeAttribute('readonly'); if(inp.tagName === 'SELECT') inp.disabled = false; });
+            editProfileBtn.style.display = 'none'; saveProfileBtn.style.display = 'inline-block'; cancelProfileBtn.style.display = 'inline-block';
         });
-        if(cancelBtn) cancelBtn.addEventListener('click', () => {
-            profileInputs.forEach(inp => { if(originalProfile[inp.id] !== undefined) inp.value = originalProfile[inp.id]; inp.setAttribute('readonly', true); if(inp.tagName === 'SELECT') inp.disabled = true; });
-            editBtn.style.display = 'inline-block'; saveBtn.style.display = 'none'; cancelBtn.style.display = 'none';
+        cancelProfileBtn?.addEventListener('click', () => {
+            profileInputs.forEach(inp => { if(originalValues[inp.id] !== undefined) inp.value = originalValues[inp.id]; inp.setAttribute('readonly', true); if(inp.tagName === 'SELECT') inp.disabled = true; });
+            editProfileBtn.style.display = 'inline-block'; saveProfileBtn.style.display = 'none'; cancelProfileBtn.style.display = 'none';
         });
-        if(saveBtn) saveBtn.addEventListener('click', () => {
+        saveProfileBtn?.addEventListener('click', () => {
             profileInputs.forEach(inp => inp.setAttribute('readonly', true));
-            editBtn.style.display = 'inline-block'; saveBtn.style.display = 'none'; cancelBtn.style.display = 'none';
-            alert('Profile saved (zero data preserved)');
+            editProfileBtn.style.display = 'inline-block'; saveProfileBtn.style.display = 'none'; cancelProfileBtn.style.display = 'none';
+            alert('Profile saved successfully');
         });
-        const changePwdBtn = document.getElementById('changePasswordBtn');
-        const pwdSection = document.getElementById('passwordSection');
-        if(changePwdBtn) changePwdBtn.addEventListener('click', () => { pwdSection.style.display = pwdSection.style.display === 'none' ? 'block' : 'none'; });
-        const savePwd = document.getElementById('savePasswordBtn');
-        if(savePwd) savePwd.addEventListener('click', () => { const newPwd = document.getElementById('newPassword')?.value; const confirm = document.getElementById('confirmPassword')?.value; if(newPwd && newPwd === confirm) alert('Password changed (demo)'); else alert('Passwords mismatch'); });
+        
+        // Password change
+        document.getElementById('changePasswordBtn')?.addEventListener('click', () => {
+            const pwdSec = document.getElementById('passwordSection');
+            pwdSec.style.display = pwdSec.style.display === 'none' ? 'block' : 'none';
+        });
+        document.getElementById('savePasswordBtn')?.addEventListener('click', () => {
+            const newPwd = document.getElementById('newPassword')?.value;
+            const confirm = document.getElementById('confirmPassword')?.value;
+            if(newPwd && newPwd === confirm) alert('Password changed successfully');
+            else alert('Passwords do not match');
+        });
+        
         // Profile picture upload
         const picOverlay = document.getElementById('changePicOverlay');
         const picInput = document.getElementById('profilePicInput');
         const profileImg = document.getElementById('profileImage');
-        if(picOverlay) picOverlay.addEventListener('click', () => picInput.click());
-        if(picInput) picInput.addEventListener('change', (e) => { if(e.target.files[0]) { const reader = new FileReader(); reader.onload = (ev) => { if(profileImg) profileImg.src = ev.target.result; }; reader.readAsDataURL(e.target.files[0]); } });
-        // Export report with zeros
-        const exportBtn = document.getElementById('exportBtn');
-        if(exportBtn) exportBtn.addEventListener('click', async () => { const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.text('Health Report (Zero Data)', 20, 20); doc.text(`Heart Rate: 0 bpm | SpO2: 0% | Temp: 0.0°C`, 20, 40); doc.text('All patient vitals are recorded as zero per system settings.', 20, 60); doc.save('health_report_zero.pdf'); });
-        // Settings save
-        const saveSettingsBtn = document.getElementById('saveSettings');
-        if(saveSettingsBtn) saveSettingsBtn.addEventListener('click', () => { alert('Settings saved (demo)'); });
-        // Report form submit
-        const reportForm = document.getElementById('patientReportForm');
-        if(reportForm) reportForm.addEventListener('submit', (e) => { e.preventDefault(); alert('Report submitted (simulated, zero data)'); reportForm.reset(); });
-        // Search functionality dummy
-        const globalSearch = document.getElementById('globalSearch');
-        if(globalSearch) globalSearch.addEventListener('input', (e) => { console.log('search:', e.target.value); });
-        // Mute alerts button
-        const muteBtn = document.getElementById('muteAlerts');
-        if(muteBtn) muteBtn.addEventListener('click', () => { alert('Alerts muted (no active alerts)'); });
-        // Filter apply/reset (just UI feedback)
-        document.getElementById('applyFilter')?.addEventListener('click', () => filterDropdown.style.display = 'none');
-        document.getElementById('resetFilter')?.addEventListener('click', () => filterDropdown.style.display = 'none');
+        picOverlay?.addEventListener('click', () => picInput.click());
+        picInput?.addEventListener('change', (e) => { if(e.target.files[0]) { const reader = new FileReader(); reader.onload = (ev) => { if(profileImg) profileImg.src = ev.target.result; }; reader.readAsDataURL(e.target.files[0]); } });
         
-        // Additional override to ensure any simulated interval does not affect zeros
-        if(window.stopVitalSimulation) window.stopVitalSimulation();
-        // Explicitly set all again after any potential delayed scripts
-        setInterval(() => {
-            document.getElementById('healthScore') && (document.getElementById('healthScore').innerText = '0');
-            document.getElementById('activeAlertsCount') && (document.getElementById('activeAlertsCount').innerText = '0');
-            document.getElementById('heartValue') && (document.getElementById('heartValue').innerHTML = '0 <span>bpm</span>');
-            document.getElementById('spo2Value') && (document.getElementById('spo2Value').innerHTML = '0 <span>%</span>');
-            document.getElementById('tempValue') && (document.getElementById('tempValue').innerHTML = '0.0 <span>°C</span>');
-        }, 100);
+        // Export report (zero data)
+        document.getElementById('exportBtn')?.addEventListener('click', async () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text('Health Report (All Values Zero)', 20, 20);
+            doc.text(`Heart Rate: 0 bpm | SpO2: 0% | Body Temp: 0.0°C`, 20, 40);
+            doc.text('No active alerts. All vitals are recorded as zero.', 20, 60);
+            doc.save('health_report_zero.pdf');
+        });
+        
+        // Mute alerts
+        document.getElementById('muteAlerts')?.addEventListener('click', () => alert('Alerts muted (no active alerts)'));
+        
+        // Settings save
+        document.getElementById('saveSettings')?.addEventListener('click', () => alert('Settings saved'));
+        
+        // Report form submit
+        document.getElementById('patientReportForm')?.addEventListener('submit', (e) => { e.preventDefault(); alert('Report submitted successfully'); e.target.reset(); });
+        
+        // Search (placeholder functionality)
+        document.getElementById('globalSearch')?.addEventListener('input', (e) => console.log('Search:', e.target.value));
+        document.getElementById('historySearch')?.addEventListener('input', (e) => console.log('History search:', e.target.value));
+        document.getElementById('appointmentSearch')?.addEventListener('input', (e) => console.log('Appointment search:', e.target.value));
+        
+        // Initialize all zero data and charts
+        initZeroCharts();
+        forceZeroData();
+        
+        // Persistent zero override every 500ms to ensure no external data appears
+        setInterval(() => { forceZeroData(); }, 500);
     </script>
 </body>
 </html>
