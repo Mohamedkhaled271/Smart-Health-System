@@ -1,32 +1,36 @@
-// mqtt.js – Real MQTT Client with WebSocket
+// mqtt.js – Real MQTT Client with WebSocket (Updated for HiveMQ)
 class MQTTClient {
     constructor() {
         this.client = null;
         this.listeners = {};
         this.connected = false;
         this.reconnectAttempts = 0;
-        // Variables to store the latest readings
         this.currentHeart = null;
         this.currentSpo2 = null;
         this.currentTemp = null;
     }
 
     connect() {
-        const brokerUrl = "ws://192.168.1.231:9001";
-        const options = {
-            username: "",
-            password: "",
-            clientId: "web_" + Math.random().toString(16).substr(2, 8),
-            reconnectPeriod: 5000
-        };
+        // --- التعديل هنا ---
+        // HiveMQ Public Broker WebSocket URL
+        // نستخدم المنفذ 8884 للاتصال الآمن عبر المتصفح
+        const brokerUrl = "wss://broker.hivemq.com:8884/mqtt"; 
         
+        const options = {
+            clientId: "web_patient_monitor_" + Math.random().toString(16).substr(2, 8),
+            keepalive: 60,
+            clean: true,
+            reconnectPeriod: 5000,
+            connectTimeout: 30 * 1000,
+        };
+        // ------------------
+
         this.client = mqtt.connect(brokerUrl, options);
         
         this.client.on('connect', () => {
-            console.log('MQTT connected');
+            console.log('Connected to HiveMQ Broker');
             this.connected = true;
             this.reconnectAttempts = 0;
-            // Subscribe to topics after connecting
             this.subscribeToTopics();
         });
         
@@ -47,7 +51,7 @@ class MQTTClient {
         });
         
         this.client.on('reconnect', () => {
-            console.log('MQTT reconnecting...');
+            console.log('MQTT reconnecting to HiveMQ...');
         });
     }
     
@@ -69,19 +73,16 @@ class MQTTClient {
     }
 
     subscribeToTopics() {
-        // Subscribe to patient data topics
+        // نفس بقية الوظائف الخاصة بك بدون تغيير
         this.subscribe('health/patient/heartrate', (data) => {
             const heart = parseInt(data);
             if (!isNaN(heart)) {
                 this.currentHeart = heart;
-                // Update UI
                 const heartElem = document.getElementById('heartValue');
                 if (heartElem) heartElem.innerHTML = heart + ' <span>bpm</span>';
-                // Update chart if function is available
                 if (typeof updateCharts === 'function') {
                     updateCharts(heart, this.currentSpo2, this.currentTemp);
                 }
-                // Save to Firebase
                 if (window.db) {
                     window.db.ref('SensorReadings/heartrate').push({
                         value: heart,
@@ -115,24 +116,25 @@ class MQTTClient {
             }
         });
 
-        // Other topics can be added in the same way
         this.subscribe('health/room/temp', (data) => {
             const roomTemp = parseFloat(data);
             const elem = document.getElementById('roomTempValue');
             if (elem && !isNaN(roomTemp)) elem.innerHTML = roomTemp.toFixed(1) + ' <span>°C</span>';
         });
+
         this.subscribe('health/room/humidity', (data) => {
             const humidity = parseInt(data);
             const elem = document.getElementById('humidityValue');
             if (elem && !isNaN(humidity)) elem.innerHTML = humidity + ' <span>%</span>';
         });
+
         this.subscribe('health/patient/position', (data) => {
             const elem = document.getElementById('positionValue');
             if (elem) elem.innerText = data;
         });
+
         this.subscribe('alert', (data) => {
             console.warn('Alert:', data);
-            // Display notification or update alerts UI
             const alertsList = document.getElementById('alertsList');
             if (alertsList) {
                 const alertDiv = document.createElement('div');
@@ -141,7 +143,6 @@ class MQTTClient {
                 alertsList.prepend(alertDiv);
                 if (alertsList.children.length > 10) alertsList.removeChild(alertsList.lastChild);
             }
-            // Play sound if needed
             if (typeof alertSound === 'function') alertSound('danger');
         });
     }
