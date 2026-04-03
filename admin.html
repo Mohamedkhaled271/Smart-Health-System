@@ -2,31 +2,594 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin · Smart Health · Administration Panel</title>
-    <link rel="icon" type="image/png" href="assets\icons\heart-rate.png">
-    <link rel="stylesheet" href="css/admin.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Care Sync · Admin Portal · Intelligent Health Platform</title>
+    <link rel="icon" type="image/png" href="assets/icons/heart-rate.png">
+    
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <!-- Chart.js and ApexCharts (for potential analytics) -->
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js & ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <!-- Include jsPDF library -->
+    
+    <!-- jsPDF for Reports -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/admin.css">
+    
+    <style>
+        /* Additional Premium Styles for Admin Dashboard */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-gradient-start: #f0f9ff;
+            --bg-gradient-end: #e6f0fa;
+            --card-bg: rgba(255, 255, 255, 0.96);
+            --text-primary: #0a2b3e;
+            --text-secondary: #2c5a6e;
+            --accent-primary: #1a7f9e;
+            --accent-glow: #2fa6cc;
+            --border-light: rgba(0, 180, 216, 0.2);
+            --shadow-sm: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+        }
+
+        [data-theme="dark"] {
+            --bg-gradient-start: #0b1a22;
+            --bg-gradient-end: #071117;
+            --card-bg: rgba(18, 30, 36, 0.96);
+            --text-primary: #eef4ff;
+            --text-secondary: #bdd4e2;
+            --accent-primary: #2ba9cf;
+            --accent-glow: #4fc3f7;
+            --border-light: rgba(43, 169, 207, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', 'Poppins', sans-serif;
+            background: radial-gradient(circle at 10% 30%, var(--bg-gradient-start), var(--bg-gradient-end));
+            min-height: 100vh;
+            transition: background 0.3s ease;
+        }
+
+        .app-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Premium Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar.collapsed .logo-area span,
+        .sidebar.collapsed .menu-item span {
+            display: none;
+        }
+
+        .sidebar.collapsed .menu-item i {
+            margin: 0 auto;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.8rem 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-glow));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-area i {
+            background: none;
+            -webkit-background-clip: unset;
+            color: var(--accent-primary);
+            font-size: 1.8rem;
+        }
+
+        .collapse-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            transition: 0.2s;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .collapse-btn:hover {
+            background: var(--border-light);
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 1.5rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 0.9rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 6px 12px;
+            border-radius: 16px;
+        }
+
+        .menu-item i {
+            width: 26px;
+            font-size: 1.2rem;
+        }
+
+        .menu-item.active, .menu-item:hover {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-glow));
+            color: white;
+            box-shadow: 0 0 20px rgba(31, 147, 184, 0.3);
+            transform: translateX(4px);
+        }
+
+        .sidebar-footer {
+            padding: 1rem 0;
+            border-top: 1px solid var(--border-light);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 1.8rem 2.2rem;
+            overflow-x: auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--card-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            border: 1px solid var(--border-light);
+        }
+
+        .search-area input {
+            background: transparent;
+            border: none;
+            padding: 0.5rem;
+            width: 250px;
+            color: var(--text-primary);
+        }
+
+        .search-area input:focus {
+            outline: none;
+        }
+
+        .date-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--card-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            border: 1px solid var(--border-light);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 1.3rem 1.5rem;
+            border-radius: 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0.5rem 0;
+            color: var(--text-primary);
+        }
+
+        /* Form Styles */
+        .form-container {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 24px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            background: transparent;
+            color: var(--text-primary);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-glow));
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: var(--card-bg);
+            border-radius: 24px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border: 1px solid var(--border-light);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        th {
+            background: rgba(26, 127, 158, 0.1);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Badges */
+        .role-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .role-admin { background: #8b5cf6; color: white; }
+        .role-doctor { background: #10b981; color: white; }
+        .role-patient { background: #f59e0b; color: white; }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .status-active { background: #10b98120; color: #10b981; border: 1px solid #10b981; }
+        .status-inactive { background: #ef444420; color: #ef4444; border: 1px solid #ef4444; }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: 0.2s;
+            color: var(--text-secondary);
+        }
+
+        .action-btn:hover {
+            background: var(--border-light);
+        }
+
+        .action-btn.delete:hover { color: var(--danger); }
+        .action-btn.edit:hover { color: var(--warning); }
+        .action-btn.view:hover { color: var(--info); }
+
+        /* User Info */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            background: var(--accent-primary);
+        }
+
+        /* Filter Dropdown */
+        .filter-dropdown, .date-dropdown {
+            position: absolute;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            z-index: 1000;
+            display: none;
+            min-width: 280px;
+        }
+
+        .filter-dropdown.active, .date-dropdown.active {
+            display: block;
+        }
+
+        .filter-header, .filter-footer {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .filter-body {
+            padding: 1rem;
+        }
+
+        .filter-section {
+            margin-bottom: 1rem;
+        }
+
+        .filter-section label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        /* Page Sections */
+        .page-section {
+            display: none;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Charts Row */
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 1.2rem;
+            border: 1px solid var(--border-light);
+        }
+
+        /* Toast Container */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast-message {
+            background: var(--text-primary);
+            color: var(--card-bg);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+            .sidebar span {
+                display: none;
+            }
+            .main-content {
+                padding: 1rem;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div id="toastContainer" class="toast-container"></div>
+    
     <div class="app-wrapper">
-        <!-- SIDEBAR (admin version) -->
+        <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo-area">
                     <i class="fas fa-heartbeat"></i>
-                    <span>SmartHealth</span>
+                    <span>Care Sync</span>
                 </div>
-                <button class="collapse-btn" id="collapseSidebar"><i class="fas fa-chevron-left"></i></button>
+                <button class="collapse-btn" id="collapseSidebar">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
             </div>
             <div class="sidebar-menu">
                 <a href="javascript:void(0)" class="menu-item active" data-page="dashboard">
@@ -45,6 +608,10 @@
                     <i class="fas fa-file-alt"></i>
                     <span>Reports</span>
                 </a>
+                <a href="javascript:void(0)" class="menu-item" data-page="analytics">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
                 <a href="javascript:void(0)" class="menu-item" data-page="settings">
                     <i class="fas fa-cog"></i>
                     <span>Settings</span>
@@ -58,29 +625,30 @@
             </div>
         </aside>
 
-        <!-- MAIN CONTENT -->
+        <!-- Main Content -->
         <main class="main-content">
-            <!-- Top bar with search, date, and theme toggle -->
+            <!-- Top Bar -->
             <div class="top-bar">
                 <div class="search-area">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="globalSearch" placeholder="Search users...">
-                    <button id="filterBtn"><i class="fas fa-sliders-h"></i> Filters</button>
+                    <input type="text" id="globalSearch" placeholder="Search users by name or email...">
+                    <button id="filterBtn" class="btn" style="padding: 0.5rem 1rem;">
+                        <i class="fas fa-sliders-h"></i> Filters
+                    </button>
                 </div>
-                <div style="display: flex; gap: 1rem;">
-                    <div class="date-badge">
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <div class="date-badge" id="dateBadge">
                         <i class="fas fa-calendar-alt"></i>
-                        <span>Last 30 days</span>
+                        <span id="dateRangeText">Last 30 days</span>
                         <i class="fas fa-chevron-down"></i>
                     </div>
-                    <!-- Theme Toggle Button (fixed) -->
-                    <button class="collapse-btn" id="themeToggle" style="width:45px;height:45px;">
+                    <button class="collapse-btn" id="themeToggle" style="width: 42px; height: 42px;">
                         <i class="fas fa-moon"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Filter Dropdown (hidden by default) -->
+            <!-- Filter Dropdown -->
             <div class="filter-dropdown" id="filterDropdown">
                 <div class="filter-header">
                     <h4>Filter Options</h4>
@@ -89,123 +657,151 @@
                 <div class="filter-body">
                     <div class="filter-section">
                         <label>Role</label>
-                        <select id="filterRole">
-                            <option value="all">All</option>
-                            <option value="patient">Patient</option>
-                            <option value="doctor">Doctor</option>
-                            <option value="admin">Admin</option>
+                        <select id="filterRole" class="form-control">
+                            <option value="all">All Users</option>
+                            <option value="patient">Patients</option>
+                            <option value="doctor">Doctors</option>
+                            <option value="admin">Admins</option>
                         </select>
                     </div>
                     <div class="filter-section">
                         <label>Status</label>
-                        <select id="filterStatus">
-                            <option value="all">All</option>
+                        <select id="filterStatus" class="form-control">
+                            <option value="all">All Status</option>
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
                         </select>
                     </div>
-                    <div class="filter-section">
-                        <label>Date Range</label>
-                        <input type="date" id="filterStartDate"> to <input type="date" id="filterEndDate">
-                    </div>
                 </div>
                 <div class="filter-footer">
-                    <button class="btn" id="applyFilter">Apply</button>
-                    <button class="btn btn-secondary" id="resetFilter">Reset</button>
+                    <button class="btn" id="applyFilter">Apply Filters</button>
+                    <button class="btn" id="resetFilter" style="background: transparent; color: var(--text-secondary);">Reset</button>
                 </div>
             </div>
 
-            <!-- Date Range Dropdown (hidden by default) -->
+            <!-- Date Range Dropdown -->
             <div class="date-dropdown" id="dateDropdown">
-                <ul>
-                    <li data-range="7">Last 7 days</li>
-                    <li data-range="30" class="active">Last 30 days</li>
-                    <li data-range="90">Last 3 months</li>
-                    <li data-range="custom">Custom range</li>
+                <ul style="list-style: none; padding: 0.5rem;">
+                    <li data-range="7" style="padding: 0.75rem; cursor: pointer;">Last 7 days</li>
+                    <li data-range="30" class="active" style="padding: 0.75rem; cursor: pointer;">Last 30 days</li>
+                    <li data-range="90" style="padding: 0.75rem; cursor: pointer;">Last 90 days</li>
+                    <li data-range="365" style="padding: 0.75rem; cursor: pointer;">Last year</li>
                 </ul>
             </div>
 
-            <!-- PAGES SECTIONS -->
-            <!-- DASHBOARD PAGE (active by default) -->
+            <!-- Dashboard Page -->
             <div class="page-section active" id="dashboardPage">
-                <!-- STATS CARDS (admin overview) -->
+                <!-- Stats Cards -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-title">Total Patients</div>
-                        <div class="stat-value" id="totalPatients">24</div>
-                        <div class="stat-sub"><i class="fas fa-arrow-up"></i> +12%</div>
+                        <div class="stat-value" id="totalPatients">0</div>
+                        <div class="stat-sub"><i class="fas fa-users"></i> Registered patients</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-title">Active Doctors</div>
-                        <div class="stat-value" id="totalDoctors">8</div>
-                        <div class="stat-sub"><i class="fas fa-check-circle" style="color:#10b981;"></i> 6 online</div>
+                        <div class="stat-value" id="totalDoctors">0</div>
+                        <div class="stat-sub"><i class="fas fa-user-md"></i> Medical staff</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-title">Critical Cases</div>
-                        <div class="stat-value" id="criticalCases">3</div>
-                        <div class="stat-sub"><i class="fas fa-exclamation-triangle" style="color:#e11d48;"></i> high</div>
+                        <div class="stat-title">Active Users</div>
+                        <div class="stat-value" id="activeUsers">0</div>
+                        <div class="stat-sub"><i class="fas fa-check-circle"></i> Currently active</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-title">Bed Occupancy</div>
-                        <div class="stat-value" id="bedOccupancy">86%</div>
-                        <div class="stat-sub">32/37 beds</div>
+                        <div class="stat-title">Completion Rate</div>
+                        <div class="stat-value" id="completionRate">0%</div>
+                        <div class="stat-sub"><i class="fas fa-chart-line"></i> Profile completion</div>
                     </div>
                 </div>
 
-                <!-- ADD USER FORM (original IDs preserved) -->
-                <h2>➕ Add New User</h2>
+                <!-- Charts Row -->
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <h4><i class="fas fa-chart-line"></i> User Growth Trend</h4>
+                        <canvas id="userGrowthChart" style="height: 250px;"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h4><i class="fas fa-chart-pie"></i> Role Distribution</h4>
+                        <canvas id="roleDistributionChart" style="height: 250px;"></canvas>
+                    </div>
+                </div>
+
+                <!-- Add User Form -->
+                <h2><i class="fas fa-user-plus"></i> Add New User</h2>
                 <div class="form-container">
                     <form id="addUserForm">
-                        <div class="form-group">
-                            <label>Full Name</label>
-                            <input type="text" class="form-control" id="newName" placeholder="e.g., John Smith" required>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" class="form-control" id="newName" placeholder="Dr. John Smith" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" class="form-control" id="newEmail" placeholder="user@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" class="form-control" id="newPassword" placeholder="••••••••" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="tel" class="form-control" id="newPhone" placeholder="+1 234 567 890">
+                            </div>
+                            <div class="form-group">
+                                <label>Role</label>
+                                <select class="form-control" id="newRole">
+                                    <option value="patient">Patient</option>
+                                    <option value="doctor">Doctor</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" class="form-control" id="newEmail" placeholder="user@example.com" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Password</label>
-                            <input type="password" class="form-control" id="newPassword" placeholder="••••••••" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Role</label>
-                            <select class="form-control" id="newRole">
-                                <option value="patient">Patient</option>
-                                <option value="doctor">Doctor</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn">Create User</button>
+                        <button type="submit" class="btn" style="margin-top: 1rem;">
+                            <i class="fas fa-plus-circle"></i> Create User
+                        </button>
                     </form>
                 </div>
 
-                <!-- USERS TABLE (original IDs preserved) -->
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2>👥 User Management</h2>
+                <!-- Users Table -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 1.5rem 0 1rem;">
+                    <h2><i class="fas fa-users"></i> User Management</h2>
+                    <div>
+                        <button class="btn" id="exportCSVBtn" style="margin-right: 0.5rem;">
+                            <i class="fas fa-file-csv"></i> Export CSV
+                        </button>
+                        <button class="btn" id="exportBtn">
+                            <i class="fas fa-file-pdf"></i> Export PDF
+                        </button>
+                    </div>
                 </div>
                 <div class="table-container">
                     <table id="usersTable">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Email</th>
+                                <th>User</th>
                                 <th>Role</th>
                                 <th>Status</th>
+                                <th>Phone</th>
+                                <th>Joined</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="usersTableBody">
-                            <!-- JS will populate -->
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px;">
+                                    <i class="fas fa-spinner fa-spin" style="font-size: 32px;"></i>
+                                    <p>Loading users...</p>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
-                <button class="btn" id="exportBtn"><i class="fas fa-download"></i> Export User Management Report PDF</button>
             </div>
 
-            <!-- PATIENTS PAGE -->
+            <!-- Patients Page -->
             <div class="page-section" id="patientsPage">
-                <h2>👤 Patients Management</h2>
+                <h2><i class="fas fa-users"></i> Patients Management</h2>
                 <div class="table-container">
                     <table id="patientsTable">
                         <thead>
@@ -221,9 +817,9 @@
                 </div>
             </div>
 
-            <!-- DOCTORS PAGE -->
+            <!-- Doctors Page -->
             <div class="page-section" id="doctorsPage">
-                <h2>👨‍⚕️ Doctors Management</h2>
+                <h2><i class="fas fa-user-md"></i> Doctors Management</h2>
                 <div class="table-container">
                     <table id="doctorsTable">
                         <thead>
@@ -238,65 +834,92 @@
                     </table>
                 </div>
             </div>
-            <!-- REPORTS PAGE -->
+
+            <!-- Reports Page -->
             <div class="page-section" id="reportsPage">
-                <h2>📊 Reports</h2>
-                <div class="card">
-                    <canvas id="monthlyReportChart" style="height:300px;"></canvas>
+                <h2><i class="fas fa-chart-bar"></i> Analytics Reports</h2>
+                <div class="chart-card">
+                    <canvas id="monthlyReportChart" style="height: 350px;"></canvas>
                 </div>
-                <div style="margin-top:20px">
-                    <button class="btn" id="exportReportBtn">Export Report PDF</button>
+                <div style="margin-top: 1.5rem;">
+                    <button class="btn" id="exportReportBtn">
+                        <i class="fas fa-download"></i> Export Report PDF
+                    </button>
                 </div>
             </div>
-            <!-- SETTINGS PAGE -->
+
+            <!-- Analytics Page -->
+            <div class="page-section" id="analyticsPage">
+                <h2><i class="fas fa-chart-line"></i> Advanced Analytics</h2>
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <h4>Patient Acquisition</h4>
+                        <canvas id="acquisitionChart" style="height: 250px;"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h4>User Engagement</h4>
+                        <canvas id="engagementChart" style="height: 250px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
             <div class="page-section" id="settingsPage">
-                <h2>⚙️ System Settings</h2>
+                <h2><i class="fas fa-cog"></i> System Settings</h2>
                 <div class="form-container">
                     <div class="form-group">
                         <label>Hospital Name</label>
-                        <input type="text" class="form-control" id="hospitalName" placeholder="Smart Health Hospital">
+                        <input type="text" class="form-control" id="hospitalName" placeholder="Care Sync Hospital">
                     </div>
                     <div class="form-group">
                         <label>Notification Email</label>
-                        <input type="email" class="form-control" id="notificationEmail" placeholder="admin@hospital.com">
+                        <input type="email" class="form-control" id="notificationEmail" placeholder="admin@caresync.com">
                     </div>
                     <div class="form-group">
-                        <label>Language</label>
+                        <label>Default Language</label>
                         <select class="form-control" id="language">
                             <option value="en">English</option>
                             <option value="ar">Arabic</option>
                         </select>
                     </div>
-                    <button class="btn" id="saveSettings">Save Settings</button>
+                    <div class="form-group">
+                        <label>Timezone</label>
+                        <select class="form-control" id="timezone">
+                            <option value="UTC">UTC</option>
+                            <option value="EST">Eastern Time</option>
+                            <option value="PST">Pacific Time</option>
+                            <option value="GMT">GMT</option>
+                        </select>
+                    </div>
+                    <button class="btn" id="saveSettings">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
                 </div>
             </div>
 
-            <!-- SUPPORT PAGE (simple placeholder) -->
+            <!-- Support Page -->
             <div class="page-section" id="supportPage">
-                <h2>🆘 Support</h2>
-                <p>Contact us at support@smarthealth.com</p>
+                <h2><i class="fas fa-headset"></i> Support Center</h2>
+                <div class="form-container">
+                    <p style="margin-bottom: 1rem;">Need help? Contact our support team:</p>
+                    <p><i class="fas fa-envelope"></i> Email: support@caresync.com</p>
+                    <p><i class="fas fa-phone"></i> Phone: +1 (800) 123-4567</p>
+                    <p><i class="fas fa-clock"></i> Hours: 24/7 Emergency Support</p>
+                </div>
             </div>
         </main>
     </div>
 
-    <!-- Firebase (commented out – uncomment when backend ready) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
-    <!-- MQTT library (real connection, currently simulated internally) -->
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 
-    <!-- JavaScript files (integrated, removed theme.js to avoid conflict) -->
+    <!-- Custom JS Files -->
     <script src="js/firebase.js"></script>
-    
-    <script src="js/theme.js"></script> <!-- Removed because theme is handled inline -->
-    <!-- <script src="js/auth.js"></script> -->
+    <script src="js/auth.js"></script>
+    <script src="js/theme.js"></script>
     <script src="js/admin.js"></script>
-    <!-- 
-        FIREBASE NOTES:
-        To enable real Firebase, uncomment SDK scripts in <head> and ensure firebase.js is configured.
-        The current implementation uses mock data and simulates admin functions.
-    -->
 </body>
 </html>
