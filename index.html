@@ -2,292 +2,222 @@
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Care Sync | Intelligent Health Platform</title>
-  <link rel="icon" type="image/png" href="assets/icons/heart-rate.png">
-  
-  <!-- Google Fonts + Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Health System</title>
+  <link rel="icon" type="image/png" href="assets\icons\heart-rate.png">
+  <!-- ==================== FONTS & ICONS ==================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  
-  <!-- CSS Files -->
   <link rel="stylesheet" href="css/index.css">
-  
-  <style>
-    .toast-container {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 10000;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    
-    .toast-message {
-      background: var(--toast-bg);
-      color: var(--toast-text);
-      padding: 12px 20px;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      animation: slideInRight 0.3s ease;
-    }
-    
-    @keyframes slideInRight {
-      from { opacity: 0; transform: translateX(100px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    
-    .role-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10001;
-    }
-    
-    .role-modal-content {
-      background: var(--card-bg);
-      padding: 2rem;
-      border-radius: 24px;
-      max-width: 400px;
-      width: 90%;
-      text-align: center;
-    }
-    
-    .form-row {
-      display: flex;
-      gap: 1rem;
-    }
-    
-    .form-row .form-group {
-      flex: 1;
-    }
-    
-    .strength-labels {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 0.5rem;
-      font-size: 0.75rem;
-    }
-    
-    .security-badges {
-      display: flex;
-      justify-content: center;
-      gap: 1.2rem;
-      margin-top: 0.5rem;
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-    }
-    
-    .forgot-link {
-      color: var(--accent-primary);
-      text-decoration: none;
-      font-size: 0.8rem;
-    }
-    
-    .validation-hint {
-      font-size: 0.7rem;
-      margin-top: 0.25rem;
-    }
-  </style>
 </head>
 <body>
-  <div id="toastContainer" class="toast-container"></div>
-  
+  <!-- Preloader -->
+  <div id="preloader">
+    <div class="heartbeat-loader"><i class="fas fa-heartbeat"></i></div>
+  </div>
+
+  <!-- ==================== ANIMATED BACKGROUND SHAPES ==================== -->
   <div class="bg-shapes">
     <div class="shape shape-1"></div>
     <div class="shape shape-2"></div>
     <div class="shape shape-3"></div>
   </div>
   <div class="ecg-line"></div>
-  
-  <div class="theme-toggle" id="themeToggle">
-    <i class="fas fa-moon"></i>
+
+  <!-- AI Assistant -->
+  <div class="ai-assistant" id="aiBtn"><i class="fas fa-robot"></i></div>
+  <div class="ai-popup" id="aiPopup">
+    <h4 style="color:var(--text-primary); margin-bottom:10px;">🩺 MediAI</h4>
+    <p style="color:var(--text-secondary); font-size:0.9rem;">I can help with symptoms, trends, or explain readings. (Demo)</p>
+    <input type="text" placeholder="Ask something..." style="width:100%; padding:8px; border-radius:20px; border:none; margin-top:8px;">
   </div>
 
+  <!-- Toast -->
+  <div id="toast"></div>
+
   <div class="login-wrapper">
+    <div class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode">
+      <i class="fas fa-sun"></i>
+    </div>
+
     <div class="login-card">
       <div class="login-header">
         <div class="logo-animation">
           <i class="fas fa-heartbeat"></i>
         </div>
-        <h2>Care Sync</h2>
-        <p>Unified · Secure · Intelligent Health Coordination</p>
+        <h2>Smart Health System</h2>
       </div>
-      
+
+      <!-- TABS -->
       <div class="auth-tabs">
-        <button class="tab-btn active" id="loginTab">
-          <i class="fas fa-sign-in-alt"></i> Sign In
-        </button>
-        <button class="tab-btn" id="registerTab">
-          <i class="fas fa-user-plus"></i> Create Account
-        </button>
+        <button class="tab-btn active" id="loginTab"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+        <button class="tab-btn" id="registerTab"><i class="fas fa-user-plus"></i> Create Account</button>
       </div>
-      
+
+      <!-- FORMS -->
       <div class="auth-forms">
-        <!-- Login Form -->
+        <!-- LOGIN FORM -->
         <form id="loginForm" class="auth-form">
           <div class="form-group">
-            <label>Email Address</label>
+            <label for="loginEmail"><i class="far fa-envelope"></i> Email</label>
             <div class="input-wrapper">
               <i class="fas fa-envelope input-icon"></i>
-              <input type="email" class="form-control" id="loginEmail" placeholder="doctor@caresync.com" required>
+              <input type="email" class="form-control" id="loginEmail" placeholder="doctor@hospital.com" required>
             </div>
           </div>
-          
           <div class="form-group">
-            <label>Password</label>
+            <label for="loginPassword"><i class="fas fa-lock"></i> Password</label>
             <div class="input-wrapper">
-              <i class="fas fa-lock input-icon"></i>
+              <i class="fas fa-key input-icon"></i>
               <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required>
               <i class="fas fa-eye toggle-password" data-target="loginPassword"></i>
             </div>
           </div>
-          
+
           <div class="form-options">
-            <label class="remember">
-              <input type="checkbox" id="rememberMe"> Remember me
-            </label>
-            <a href="#" id="forgotPassword" class="forgot-link">Forgot Password?</a>
+            <label class="remember"><input type="checkbox" id="rememberMe"> Remember me</label>
+            <a href="#" class="forgot-link" id="forgotPassword"><i class="fas fa-question-circle"></i> Forgot?</a>
           </div>
-          
-          <button type="submit" class="btn-login" id="loginBtn">
-            <i class="fas fa-arrow-right-to-bracket"></i> Secure Sign In
-          </button>
+
+          <!-- fake recaptcha + 2FA badge -->
+          <div class="security-row">
+            <div class="fake-recaptcha"><i class="fab fa-google"></i> I'm not a robot</div>
+            <span><i class="fas fa-shield-alt"></i> 2FA enabled</span>
+          </div>
+
+          <button type="submit" class="btn-login" id="loginBtn"><i class="fas fa-arrow-right-to-bracket"></i> Sign In</button>
           <div id="loginError" class="error-msg"></div>
         </form>
-        
-        <!-- Register Form -->
+
+        <!-- REGISTER FORM -->
         <form id="registerForm" class="auth-form hidden">
-          <div class="form-group">
-            <label>Profile Photo</label>
-            <div class="file-upload">
-              <input type="file" id="profileUpload" accept="image/*" style="display:none;">
-              <div class="file-label" id="fileLabelTrigger">
-                <img id="profilePreview" src="https://ui-avatars.com/api/?background=1a7f9e&color=fff&name=User">
-                <span>Upload Picture</span>
-              </div>
+          <!-- Profile image upload -->
+          <div class="form-group file-upload">
+            <label><i class="fas fa-camera"></i> Profile picture</label>
+            <input type="file" id="profileUpload" accept="image/*">
+            <div class="file-label">
+              <img id="profilePreview" src="https://via.placeholder.com/40" alt="preview">
+              <span>Click to upload photo</span>
             </div>
           </div>
-          
+
           <div class="form-group">
-            <label>Full Name</label>
+            <label><i class="fas fa-user"></i> Full name</label>
             <div class="input-wrapper">
               <i class="fas fa-user input-icon"></i>
-              <input type="text" class="form-control" id="regName" placeholder="Dr. Sarah Chen" required>
+              <input type="text" class="form-control" id="regName" required>
             </div>
           </div>
-          
+
           <div class="form-group">
-            <label>Email Address</label>
+            <label><i class="far fa-envelope"></i> Email</label>
             <div class="input-wrapper">
               <i class="fas fa-envelope input-icon"></i>
-              <input type="email" class="form-control" id="regEmail" placeholder="contact@example.com" required>
+              <input type="email" class="form-control" id="regEmail" required>
             </div>
-            <div id="emailHint" class="validation-hint"></div>
+            <div class="validation-hint" id="emailHint"></div>
           </div>
-          
+
           <div class="form-group">
-            <label>Account Role</label>
+            <label><i class="fas fa-user-md"></i> Role</label>
             <div class="input-wrapper">
               <i class="fas fa-briefcase input-icon"></i>
-              <select class="form-control" id="regRole">
+              <select class="form-control" id="regRole" required>
+                <option value="" disabled selected>– Select –</option>
                 <option value="patient">Patient</option>
                 <option value="doctor">Doctor</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
           </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label>Password</label>
+
+          <div class="row-fields" style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+            <div class="form-group" style="flex:1;">
+              <label><i class="fas fa-lock"></i> Password</label>
               <div class="input-wrapper">
                 <i class="fas fa-key input-icon"></i>
                 <input type="password" class="form-control" id="regPassword" required>
                 <i class="fas fa-eye toggle-password" data-target="regPassword"></i>
               </div>
             </div>
-            
-            <div class="form-group">
-              <label>Confirm Password</label>
+            <div class="form-group" style="flex:1;">
+              <label><i class="fas fa-check-circle"></i> Confirm</label>
               <div class="input-wrapper">
-                <i class="fas fa-check-circle input-icon"></i>
+                <i class="fas fa-key input-icon"></i>
                 <input type="password" class="form-control" id="regConfirm" required>
                 <i class="fas fa-eye toggle-password" data-target="regConfirm"></i>
               </div>
             </div>
           </div>
-          
+
+          <!-- Password strength -->
           <div class="strength-meter">
-            <div class="meter-bar">
-              <div class="meter-fill" id="strengthFill"></div>
-            </div>
-            <div class="strength-labels">
-              <span>Password Strength</span>
-              <span id="strengthLabel">Weak</span>
-            </div>
+            <div class="meter-bar"><div class="meter-fill" id="strengthFill"></div></div>
+            <div class="strength-text" style="display:flex; justify-content:space-between;"><span>Strength</span> <span id="strengthLabel">Weak</span></div>
           </div>
-          
+
+          <!-- Terms & conditions -->
           <div class="terms">
-            <input type="checkbox" id="termsCheck">
-            <label>I agree to <a href="#">Terms of Service</a> & <a href="#">Privacy Policy</a></label>
+            <input type="checkbox" id="termsCheck" required>
+            <label for="termsCheck">I agree to <a href="#">Terms</a> and <a href="#">Privacy</a></label>
           </div>
-          
-          <button type="submit" class="btn-login" id="registerBtn">
-            <i class="fas fa-user-shield"></i> Create Account
-          </button>
+
+          <button type="submit" class="btn-login" id="registerBtn"><i class="fas fa-user-plus"></i> Create Account</button>
           <div id="registerError" class="error-msg"></div>
         </form>
       </div>
-      
+
+      <!-- Multi-social login -->
       <div class="social-login">
-        <button class="social-btn" id="googleBtn">
-          <i class="fab fa-google"></i>
-        </button>
-        <button class="social-btn" id="microsoftBtn">
-          <i class="fab fa-microsoft"></i>
-        </button>
-        <button class="social-btn" id="appleBtn">
-          <i class="fab fa-apple"></i>
-        </button>
+        <button class="social-btn" id="googleBtn"><i class="fab fa-google"></i></button>
+        <button class="social-btn" id="appleBtn"><i class="fab fa-apple"></i></button>
+        <button class="social-btn" id="microsoftBtn"><i class="fab fa-microsoft"></i></button>
       </div>
-      
-      <div class="security-badges">
-        <span><i class="fas fa-check-circle"></i> HIPAA Ready</span>
-        <span><i class="fas fa-lock"></i> AES-256</span>
-        <span><i class="fas fa-shield-alt"></i> Data Protection</span>
+
+      <!-- Security badge (enhanced) -->
+      <div style="display:flex; justify-content:center; gap:1.5rem; font-size:0.8rem; color:var(--text-secondary);">
+        <span><i class="fas fa-check-circle" style="color:#10b981;"></i> HIPAA Ready</span>
+        <span><i class="fas fa-lock"></i> 256-bit encrypted</span>
       </div>
-      
+
+      <!-- Demo access (original)
+      <div class="demo-section">
+        <p><i class="fas fa-flask"></i> Demo access (bypass login)</p>
+        <div class="demo-buttons">
+          <a href="patient.html" class="demo-btn"><i class="fas fa-user"></i> Patient</a>
+          <a href="doctor.html" class="demo-btn"><i class="fas fa-stethoscope"></i> Doctor</a>
+          <a href="admin.html" class="demo-btn"><i class="fas fa-user-cog"></i> Admin</a>
+        </div>
+      </div> -->
+
+      <!-- Login activity (fake)
+      <div style="text-align:center; margin-top:1rem; font-size:0.7rem; color:var(--text-secondary);">
+        <i class="fas fa-clock"></i> Last login: Today 09:24 · Cairo
+      </div> -->
+
+      <!-- Footer -->
       <div class="login-footer">
-        © 2026 Care Sync — Next-gen Health Orchestration
+        © 2026 Smart Health
       </div>
     </div>
   </div>
+    <!-- ==================== FIREBASE & SCRIPTS (as requested) ==================== -->
+      <!-- Firebase SDK (v8 compat) - commented for demo, uncomment when ready -->
+      
+      <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+      <script src="js/firebase.js"></script>
+     
+    <!-- MQTT library (real connection, currently simulated internally) -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
-  
-  <!-- Custom JS Files -->
-  <script src="js/firebase.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/theme.js"></script>
-  <script src="js/notifications.js"></script>
+  <!-- Local Firebase config placeholder -->
+  <!-- <script src="js/firebase.js"></script> -->
   <script src="js/index.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/auth.js"></script>
 </body>
 </html>
