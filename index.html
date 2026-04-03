@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>MediFlow | Smart Health System</title>
+  <title>Care Sync | Intelligent Health Platform</title>
   <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300b4d8'%3E%3Cpath d='M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5 2,5.41 4.42,3 7.5,3c1.74,0 3.41.81 4.5,2.08C13.09,3.81 14.76,3 16.5,3 19.58,3 22,5.41 22,8.5c0,3.77-3.4,6.86-8.55,11.54L12,21.35Z'/%3E%3C/svg%3E">
   <!-- Google Fonts + Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
@@ -393,21 +393,21 @@
   <div class="ecg-line"></div>
   <div class="ai-assistant" id="aiBtn"><i class="fas fa-robot"></i></div>
   <div class="ai-popup" id="aiPopup">
-    <h4 style="margin:0 0 6px;">🩺 MediAI Assistant</h4>
-    <p style="font-size:0.8rem;">Describe symptoms or ask about health trends. (Demo simulation)</p>
-    <input type="text" id="aiQuery" placeholder="e.g., chest discomfort, fever..." style="width:100%; padding:8px; border-radius:30px; border:1px solid #ccc; margin-top:6px;">
-    <button id="sendAiQuery" style="margin-top:8px; background:var(--accent-primary); border:none; border-radius:30px; padding:6px; width:100%; color:white;">Ask</button>
+    <h4 style="margin:0 0 6px;">🤖 Care Sync AI</h4>
+    <p style="font-size:0.8rem;">Ask about symptoms, medication or health insights. (Demo)</p>
+    <input type="text" id="aiQuery" placeholder="e.g., headache, blood pressure..." style="width:100%; padding:8px; border-radius:30px; border:1px solid #ccc; margin-top:6px;">
+    <button id="sendAiQuery" style="margin-top:8px; background:var(--accent-primary); border:none; border-radius:30px; padding:6px; width:100%; color:white;">Consult AI</button>
   </div>
   <div id="toast"></div>
   <div class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></div>
 
   <div class="login-wrapper">
     <div class="login-card">
-      <div class="login-header"><div class="logo-animation"><i class="fas fa-heartbeat"></i></div><h2>MediFlow Health</h2><p style="font-size:0.8rem; color:var(--text-secondary)">Secure · Intelligent · HIPAA Ready</p></div>
+      <div class="login-header"><div class="logo-animation"><i class="fas fa-heartbeat"></i></div><h2>Care Sync</h2><p style="font-size:0.8rem; color:var(--text-secondary)">Unified · Secure · Intelligent Health Coordination</p></div>
       <div class="auth-tabs"><button class="tab-btn active" id="loginTab"><i class="fas fa-sign-in-alt"></i> Sign In</button><button class="tab-btn" id="registerTab"><i class="fas fa-user-plus"></i> Create Account</button></div>
       <div class="auth-forms">
         <form id="loginForm" class="auth-form">
-          <div class="form-group"><label><i class="far fa-envelope"></i> Email</label><div class="input-wrapper"><i class="fas fa-envelope input-icon"></i><input type="email" class="form-control" id="loginEmail" placeholder="clinical@mediflow.com" required></div></div>
+          <div class="form-group"><label><i class="far fa-envelope"></i> Email</label><div class="input-wrapper"><i class="fas fa-envelope input-icon"></i><input type="email" class="form-control" id="loginEmail" placeholder="doctor@caresync.com" required></div></div>
           <div class="form-group"><label><i class="fas fa-lock"></i> Password</label><div class="input-wrapper"><i class="fas fa-key input-icon"></i><input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required><i class="fas fa-eye toggle-password" data-target="loginPassword"></i></div></div>
           <div class="form-options" style="display:flex; justify-content:space-between; margin:0.5rem 0;"><label class="remember"><input type="checkbox" id="rememberMe"> Remember me</label><a href="#" id="forgotPassword" style="color:var(--accent-primary);">Forgot?</a></div>
           <div class="security-row"><div class="fake-recaptcha"><i class="fab fa-google"></i> Protected by reCAPTCHA</div><span><i class="fas fa-shield-alt"></i> 2FA ready</span></div>
@@ -428,7 +428,7 @@
       </div>
       <div class="social-login"><button class="social-btn" id="googleBtn"><i class="fab fa-google"></i></button><button class="social-btn" id="appleBtn"><i class="fab fa-apple"></i></button><button class="social-btn" id="microsoftBtn"><i class="fab fa-microsoft"></i></button></div>
       <div style="display:flex; justify-content:center; gap:1.2rem; margin-top:0.5rem;"><span><i class="fas fa-check-circle" style="color:#10b981;"></i> HIPAA Ready</span><span><i class="fas fa-lock"></i> AES-256</span></div>
-      <div class="login-footer">© 2026 MediFlow — Next‑gen Digital Health</div>
+      <div class="login-footer">© 2026 Care Sync — Next‑gen Health Orchestration</div>
     </div>
   </div>
 
@@ -447,13 +447,13 @@
       setTimeout(() => { toast.remove(); }, 4000);
     }
 
-    // demo simulated 2FA / security alerts
+    // demo professional startup
     window.addEventListener('load', () => {
-      showNotification("🔐 System ready — End-to-end encrypted session", "success");
-      setTimeout(() => showNotification("🩺 Welcome to MediFlow. Your health data is protected with AI monitoring.", "info"), 1000);
+      showNotification("🔐 Care Sync • Secure channel established", "success");
+      setTimeout(() => showNotification("🩺 Unified patient data & real-time sync active", "info"), 1000);
     });
 
-    // theme toggle with improved icon
+    // theme toggle
     const themeToggle = document.getElementById('themeToggle');
     const root = document.documentElement;
     themeToggle.addEventListener('click', () => {
@@ -488,7 +488,7 @@
       });
     });
 
-    // password strength + validation
+    // password strength
     const regPass = document.getElementById('regPassword');
     const strengthFill = document.getElementById('strengthFill');
     const strengthLabel = document.getElementById('strengthLabel');
@@ -520,7 +520,7 @@
       }
     });
 
-    // demo login validation + enhanced alerts
+    // ---------- LOGIN: successful sign in + redirect simulation (email opens dashboard) ----------
     const loginForm = document.getElementById('loginForm');
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -528,13 +528,18 @@
       const pass = document.getElementById('loginPassword').value.trim();
       if (!email || !pass) { showNotification("Please fill email & password", "error"); return; }
       if (!email.includes('@')) { showNotification("Invalid email format", "error"); return; }
-      // demo successful login simulation (redirect simulation)
-      showNotification(`✅ Welcome back, ${email.split('@')[0]}. Redirecting to dashboard...`, "success");
-      setTimeout(() => { showNotification("🔔 Demo: full dashboard would load here (simulated)", "info"); }, 1500);
-      // In real system: firebase auth etc, here we just simulate professional behavior
+      // professional success with redirection simulation (just like "after email opens")
+      showNotification(`✅ Welcome back, ${email.split('@')[0]}. Redirecting to Care Sync dashboard...`, "success");
+      // Simulate page redirection to dashboard (professional flow)
+      setTimeout(() => {
+        showNotification("🚀 Dashboard loading • Unified care records • Real-time updates", "success");
+        // optional: in real scenario window.location.href = "/dashboard";
+        // Here we just simulate that the email opens the main interface (professional demo)
+        alert("🔓 Demo Mode: You are now signed in. In production, you would be redirected to the Care Sync unified dashboard.\nWelcome to the intelligent health platform.");
+      }, 1200);
     });
 
-    // registration validation
+    // ---------- REGISTRATION: after email registration opens automatically and redirects ----------
     const regForm = document.getElementById('registerForm');
     regForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -548,8 +553,19 @@
       if (pwd !== confirm) { showNotification("Passwords do not match", "error"); return; }
       if (pwd.length < 6) { showNotification("Password must be at least 6 characters", "error"); return; }
       if (!terms) { showNotification("Please accept Terms & Privacy", "warning"); return; }
-      showNotification(`🎉 Account created for ${name} (${role}). Verification email sent.`, "success");
-      setTimeout(() => { loginTab.click(); }, 1500);
+      
+      // SUCCESSFUL REGISTRATION => "email opens" simulation + auto redirect to dashboard after creation
+      showNotification(`🎉 Account created for ${name} (${role}). Verification email sent to ${email}.`, "success");
+      setTimeout(() => {
+        showNotification("📧 Email verified automatically (demo). Redirecting to Care Sync...", "info");
+        setTimeout(() => {
+          alert(`✅ Registration successful, ${name}! \nWelcome to Care Sync. Your professional health ecosystem is ready.\n(Redirecting to main interface)`);
+          // Simulate opening main app after registration (email opened and authenticated)
+          // In real implementation: window.location.href = "/dashboard";
+          loginTab.click();  // switch to login tab optionally to show seamless flow, but professional behaviour: user is redirected
+          showNotification("✨ Access granted • Unified patient portal loaded", "success");
+        }, 800);
+      }, 600);
     });
 
     // Forgot password interactive alert
@@ -575,12 +591,13 @@
       if (lower.includes("headache") || lower.includes("migraine")) return "💡 Frequent headaches may be stress or hydration related. Consider tracking patterns in your health log.";
       if (lower.includes("fever")) return "🌡️ Fever indicates immune response. Monitor temperature and rest. Consult a doctor if persists >48h.";
       if (lower.includes("heart") || lower.includes("chest")) return "❤️ Chest discomfort requires attention. Our AI suggests scheduling a teleconsultation for further evaluation.";
+      if (lower.includes("blood pressure")) return "📊 Consistent BP monitoring recommended. Log readings in Care Sync for trend analysis.";
       return "🩺 Thank you. I'll log your symptom. For urgent medical issues, please contact a physician immediately. (Demo response)";
     }
     sendAi.addEventListener('click', () => {
       const query = aiInput.value.trim();
       const reply = aiResponse(query);
-      showNotification(`🤖 MediAI: ${reply.substring(0, 100)}`, "info");
+      showNotification(`🤖 Care Sync AI: ${reply.substring(0, 100)}`, "info");
       aiInput.value = '';
       aiPopup.classList.remove('show');
     });
@@ -595,17 +612,17 @@
       else emailHint.innerHTML = '';
     });
 
-    // extra smooth: AI popup close on outside click (basic)
+    // close AI popup on outside click
     document.addEventListener('click', (e) => {
       if (!aiBtn.contains(e.target) && !aiPopup.contains(e.target)) aiPopup.classList.remove('show');
     });
 
-    // Professional security demo alert: remember me option
+    // remember me alert
     const rememberCheck = document.getElementById('rememberMe');
     rememberCheck?.addEventListener('change', (e) => {
       if(e.target.checked) showNotification("🔒 This device will be remembered for 30 days (encrypted)", "info");
     });
-    // simulated 2FA badge interactive
+    // 2FA badge interaction
     const securityBadge = document.querySelector('.security-row span');
     if(securityBadge) securityBadge.addEventListener('click', () => showNotification("Two-Factor Authentication ready via authenticator app / SMS", "info"));
   </script>
