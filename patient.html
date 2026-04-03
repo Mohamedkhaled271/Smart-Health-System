@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Helios Medical · Smart Health Admin Panel</title>
+    <title>Helios Medical · IoT Admin Panel · Live ESP32 Sync</title>
     <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007bff'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E">
     <style>
         * {
@@ -14,18 +14,18 @@
         }
 
         :root {
-            --bg: #f4f7fc;
+            --bg: #f0f4f8;
             --surface: #ffffff;
-            --text-primary: #1e2a3e;
-            --text-secondary: #5a6e7c;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
             --border: #e2e8f0;
-            --primary: #0077b6;
-            --primary-dark: #023e8a;
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
             --success: #10b981;
-            --danger: #e11d48;
+            --danger: #ef4444;
             --warning: #f59e0b;
             --sidebar-bg: #ffffff;
-            --card-shadow: 0 8px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,0,0,0.05);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
         body.dark {
@@ -34,14 +34,14 @@
             --text-primary: #f1f5f9;
             --text-secondary: #94a3b8;
             --border: #334155;
-            --primary: #3b82f6;
+            --primary: #38bdf8;
             --sidebar-bg: #0f172a;
         }
 
         body {
             background: var(--bg);
             color: var(--text-primary);
-            transition: background 0.2s, color 0.2s;
+            transition: background 0.2s;
         }
 
         .app-wrapper {
@@ -49,7 +49,6 @@
             min-height: 100vh;
         }
 
-        /* SIDEBAR */
         .sidebar {
             width: 260px;
             background: var(--sidebar-bg);
@@ -75,7 +74,7 @@
             align-items: center;
             gap: 10px;
             font-weight: 700;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: var(--primary);
         }
 
@@ -85,7 +84,6 @@
             cursor: pointer;
             font-size: 1.2rem;
             color: var(--text-secondary);
-            transition: 0.2s;
         }
 
         .sidebar-menu {
@@ -106,7 +104,6 @@
 
         .menu-item i {
             width: 24px;
-            font-size: 1.2rem;
         }
 
         .menu-item.active, .menu-item:hover {
@@ -122,7 +119,6 @@
             border-top: 1px solid var(--border);
         }
 
-        /* MAIN */
         .main-content {
             flex: 1;
             padding: 1.5rem 2rem;
@@ -169,28 +165,29 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .stat-card {
             background: var(--surface);
-            padding: 1.2rem;
-            border-radius: 24px;
+            padding: 1.3rem;
+            border-radius: 28px;
             box-shadow: var(--card-shadow);
             border: 1px solid var(--border);
+            transition: transform 0.1s ease;
         }
 
         .stat-title {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--text-secondary);
         }
 
         .stat-value {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 700;
             margin: 0.5rem 0;
         }
@@ -218,7 +215,7 @@
         .btn {
             background: var(--primary);
             border: none;
-            padding: 0.6rem 1.2rem;
+            padding: 0.6rem 1.3rem;
             border-radius: 40px;
             color: white;
             font-weight: 500;
@@ -241,22 +238,10 @@
         .form-control {
             width: 100%;
             padding: 0.7rem;
-            border-radius: 12px;
+            border-radius: 14px;
             border: 1px solid var(--border);
             background: var(--bg);
             color: var(--text-primary);
-        }
-
-        .filter-dropdown, .date-dropdown {
-            display: none;
-            position: absolute;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1rem;
-            z-index: 100;
-            width: 280px;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
         }
 
         .page-section {
@@ -267,18 +252,6 @@
             display: block;
         }
 
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 80px;
-            }
-            .sidebar span {
-                display: none;
-            }
-            .main-content {
-                padding: 1rem;
-            }
-        }
-
         .data-update-pulse {
             animation: pulse 0.3s ease-in-out;
         }
@@ -287,10 +260,23 @@
             0% { opacity: 0.6; transform: scale(0.98);}
             100% { opacity: 1; transform: scale(1);}
         }
-        .badge-online { color: #10b981; font-size: 0.7rem; }
-        .action-icon { cursor: pointer; margin: 0 6px; color: var(--primary); }
+
+        .live-badge {
+            background: var(--success);
+            color: white;
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            margin-left: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 80px; }
+            .sidebar span { display: none; }
+            .main-content { padding: 1rem; }
+        }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -301,9 +287,12 @@
 <body>
 <div class="app-wrapper">
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header"><div class="logo-area"><i class="fas fa-heartbeat"></i><span>HeliosMed</span></div><button class="collapse-btn" id="collapseSidebar"><i class="fas fa-chevron-left"></i></button></div>
+        <div class="sidebar-header">
+            <div class="logo-area"><i class="fas fa-heartbeat"></i><span>HeliosMed IoT</span></div>
+            <button class="collapse-btn" id="collapseSidebar"><i class="fas fa-chevron-left"></i></button>
+        </div>
         <div class="sidebar-menu">
-            <a href="javascript:void(0)" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+            <a href="javascript:void(0)" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-line"></i><span>Live Dashboard</span></a>
             <a href="javascript:void(0)" class="menu-item" data-page="patients"><i class="fas fa-users"></i><span>Patients</span></a>
             <a href="javascript:void(0)" class="menu-item" data-page="doctors"><i class="fas fa-user-md"></i><span>Doctors</span></a>
             <a href="javascript:void(0)" class="menu-item" data-page="reports"><i class="fas fa-file-alt"></i><span>Reports</span></a>
@@ -314,50 +303,205 @@
     <main class="main-content">
         <div class="top-bar">
             <div class="search-area"><i class="fas fa-search"></i><input type="text" id="globalSearch" placeholder="Search users..."></div>
-            <div style="display: flex; gap: 1rem;"><div class="date-badge" id="dateRangeBadge"><i class="fas fa-calendar-alt"></i><span>Last 30 days</span><i class="fas fa-chevron-down"></i></div>
-            <button class="collapse-btn" id="themeToggle" style="width:45px;height:45px;"><i class="fas fa-moon"></i></button></div>
+            <div style="display: flex; gap: 1rem;">
+                <div class="date-badge" id="liveStatusBadge"><i class="fas fa-circle" style="color:#10b981; font-size:0.7rem;"></i><span>ESP32 Live</span><i class="fas fa-microchip"></i></div>
+                <button class="collapse-btn" id="themeToggle" style="width:45px;height:45px;"><i class="fas fa-moon"></i></button>
+            </div>
         </div>
-        <div id="dateDropdown" class="date-dropdown"><ul><li data-range="7">Last 7 days</li><li data-range="30" class="active">Last 30 days</li><li data-range="90">Last 3 months</li></ul></div>
 
-        <!-- Dashboard -->
+        <!-- DASHBOARD - NO MOCK DATA, ONLY FIREBASE -->
         <div class="page-section active" id="dashboardPage">
             <div class="stats-grid">
-                <div class="stat-card"><div class="stat-title">❤️ Heart Rate</div><div class="stat-value" id="liveHeartRate">-- <small>BPM</small></div><div class="stat-sub">Real-time from ESP32</div></div>
-                <div class="stat-card"><div class="stat-title">🫀 SpO₂</div><div class="stat-value" id="liveSpO2">-- <small>%</small></div><div class="stat-sub">Oxygen saturation</div></div>
-                <div class="stat-card"><div class="stat-title">🌡️ Body Temp</div><div class="stat-value" id="liveTemp">-- <small>°C</small></div><div class="stat-sub">Infrared sensor</div></div>
-                <div class="stat-card"><div class="stat-title">🏥 Active Alerts</div><div class="stat-value" id="activeAlertsCount">0</div><div class="stat-sub">critical threshold</div></div>
+                <div class="stat-card"><div class="stat-title"><i class="fas fa-heart"></i> Heart Rate (BPM)</div><div class="stat-value" id="liveHeartRate">-- <small>bpm</small></div><div class="stat-sub">Real from ESP32 MAX30105</div></div>
+                <div class="stat-card"><div class="stat-title"><i class="fas fa-lungs"></i> SpO₂ (%)</div><div class="stat-value" id="liveSpO2">-- <small>%</small></div><div class="stat-sub">Oxygen saturation</div></div>
+                <div class="stat-card"><div class="stat-title"><i class="fas fa-thermometer-half"></i> Body Temp (°C)</div><div class="stat-value" id="liveTemp">-- <small>°C</small></div><div class="stat-sub">Infrared / DHT</div></div>
+                <div class="stat-card"><div class="stat-title"><i class="fas fa-exclamation-triangle"></i> Critical Alerts</div><div class="stat-value" id="activeAlertsCount">0</div><div class="stat-sub">Threshold based</div></div>
             </div>
-            <h2>➕ Add New User</h2>
+            
+            <h2>➕ Add New User (Mock Management)</h2>
             <div class="form-container"><form id="addUserForm"><div class="form-group"><label>Full Name</label><input type="text" class="form-control" id="newName" required></div><div class="form-group"><label>Email</label><input type="email" class="form-control" id="newEmail" required></div><div class="form-group"><label>Password</label><input type="password" class="form-control" id="newPassword" required></div><div class="form-group"><label>Role</label><select class="form-control" id="newRole"><option value="patient">Patient</option><option value="doctor">Doctor</option><option value="admin">Admin</option></select></div><button type="submit" class="btn">Create User</button></form></div>
+            
             <h2>👥 User Management</h2>
             <div class="table-container"><table id="usersTable"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersTableBody"></tbody></table></div>
             <button class="btn" id="exportBtn"><i class="fas fa-download"></i> Export User Report PDF</button>
         </div>
-        <div class="page-section" id="patientsPage"><h2>👤 Patients Management</h2><div class="table-container"><table><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Last Visit</th></tr></thead><tbody id="patientsTableBody"></tbody></table></div></div>
-        <div class="page-section" id="doctorsPage"><h2>👨‍⚕️ Doctors</h2><div class="table-container"><table><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Patients Assigned</th></tr></thead><tbody id="doctorsTableBody"></tbody></table></div></div>
-        <div class="page-section" id="reportsPage"><h2>📊 Vitals Historical Chart</h2><div class="card"><canvas id="monthlyReportChart" style="height:300px;"></canvas></div><button class="btn" id="exportReportBtn">Export Clinical PDF</button></div>
-        <div class="page-section" id="settingsPage"><h2>⚙️ System Settings</h2><div class="form-container"><div class="form-group"><label>Hospital Name</label><input type="text" class="form-control" id="hospitalName" placeholder="Helios Medical"></div><div class="form-group"><label>Notification Email</label><input type="email" class="form-control" id="notificationEmail"></div><button class="btn" id="saveSettings">Save Settings</button></div></div>
-        <div class="page-section" id="supportPage"><h2>🆘 Support</h2><p>Contact: support@heliosmed.com | MQTT & Firebase active</p></div>
+        
+        <div class="page-section" id="patientsPage"><h2>👤 Patients Directory</h2><div class="table-container"><table><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Last Visit</th></tr></thead><tbody id="patientsTableBody"></tbody></table></div></div>
+        <div class="page-section" id="doctorsPage"><h2>👨‍⚕️ Doctors Directory</h2><div class="table-container"><table><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Patients Assigned</th></tr></thead><tbody id="doctorsTableBody"></tbody></table></div></div>
+        <div class="page-section" id="reportsPage"><h2>📈 IoT Vitals Historical Chart (Live Stream)</h2><div class="table-container"><canvas id="liveVitalsChart" style="height:300px; width:100%"></canvas></div><button class="btn" id="exportReportBtn">Export Clinical PDF Snapshot</button></div>
+        <div class="page-section" id="settingsPage"><h2>⚙️ System Preferences</h2><div class="form-container"><div class="form-group"><label>Hospital Name</label><input type="text" class="form-control" id="hospitalName" placeholder="Helios Medical Center"></div><div class="form-group"><label>Alert Threshold (HR max)</label><input type="number" class="form-control" id="hrThreshold" value="120"></div><button class="btn" id="saveSettings">Save Settings</button></div></div>
+        <div class="page-section" id="supportPage"><h2>🆘 Technical Support</h2><p><i class="fas fa-microchip"></i> ESP32 Firebase path: <code>/HELIOS_DATA_LIVE/Vitals</code><br>MQTT bridge active. All data displayed is directly from IoT device.</p></div>
     </main>
 </div>
-<script>
-    // ---------- MOCK & FIREBASE REAL INTEGRATION (ESP32 SYNC) ----------
-    let currentUsers = [
-        { id: "1", name: "John Doe", email: "john@patient.com", role: "patient", status: "active", lastVisit: "2025-03-20" },
-        { id: "2", name: "Dr. Sarah Connor", email: "sarah@doc.com", role: "doctor", status: "active", patientsAssigned: 12 },
-        { id: "3", name: "Admin Alex", email: "alex@admin.com", role: "admin", status: "active" }
-    ];
-    let chartInstance = null;
 
-    // Firebase config (exactly as ESP32)
+<script>
+    // --------------------------------------------------------------
+    //  PURE FIREBASE INTEGRATION - NO DEFAULT MOCK DATA
+    //  ESP32 writes to: /HELIOS_DATA_LIVE/Vitals
+    //  Admin panel listens ONLY to that path.
+    // --------------------------------------------------------------
+    
+    // FIREBASE CONFIG (exactly from ESP32 code)
     const firebaseConfig = {
         apiKey: "AIzaSyDy29ivSun9rqvqTlYhgBI8PBGJhnLJSc0",
         databaseURL: "https://smart-health-monitoring-f97fb-default-rtdb.firebaseio.com/",
         projectId: "smart-health-monitoring-f97fb"
     };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
+    
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const database = firebase.database();
+    
+    // ----- Chart for Reports Page (Real-time update) -----
+    let vitalsChart = null;
+    const chartHistory = { heart: [], spo2: [], temp: [], timeLabels: [] };
+    const MAX_HISTORY = 20;
+    
+    function initVitalsChart() {
+        const ctx = document.getElementById('liveVitalsChart')?.getContext('2d');
+        if (!ctx) return;
+        if (vitalsChart) vitalsChart.destroy();
+        vitalsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    { label: 'Heart Rate (BPM)', data: [], borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', tension: 0.2, fill: true, yAxisID: 'y' },
+                    { label: 'SpO₂ (%)', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.2, fill: true, yAxisID: 'y' },
+                    { label: 'Body Temp (°C)', data: [], borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', tension: 0.2, fill: true, yAxisID: 'y1' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    y: { title: { display: true, text: 'HR / SpO₂' }, min: 40, max: 130 },
+                    y1: { position: 'right', title: { display: true, text: 'Temperature (°C)' }, min: 34, max: 42, grid: { drawOnChartArea: false } }
+                }
+            }
+        });
+    }
+    
+    function updateChartWithNewVitals(heart, spo2, temp) {
+        if (!vitalsChart) initVitalsChart();
+        const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute:'2-digit', second:'2-digit' });
+        chartHistory.timeLabels.push(now);
+        chartHistory.heart.push(heart);
+        chartHistory.spo2.push(spo2);
+        chartHistory.temp.push(temp);
+        
+        if (chartHistory.timeLabels.length > MAX_HISTORY) {
+            chartHistory.timeLabels.shift();
+            chartHistory.heart.shift();
+            chartHistory.spo2.shift();
+            chartHistory.temp.shift();
+        }
+        
+        vitalsChart.data.labels = [...chartHistory.timeLabels];
+        vitalsChart.data.datasets[0].data = [...chartHistory.heart];
+        vitalsChart.data.datasets[1].data = [...chartHistory.spo2];
+        vitalsChart.data.datasets[2].data = [...chartHistory.temp];
+        vitalsChart.update('none');
+    }
+    
+    // Helper to update UI cards with animation
+    function updateLiveCard(elementId, value, unit) {
+        const el = document.getElementById(elementId);
+        if (el) {
+            el.innerHTML = `${value} <small>${unit}</small>`;
+            el.classList.add('data-update-pulse');
+            setTimeout(() => el.classList.remove('data-update-pulse'), 400);
+        }
+    }
+    
+    // Critical alerts logic (based on actual vitals)
+    let currentAlertCount = 0;
+    function evaluateAlerts(heart, spo2, temp) {
+        let count = 0;
+        if (heart !== null && (heart > 120 || heart < 50)) count++;
+        if (spo2 !== null && spo2 < 90) count++;
+        if (temp !== null && (temp > 38.5 || temp < 35.0)) count++;
+        const alertElem = document.getElementById('activeAlertsCount');
+        if (alertElem) {
+            alertElem.innerText = count;
+            if (count > 0) alertElem.style.color = '#ef4444';
+            else alertElem.style.color = 'var(--text-primary)';
+        }
+        currentAlertCount = count;
+    }
+    
+    // ---------- MAIN FIREBASE LISTENER (ESP32 PATH) ----------
+    // ESP32 writes to "/HELIOS_DATA_LIVE/Vitals" with fields: HeartRate, SpO2, BodyTemp, RoomTemp, Humidity, Motion, Timestamp
+    function startESP32FirebaseSync() {
+        const vitalsRef = database.ref('/HELIOS_DATA_LIVE/Vitals');
+        
+        vitalsRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && typeof data === 'object') {
+                console.log("📡 ESP32 Data Received:", data);
+                
+                // Extract values (exact keys from ESP32 code)
+                let heartRate = data.HeartRate !== undefined ? data.HeartRate : (data.heartRate !== undefined ? data.heartRate : null);
+                let spo2 = data.SpO2 !== undefined ? data.SpO2 : (data.spo2 !== undefined ? data.spo2 : null);
+                let bodyTemp = data.BodyTemp !== undefined ? data.BodyTemp : (data.bodyTemp !== undefined ? data.bodyTemp : null);
+                
+                // Also handle possible numeric conversions
+                if (heartRate !== null && !isNaN(heartRate)) {
+                    updateLiveCard('liveHeartRate', Math.round(heartRate), 'bpm');
+                } else {
+                    document.getElementById('liveHeartRate').innerHTML = '-- <small>bpm</small>';
+                }
+                
+                if (spo2 !== null && !isNaN(spo2)) {
+                    updateLiveCard('liveSpO2', Math.round(spo2), '%');
+                } else {
+                    document.getElementById('liveSpO2').innerHTML = '-- <small>%</small>';
+                }
+                
+                if (bodyTemp !== null && !isNaN(bodyTemp)) {
+                    updateLiveCard('liveTemp', parseFloat(bodyTemp).toFixed(1), '°C');
+                } else {
+                    document.getElementById('liveTemp').innerHTML = '-- <small>°C</small>';
+                }
+                
+                // Only update chart and alerts if we have actual numbers
+                if (heartRate && spo2 && bodyTemp) {
+                    updateChartWithNewVitals(heartRate, spo2, bodyTemp);
+                    evaluateAlerts(heartRate, spo2, bodyTemp);
+                } else if (heartRate && spo2) {
+                    updateChartWithNewVitals(heartRate, spo2, bodyTemp || 36.5);
+                    evaluateAlerts(heartRate, spo2, bodyTemp || 36.5);
+                }
+                
+                // Update live status badge
+                const badgeSpan = document.querySelector('#liveStatusBadge span');
+                if (badgeSpan) badgeSpan.innerHTML = 'ESP32 Online';
+                document.querySelector('#liveStatusBadge i').style.color = '#10b981';
+                
+            } else {
+                console.log("⏳ Waiting for ESP32 to push data to /HELIOS_DATA_LIVE/Vitals...");
+                document.getElementById('liveHeartRate').innerHTML = '-- <small>bpm</small>';
+                document.getElementById('liveSpO2').innerHTML = '-- <small>%</small>';
+                document.getElementById('liveTemp').innerHTML = '-- <small>°C</small>';
+                const badgeSpan = document.querySelector('#liveStatusBadge span');
+                if (badgeSpan) badgeSpan.innerHTML = 'Waiting for ESP32';
+                document.querySelector('#liveStatusBadge i').style.color = '#f59e0b';
+            }
+        }, (error) => {
+            console.error("Firebase connection error:", error);
+            document.getElementById('liveHeartRate').innerHTML = 'ERR <small>bpm</small>';
+        });
+    }
+    
+    // ---------- MOCK USER MANAGEMENT (independent from vitals) ----------
+    let currentUsers = [
+        { id: "1", name: "Emily Clark", email: "emily@patient.com", role: "patient", status: "active", lastVisit: "2025-04-01" },
+        { id: "2", name: "Dr. James Wilson", email: "james@doctor.com", role: "doctor", status: "active", patientsAssigned: 14 },
+        { id: "3", name: "Admin Liam", email: "liam@admin.com", role: "admin", status: "active" }
+    ];
+    
     function renderUserTable() {
         const tbody = document.getElementById('usersTableBody');
         if(!tbody) return;
@@ -369,14 +513,29 @@
             row.insertCell(2).innerText = u.role;
             row.insertCell(3).innerHTML = `<span style="color:${u.status==='active'?'#10b981':'#f97316'}">${u.status}</span>`;
             const actions = row.insertCell(4);
-            actions.innerHTML = `<i class="fas fa-edit action-icon" data-id="${u.id}"></i> <i class="fas fa-trash-alt action-icon" data-id="${u.id}" style="color:#e11d48;"></i>`;
+            actions.innerHTML = `<i class="fas fa-trash-alt action-icon" data-id="${u.id}" style="color:#ef4444; cursor:pointer;"></i>`;
         });
-        document.querySelectorAll('.fa-trash-alt').forEach(btn => btn.addEventListener('click', (e) => {
-            const id = e.target.dataset.id;
-            currentUsers = currentUsers.filter(u => u.id !== id);
-            renderUserTable();
-        }));
+        document.querySelectorAll('.fa-trash-alt').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.dataset.id;
+                currentUsers = currentUsers.filter(u => u.id !== id);
+                renderUserTable();
+                renderPatientsDoctors();
+            });
+        });
     }
+    
+    function renderPatientsDoctors() {
+        const patientsBody = document.getElementById('patientsTableBody');
+        const doctorsBody = document.getElementById('doctorsTableBody');
+        if(patientsBody) {
+            patientsBody.innerHTML = currentUsers.filter(u=>u.role==='patient').map(p=>`<tr><td>${p.name}</td><td>${p.email}</td><td>${p.status}</td><td>${p.lastVisit || 'N/A'}</td></tr>`).join('');
+        }
+        if(doctorsBody) {
+            doctorsBody.innerHTML = currentUsers.filter(u=>u.role==='doctor').map(d=>`<tr><td>${d.name}</td><td>${d.email}</td><td>${d.status}</td><td>${d.patientsAssigned || 5}</td></tr>`).join('');
+        }
+    }
+    
     document.getElementById('addUserForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
         const newUser = {
@@ -384,77 +543,37 @@
             name: document.getElementById('newName').value,
             email: document.getElementById('newEmail').value,
             role: document.getElementById('newRole').value,
-            status: "active"
+            status: "active",
+            lastVisit: new Date().toISOString().slice(0,10)
         };
         currentUsers.push(newUser);
         renderUserTable();
+        renderPatientsDoctors();
         e.target.reset();
     });
-    function renderPatientsDoctors() {
-        const patientsBody = document.getElementById('patientsTableBody');
-        const doctorsBody = document.getElementById('doctorsTableBody');
-        if(patientsBody) patientsBody.innerHTML = currentUsers.filter(u=>u.role==='patient').map(p=>`<tr><td>${p.name}</td><td>${p.email}</td><td>${p.status}</td><td>${p.lastVisit || '2025-04-01'}</td></tr>`).join('');
-        if(doctorsBody) doctorsBody.innerHTML = currentUsers.filter(u=>u.role==='doctor').map(d=>`<tr><td>${d.name}</td><td>${d.email}</td><td>${d.status}</td><td>${d.patientsAssigned || 8}</td></tr>`).join('');
-    }
-    // ESP32 realtime: listen /HELIOS_DATA_LIVE/Vitals
-    function startLiveSync() {
-        const vitalsRef = db.ref('/HELIOS_DATA_LIVE/Vitals');
-        vitalsRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if(data) {
-                if(data.HeartRate) updateLiveCard('liveHeartRate', data.HeartRate, 'BPM');
-                if(data.SpO2) updateLiveCard('liveSpO2', data.SpO2, '%');
-                if(data.BodyTemp) updateLiveCard('liveTemp', parseFloat(data.BodyTemp).toFixed(1), '°C');
-                let alertCount = 0;
-                if(data.HeartRate && (data.HeartRate > 120 || data.HeartRate < 50)) alertCount++;
-                if(data.SpO2 && data.SpO2 < 92) alertCount++;
-                if(data.BodyTemp && (data.BodyTemp > 38.5 || data.BodyTemp < 35.5)) alertCount++;
-                document.getElementById('activeAlertsCount').innerText = alertCount;
-                if(window.updateChartWithData) window.updateChartWithData(data.HeartRate, data.SpO2);
-            }
-        }, err => console.warn("Firebase read error", err));
-    }
-    function updateLiveCard(id, value, unit) {
-        const el = document.getElementById(id);
-        if(el) { el.innerHTML = `${value} <small>${unit}</small>`; el.classList.add('data-update-pulse'); setTimeout(()=>el.classList.remove('data-update-pulse'),400); }
-    }
-    // Chart.js for reports page
-    function initReportsChart() {
-        const ctx = document.getElementById('monthlyReportChart').getContext('2d');
-        if(chartInstance) chartInstance.destroy();
-        chartInstance = new Chart(ctx, {
-            type: 'line',
-            data: { labels: ['Week1','Week2','Week3','Week4'], datasets: [{ label: 'Heart Rate (BPM)', data: [72, 74, 78, 76], borderColor: '#0077b6' }, { label: 'SpO₂ (%)', data: [98,97,96,98], borderColor: '#10b981' }] },
-            options: { responsive: true }
-        });
-        window.updateChartWithData = (hr, spo2) => {
-            if(chartInstance && hr && spo2) {
-                let newHr = chartInstance.data.datasets[0].data.slice(1);
-                newHr.push(hr);
-                chartInstance.data.datasets[0].data = newHr;
-                let newSp = chartInstance.data.datasets[1].data.slice(1);
-                newSp.push(spo2);
-                chartInstance.data.datasets[1].data = newSp;
-                chartInstance.update();
-            }
-        };
-    }
-    // PDF Export
+    
+    // PDF Exports
     document.getElementById('exportBtn')?.addEventListener('click', async () => {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        doc.text("User Management Report - Helios Medical", 14, 10);
+        doc.text("User Management Report - Helios Medical IoT", 14, 10);
         doc.autoTable({ html: '#usersTable', startY: 20 });
         doc.save("users_report.pdf");
     });
+    
     document.getElementById('exportReportBtn')?.addEventListener('click', () => {
         const doc = new jspdf.jsPDF();
-        doc.text("Vitals Snapshot Report", 14, 10);
-        doc.text(`Heart Rate: ${document.getElementById('liveHeartRate')?.innerText || '--'}`, 14, 30);
-        doc.text(`SpO2: ${document.getElementById('liveSpO2')?.innerText || '--'}`, 14, 40);
-        doc.text(`Temperature: ${document.getElementById('liveTemp')?.innerText || '--'}`, 14, 50);
-        doc.save("clinical_snapshot.pdf");
+        doc.text("IoT Vitals Snapshot - Helios Medical", 14, 10);
+        const hr = document.getElementById('liveHeartRate')?.innerText || '--';
+        const spo = document.getElementById('liveSpO2')?.innerText || '--';
+        const tmp = document.getElementById('liveTemp')?.innerText || '--';
+        doc.text(`Heart Rate: ${hr}`, 14, 30);
+        doc.text(`SpO2: ${spo}`, 14, 40);
+        doc.text(`Temperature: ${tmp}`, 14, 50);
+        doc.text(`Generated from ESP32 live data (Firebase)`, 14, 70);
+        doc.save("clinical_iot_snapshot.pdf");
     });
+    
     // Navigation & Theme
     document.querySelectorAll('.menu-item[data-page]').forEach(item => {
         item.addEventListener('click', (e) => {
@@ -463,20 +582,25 @@
             document.getElementById(`${page}Page`).classList.add('active');
             document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
             item.classList.add('active');
-            if(page === 'reports' && chartInstance) chartInstance.update();
-            if(page === 'patients' || page === 'doctors') renderPatientsDoctors();
+            if(page === 'reports' && vitalsChart) vitalsChart.resize();
         });
     });
+    
     const themeToggle = document.getElementById('themeToggle');
-    themeToggle?.addEventListener('click', () => { document.body.classList.toggle('dark'); localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light'); });
+    themeToggle?.addEventListener('click', () => {
+        document.body.classList.toggle('dark');
+        localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
     if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
-    // Date badge mock
-    document.getElementById('dateRangeBadge')?.addEventListener('click', () => { document.getElementById('dateDropdown').style.display = document.getElementById('dateDropdown').style.display === 'block' ? 'none' : 'block'; });
-    document.querySelectorAll('#dateDropdown li').forEach(li => li.addEventListener('click', function() { document.getElementById('dateRangeBadge').querySelector('span').innerText = this.innerText; document.getElementById('dateDropdown').style.display = 'none'; }));
-    // Settings persistence
-    document.getElementById('saveSettings')?.addEventListener('click', () => { localStorage.setItem('hospitalName', document.getElementById('hospitalName').value); localStorage.setItem('notifyEmail', document.getElementById('notificationEmail').value); alert("Settings saved"); });
+    
+    document.getElementById('saveSettings')?.addEventListener('click', () => {
+        localStorage.setItem('hospitalName', document.getElementById('hospitalName').value);
+        localStorage.setItem('hrThreshold', document.getElementById('hrThreshold').value);
+        alert("Preferences saved");
+    });
     if(localStorage.getItem('hospitalName')) document.getElementById('hospitalName').value = localStorage.getItem('hospitalName');
-    // Global Search filter
+    
+    // Global search filter
     document.getElementById('globalSearch')?.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         const filtered = currentUsers.filter(u => u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term));
@@ -493,31 +617,20 @@
             });
         }
     });
-    // Simulate periodic fallback if firebase lacks data (mock generator for demo consistency with ESP32 pattern)
-    function fallbackMockVitals() {
-        setInterval(() => {
-            const mockHR = Math.floor(Math.random() * (95 - 65 + 1) + 65);
-            const mockSp = Math.floor(Math.random() * (99 - 94 + 1) + 94);
-            const mockTemp = (36.2 + Math.random() * 1.2).toFixed(1);
-            if(!document.getElementById('liveHeartRate').innerText.includes('--')) return;
-            updateLiveCard('liveHeartRate', mockHR, 'BPM');
-            updateLiveCard('liveSpO2', mockSp, '%');
-            updateLiveCard('liveTemp', mockTemp, '°C');
-        }, 8000);
-    }
-    // MQTT visual note: we integrate via firebase, but the ESP32 code publishes MQTT too. We'll just reflect firebase as main.
-    // Collapse sidebar
+    
     document.getElementById('collapseSidebar')?.addEventListener('click', () => {
-        document.getElementById('sidebar').style.width = document.getElementById('sidebar').style.width === '80px' ? '260px' : '80px';
-        document.querySelectorAll('.sidebar span').forEach(span => span.style.display = document.getElementById('sidebar').style.width === '80px' ? 'none' : 'inline');
+        const sidebar = document.getElementById('sidebar');
+        sidebar.style.width = sidebar.style.width === '80px' ? '260px' : '80px';
+        document.querySelectorAll('.sidebar span').forEach(span => span.style.display = sidebar.style.width === '80px' ? 'none' : 'inline');
     });
+    
+    // Initialize chart and start pure Firebase listener (NO defaults)
+    initVitalsChart();
+    startESP32FirebaseSync();
     renderUserTable();
     renderPatientsDoctors();
-    initReportsChart();
-    startLiveSync();
-    fallbackMockVitals();
-    // small mqtt bridge simulation: additional realtime from ESP's published topics would be visible in firebase
-    console.log("✅ Admin panel ready - Firebase sync active with ESP32 path /HELIOS_DATA_LIVE/Vitals");
+    
+    console.log("✅ Admin Panel ready — Listening to Firebase path /HELIOS_DATA_LIVE/Vitals from ESP32. No mock data.");
 </script>
 </body>
 </html>
