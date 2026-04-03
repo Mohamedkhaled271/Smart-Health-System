@@ -1,58 +1,52 @@
 // mqtt.js - (Firebase Realtime Sync Edition)
-// هذا الملف الآن يربط الموقع بقاعدة البيانات مباشرة لضمان استقرار 100%
-
 function startLiveSync() {
     console.log("🔗 Connecting to Helios Cloud Database...");
 
-    // التأكد من أن Firebase تم تعريفه في ملف الـ HTML أولاً
-    if (typeof firebase === 'undefined') {
-        console.error("❌ Firebase SDK is missing! Check your HTML file.");
+    if (typeof window.db === 'undefined') {
+        console.error("❌ Firebase Database is not initialized! Check firebase.js");
         return;
     }
 
-    // المرجع الخاص بالبيانات الحيوية (مطابق لكود الـ ESP32)
-    const vitalsRef = firebase.database().ref('/HELIOS_DATA_LIVE/Vitals');
+    // المرجع مطابق لكود الـ ESP32: /HELIOS_DATA_LIVE/Vitals
+    const vitalsRef = window.db.ref('/HELIOS_DATA_LIVE/Vitals');
 
-    // التنصت على أي تغيير في البيانات فور حدوثه
     vitalsRef.on('value', (snapshot) => {
         const data = snapshot.val();
         
         if (data) {
-            console.log("📥 New Data Received from Cloud:", data);
+            console.log("📥 Data from Cloud:", data);
             
-            // 1. تحديث نبض القلب
+            // 1. تحديث نبض القلب (لاحظ أن H و R كابيتال كما في الـ ESP32)
             updateUI('heartValue', data.HeartRate, 'bpm');
 
-            // 2. تحديث نسبة الأكسجين
+            // 2. تحديث نسبة الأكسجين (S و O كابيتال)
             updateUI('spo2Value', data.SpO2, '%');
 
-            // 3. تحديث حرارة الجسم
+            // 3. تحديث حرارة الجسم (B و T كابيتال)
             updateUI('tempValue', data.BodyTemp ? data.BodyTemp.toFixed(1) : "--", '°C');
 
-            // 4. تحديث الرسوم البيانية (Charts)
+            // 4. تحديث الرسوم البيانية
             if (typeof window.updateCharts === 'function') {
                 window.updateCharts(data.HeartRate || 0, data.SpO2 || 0, data.BodyTemp || 0);
             }
+        } else {
+            console.warn("⚠️ No data found at path: /HELIOS_DATA_LIVE/Vitals");
         }
     }, (error) => {
         console.error("❌ Database Read Error:", error);
     });
 }
 
-// دالة مساعدة لتحديث العناصر في الموقع بلمسة جمالية
 function updateUI(id, value, unit) {
     const elem = document.getElementById(id);
     if (elem && value !== undefined) {
         elem.innerHTML = `${value} <span>${unit}</span>`;
         
-        // تأثير وميض (Pulse) بسيط عند التحديث
-        elem.style.transition = "0.3s";
-        elem.style.color = "#00ffcc"; // لون التنبيه
-        setTimeout(() => {
-            elem.style.color = ""; // العودة للون الأصلي
-        }, 500);
+        // تأثير وميض عند التحديث
+        elem.style.color = "#00ffcc";
+        setTimeout(() => { elem.style.color = ""; }, 500);
     }
 }
 
-// تشغيل المزامنة فور تحميل الملف
-startLiveSync();
+// البدء عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', startLiveSync);
