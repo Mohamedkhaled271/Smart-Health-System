@@ -1,9 +1,9 @@
-// mqtt.js – Professional IoT Integration for Helios Medical
+// mqtt.js – النسخة النهائية المتوافقة مع كود ESP32
 class MQTTClient {
     constructor() {
         this.client = null;
         this.connected = false;
-        // تخزين القيم الحالية لتحديث الرسوم البيانية بشكل صحيح
+        // تخزين القيم الحالية لضمان تحديث الرسوم البيانية بشكل متزامن
         this.currentVitals = {
             heart: 0,
             spo2: 0,
@@ -12,95 +12,102 @@ class MQTTClient {
     }
 
     connect() {
-        // الاتصال الآمن بـ HiveMQ (متوافق مع Azure HTTPS)
+        // الربط مع HiveMQ عبر WebSockets المشفرة (المنفذ 8884 ضروري لعمل Azure HTTPS)
         const brokerUrl = "wss://broker.hivemq.com:8884/mqtt"; 
         
         const options = {
-            clientId: "helios_monitor_" + Math.random().toString(16).substr(2, 8),
+            clientId: "helios_monitor_web_" + Math.random().toString(16).substr(2, 8),
             keepalive: 60,
             clean: true,
             reconnectPeriod: 5000,
         };
 
+        console.log('⏳ جاري الاتصال بـ MQTT Broker...');
         this.client = mqtt.connect(brokerUrl, options);
         
         this.client.on('connect', () => {
-            console.log('✅ Connected to HiveMQ Broker');
+            console.log('✅ تم الاتصال بنجاح بـ HiveMQ');
             this.connected = true;
-            // الاشتراك في كل ما يخص مشروع HELIOS
-            this.client.subscribe('HELIOS_DATA_LIVE/#', (err) => {
-                if (!err) console.log('📡 Subscribed to HELIOS_DATA_LIVE Topics');
+            
+            // الاشتراك في العناوين التي يرسلها الـ ESP32 بالضبط
+            const topics = [
+                'health/patient/heartrate',
+                'health/patient/spo2',
+                'health/patient/bodytemp'
+            ];
+
+            topics.forEach(t => {
+                this.client.subscribe(t, (err) => {
+                    if (!err) console.log(`📡 مشترك الآن في: ${t}`);
+                });
             });
         });
         
         this.client.on('message', (topic, message) => {
             const data = message.toString();
-            console.log(`📥 Data Received: [${topic}] -> ${data}`);
+            console.log(`📥 بيانات مستلمة: [${topic}] -> ${data}`);
             
-            // تمرير البيانات للموقع مباشرة
+            // تمرير البيانات لمعالجتها وتحديث الواجهة
             this.processIncomingData(topic, data);
         });
 
         this.client.on('error', (err) => console.error('❌ MQTT Error:', err));
+        this.client.on('close', () => {
+            console.warn('⚠️ انقطع الاتصال بـ MQTT، جاري المحاولة مرة أخرى...');
+            this.connected = false;
+        });
     }
 
     processIncomingData(topic, data) {
         const val = parseFloat(data);
         if (isNaN(val)) return;
 
-        // تحديث العناصر في الواجهة (UI) وتخزينها في Firebase
+        // مطابقة العنوان مع العنصر المطلوب تحديثه في صفحة الـ Dashboard
         switch(topic) {
-            case 'HELIOS_DATA_LIVE/BPM':
-                this.updateElement('heartValue', val + ' <span>bpm</span>');
+            case 'health/patient/heartrate':
+                this.updateElement('heartValue', Math.round(val) + ' <span>bpm</span>');
                 this.currentVitals.heart = val;
-                this.syncToFirebase('BPM', val);
+                this.syncToFirebase('HeartRate', val);
                 break;
                 
-            case 'HELIOS_DATA_LIVE/SPO2':
-                this.updateElement('spo2Value', val + ' <span>%</span>');
-                this.currentVitals.heart = val;
-                this.syncToFirebase('SPO2', val);
+            case 'health/patient/spo2':
+                this.updateElement('spo2Value', Math.round(val) + ' <span>%</span>');
+                this.currentVitals.spo2 = val;
+                this.syncToFirebase('SpO2', val);
                 break;
                 
-            case 'HELIOS_DATA_LIVE/Temp':
+            case 'health/patient/bodytemp':
                 this.updateElement('tempValue', val.toFixed(1) + ' <span>°C</span>');
                 this.currentVitals.temp = val;
-                this.syncToFirebase('Temp', val);
-                break;
-
-            case 'HELIOS_DATA_LIVE/Room':
-                this.updateElement('roomTempValue', val.toFixed(1) + ' <span>°C</span>');
+                this.syncToFirebase('BodyTemp', val);
                 break;
         }
 
-        // تحديث الرسوم البيانية فوراً
+        // تحديث الرسوم البيانية الحية (Charts)
         if (typeof window.updateCharts === 'function') {
             window.updateCharts(this.currentVitals.heart, this.currentVitals.spo2, this.currentVitals.temp);
         }
     }
 
-    // دالة لتحديث واجهة المستخدم
+    // دالة تحديث العناصر في الـ HTML
     updateElement(id, html) {
         const elem = document.getElementById(id);
         if (elem) {
             elem.innerHTML = html;
-            // إضافة تأثير وميض بسيط عند التحديث ليعرف الدكتور أن البيانات حية
+            // إضافة تأثير نبض (Pulse) بسيط عند وصول بيانات جديدة
             elem.style.animation = "none";
             setTimeout(() => elem.style.animation = "pulse 0.5s", 10);
         }
     }
 
-    // دالة لمزامنة البيانات مع Firebase (اختياري للـ History)
+    // مزامنة اختيارية مع Firebase لضمان تحديث قاعدة البيانات من جهة الموقع أيضاً
     syncToFirebase(key, value) {
         if (window.db) {
-            window.db.ref(`LiveStatus/${key}`).set({
-                value: value,
-                lastUpdate: Date.now()
-            });
+            window.db.ref(`HELIOS_DATA_LIVE/Vitals/${key}`).set(value);
         }
     }
 }
 
-// تشغيل العميل
+// تشغيل النظام
 window.mqttClient = new MQTTClient();
 window.mqttClient.connect();
