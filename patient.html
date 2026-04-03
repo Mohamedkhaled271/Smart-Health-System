@@ -153,40 +153,65 @@
 
                 <!-- VITALS GRID (real-time patient data) -->
                 <div class="cards-grid" id="patientVitals">
-                    <div class="card" id="heartCard">
-                        <div class="card-header">
-                            <i class="fas fa-heart"></i>
-                            <h3>Heart Rate</h3>
-                        </div>
-                        <div class="card-value" id="heartValue">-- <span>bpm</span></div>
-                        <div class="card-indicator indicator-normal" id="heartIndicator">Normal</div>
-                        <div class="chart-container">
-                            <canvas id="heartChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="card" id="spo2Card">
-                        <div class="card-header">
-                            <i class="fas fa-lungs"></i>
-                            <h3>SpO₂</h3>
-                        </div>
-                        <div class="card-value" id="spo2Value">-- <span>%</span></div>
-                        <div class="card-indicator indicator-normal" id="spo2Indicator">Normal</div>
-                        <div class="chart-container">
-                            <canvas id="spo2Chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="card" id="tempCard">
-                        <div class="card-header">
-                            <i class="fas fa-thermometer-half"></i>
-                            <h3>Body Temp</h3>
-                        </div>
-                        <div class="card-value" id="tempValue">-- <span>°C</span></div>
-                        <div class="card-indicator indicator-normal" id="tempIndicator">Normal</div>
-                        <div class="chart-container">
-                            <canvas id="tempChart"></canvas>
-                        </div>
-                    </div>
-                </div>
+    <div class="card" id="heartCard">
+        <div class="card-header">
+            <i class="fas fa-heartbeat"></i>
+            <h3>Heart Rate</h3>
+        </div>
+        <div class="card-value" id="heartValue">-- <span>bpm</span></div>
+        <div class="card-indicator" id="heartIndicator">Waiting...</div>
+        <div class="chart-container">
+            <canvas id="heartChart"></canvas>
+        </div>
+    </div>
+
+    <div class="card" id="spo2Card">
+        <div class="card-header">
+            <i class="fas fa-lungs"></i>
+            <h3>SpO₂ Level</h3>
+        </div>
+        <div class="card-value" id="spo2Value">-- <span>%</span></div>
+        <div class="card-indicator" id="spo2Indicator">Waiting...</div>
+        <div class="chart-container">
+            <canvas id="spo2Chart"></canvas>
+        </div>
+    </div>
+
+    <div class="card" id="bodyTempCard">
+        <div class="card-header">
+            <i class="fas fa-thermometer-high"></i>
+            <h3>Body Temp</h3>
+        </div>
+        <div class="card-value" id="tempValue">-- <span>°C</span></div>
+        <div class="card-indicator" id="tempIndicator">Waiting...</div>
+        <div class="chart-container">
+            <canvas id="tempChart"></canvas>
+        </div>
+    </div>
+
+    <div class="card" id="environmentCard">
+        <div class="card-header">
+            <i class="fas fa-home"></i>
+            <h3>Room Env</h3>
+        </div>
+        <div class="card-value">
+            <span id="roomTempValue">--</span>°C / <span id="humidityValue">--</span>%
+        </div>
+        <div class="card-indicator">Room Status</div>
+        </div>
+
+    <div class="card" id="motionCard">
+        <div class="card-header">
+            <i class="fas fa-walking"></i>
+            <h3>Motion Activity</h3>
+        </div>
+        <div class="card-value" id="motionValue">-- <span>g</span></div>
+        <div class="card-indicator" id="motionIndicator">Status</div>
+        <div class="chart-container">
+            <canvas id="motionChart"></canvas>
+        </div>
+    </div>
+</div>
                 
                 <!-- BUTTON EXPORT (optional) -->
                 <button class="export-btn" id="exportBtn"><i class="fas fa-download"></i> Export My Health Report</button>
