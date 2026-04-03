@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Helios Medical · IoT Admin Panel · Live ESP32 Sync</title>
+    <title>Helios Medical · IoT Admin Panel · كامل بيانات ESP32</title>
     <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007bff'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E">
     <style>
         * {
@@ -24,6 +24,7 @@
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
+            --info: #8b5cf6;
             --sidebar-bg: #ffffff;
             --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
@@ -114,11 +115,6 @@
             padding: 0.85rem 1rem;
         }
 
-        .sidebar-footer {
-            padding: 1rem 0;
-            border-top: 1px solid var(--border);
-        }
-
         .main-content {
             flex: 1;
             padding: 1.5rem 2rem;
@@ -134,38 +130,9 @@
             gap: 1rem;
         }
 
-        .search-area {
-            display: flex;
-            gap: 12px;
-            background: var(--surface);
-            padding: 0.5rem 1rem;
-            border-radius: 60px;
-            border: 1px solid var(--border);
-            align-items: center;
-        }
-
-        .search-area input {
-            border: none;
-            background: transparent;
-            outline: none;
-            width: 240px;
-            color: var(--text-primary);
-        }
-
-        .date-badge {
-            background: var(--surface);
-            padding: 0.5rem 1rem;
-            border-radius: 40px;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            cursor: pointer;
-            border: 1px solid var(--border);
-        }
-
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -184,12 +151,20 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .stat-value {
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 700;
             margin: 0.5rem 0;
+        }
+
+        .stat-sub {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
         }
 
         .table-container {
@@ -270,6 +245,13 @@
             margin-left: 8px;
         }
 
+        .env-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
         @media (max-width: 768px) {
             .sidebar { width: 80px; }
             .sidebar span { display: none; }
@@ -292,56 +274,61 @@
             <button class="collapse-btn" id="collapseSidebar"><i class="fas fa-chevron-left"></i></button>
         </div>
         <div class="sidebar-menu">
-            <a href="javascript:void(0)" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-line"></i><span>Live Dashboard</span></a>
-            <a href="javascript:void(0)" class="menu-item" data-page="patients"><i class="fas fa-users"></i><span>Patients</span></a>
-            <a href="javascript:void(0)" class="menu-item" data-page="doctors"><i class="fas fa-user-md"></i><span>Doctors</span></a>
-            <a href="javascript:void(0)" class="menu-item" data-page="reports"><i class="fas fa-file-alt"></i><span>Reports</span></a>
-            <a href="javascript:void(0)" class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
+            <a href="javascript:void(0)" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-line"></i><span>البيانات الحية</span></a>
+            <a href="javascript:void(0)" class="menu-item" data-page="patients"><i class="fas fa-users"></i><span>المرضى</span></a>
+            <a href="javascript:void(0)" class="menu-item" data-page="doctors"><i class="fas fa-user-md"></i><span>الأطباء</span></a>
+            <a href="javascript:void(0)" class="menu-item" data-page="reports"><i class="fas fa-file-alt"></i><span>التقارير</span></a>
+            <a href="javascript:void(0)" class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>الإعدادات</span></a>
         </div>
-        <div class="sidebar-footer"><a href="javascript:void(0)" class="menu-item" data-page="support"><i class="fas fa-headset"></i><span>Support</span></a></div>
+        <div class="sidebar-footer"><a href="javascript:void(0)" class="menu-item" data-page="support"><i class="fas fa-headset"></i><span>الدعم</span></a></div>
     </aside>
     <main class="main-content">
         <div class="top-bar">
-            <div class="search-area"><i class="fas fa-search"></i><input type="text" id="globalSearch" placeholder="Search users..."></div>
-            <div style="display: flex; gap: 1rem;">
+            <div style="display: flex; gap: 1rem; align-items: center;">
                 <div class="date-badge" id="liveStatusBadge"><i class="fas fa-circle" style="color:#10b981; font-size:0.7rem;"></i><span>ESP32 Live</span><i class="fas fa-microchip"></i></div>
                 <button class="collapse-btn" id="themeToggle" style="width:45px;height:45px;"><i class="fas fa-moon"></i></button>
             </div>
         </div>
 
-        <!-- DASHBOARD - NO MOCK DATA, ONLY FIREBASE -->
+        <!-- DASHBOARD - عرض جميع بيانات ESP32 بدون أي بيانات عشوائية -->
         <div class="page-section active" id="dashboardPage">
+            <!-- بطاقات العلامات الحيوية الرئيسية -->
             <div class="stats-grid">
-                <div class="stat-card"><div class="stat-title"><i class="fas fa-heart"></i> Heart Rate (BPM)</div><div class="stat-value" id="liveHeartRate">-- <small>bpm</small></div><div class="stat-sub">Real from ESP32 MAX30105</div></div>
-                <div class="stat-card"><div class="stat-title"><i class="fas fa-lungs"></i> SpO₂ (%)</div><div class="stat-value" id="liveSpO2">-- <small>%</small></div><div class="stat-sub">Oxygen saturation</div></div>
-                <div class="stat-card"><div class="stat-title"><i class="fas fa-thermometer-half"></i> Body Temp (°C)</div><div class="stat-value" id="liveTemp">-- <small>°C</small></div><div class="stat-sub">Infrared / DHT</div></div>
-                <div class="stat-card"><div class="stat-title"><i class="fas fa-exclamation-triangle"></i> Critical Alerts</div><div class="stat-value" id="activeAlertsCount">0</div><div class="stat-sub">Threshold based</div></div>
+                <div class="stat-card"><div class="stat-title"><i class="fas fa-heart" style="color:#ef4444;"></i> معدل نبضات القلب</div><div class="stat-value" id="liveHeartRate">-- <small>BPM</small></div><div class="stat-sub">MAX30105</div></div>
+                <div class="stat-card"><div class="stat-title"><i class="fas fa-lungs" style="color:#10b981;"></i> تشبع الأكسجين SpO₂</div><div class="stat-value" id="liveSpO2">-- <small>%</small></div><div class="stat-sub">MAX30105</div></div>
+                <div class="stat-card"><div class="stat-title"><i class="fas fa-thermometer-half" style="color:#f59e0b;"></i> حرارة الجسم</div><div class="stat-value" id="liveBodyTemp">-- <small>°C</small></div><div class="stat-sub">مستشعر داخلي</div></div>
+                <div class="stat-card"><div class="stat-title"><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> التنبيهات الحرجة</div><div class="stat-value" id="activeAlertsCount">0</div><div class="stat-sub">حسب العتبات</div></div>
             </div>
             
-            <h2>➕ Add New User (Mock Management)</h2>
-            <div class="form-container"><form id="addUserForm"><div class="form-group"><label>Full Name</label><input type="text" class="form-control" id="newName" required></div><div class="form-group"><label>Email</label><input type="email" class="form-control" id="newEmail" required></div><div class="form-group"><label>Password</label><input type="password" class="form-control" id="newPassword" required></div><div class="form-group"><label>Role</label><select class="form-control" id="newRole"><option value="patient">Patient</option><option value="doctor">Doctor</option><option value="admin">Admin</option></select></div><button type="submit" class="btn">Create User</button></form></div>
+            <!-- بطاقات البيئة والحركة (بيانات إضافية من ESP32) -->
+            <h3><i class="fas fa-microchip"></i> بيانات البيئة والحركة (من ESP32)</h3>
+            <div class="env-grid">
+                <div class="stat-card"><div class="stat-title"><i class="fas fa-temperature-low"></i> حرارة الغرفة</div><div class="stat-value" id="liveRoomTemp">-- <small>°C</small></div><div class="stat-sub">DHT11</div></div>
+                <div class="stat-card"><div class="stat-title"><i class="fas fa-tint"></i> رطوبة الهواء</div><div class="stat-value" id="liveHumidity">-- <small>%</small></div><div class="stat-sub">DHT11</div></div>
+                <div class="stat-card"><div class="stat-title"><i class="fas fa-shoe-prints"></i> مؤشر الحركة</div><div class="stat-value" id="liveMotion">-- <small>m/s²</small></div><div class="stat-sub">MPU6050</div></div>
+                <div class="stat-card"><div class="stat-title"><i class="fas fa-clock"></i> آخر تحديث</div><div class="stat-value" id="liveTimestamp" style="font-size:1rem;">--</div><div class="stat-sub">من Firebase</div></div>
+            </div>
+
+            <h2>➕ إضافة مستخدم جديد</h2>
+            <div class="form-container"><form id="addUserForm"><div class="form-group"><label>الاسم الكامل</label><input type="text" class="form-control" id="newName" required></div><div class="form-group"><label>البريد الإلكتروني</label><input type="email" class="form-control" id="newEmail" required></div><div class="form-group"><label>كلمة المرور</label><input type="password" class="form-control" id="newPassword" required></div><div class="form-group"><label>الدور</label><select class="form-control" id="newRole"><option value="patient">مريض</option><option value="doctor">طبيب</option><option value="admin">مدير</option></select></div><button type="submit" class="btn">إنشاء مستخدم</button></form></div>
             
-            <h2>👥 User Management</h2>
-            <div class="table-container"><table id="usersTable"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersTableBody"></tbody></table></div>
-            <button class="btn" id="exportBtn"><i class="fas fa-download"></i> Export User Report PDF</button>
+            <h2>👥 إدارة المستخدمين</h2>
+            <div class="table-container"><table id="usersTable"><thead><tr><th>الاسم</th><th>البريد</th><th>الدور</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="usersTableBody"></tbody></table></div>
+            <button class="btn" id="exportBtn"><i class="fas fa-download"></i> تصدير تقرير المستخدمين PDF</button>
         </div>
         
-        <div class="page-section" id="patientsPage"><h2>👤 Patients Directory</h2><div class="table-container"><table><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Last Visit</th></tr></thead><tbody id="patientsTableBody"></tbody></table></div></div>
-        <div class="page-section" id="doctorsPage"><h2>👨‍⚕️ Doctors Directory</h2><div class="table-container"><table><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Patients Assigned</th></tr></thead><tbody id="doctorsTableBody"></tbody></table></div></div>
-        <div class="page-section" id="reportsPage"><h2>📈 IoT Vitals Historical Chart (Live Stream)</h2><div class="table-container"><canvas id="liveVitalsChart" style="height:300px; width:100%"></canvas></div><button class="btn" id="exportReportBtn">Export Clinical PDF Snapshot</button></div>
-        <div class="page-section" id="settingsPage"><h2>⚙️ System Preferences</h2><div class="form-container"><div class="form-group"><label>Hospital Name</label><input type="text" class="form-control" id="hospitalName" placeholder="Helios Medical Center"></div><div class="form-group"><label>Alert Threshold (HR max)</label><input type="number" class="form-control" id="hrThreshold" value="120"></div><button class="btn" id="saveSettings">Save Settings</button></div></div>
-        <div class="page-section" id="supportPage"><h2>🆘 Technical Support</h2><p><i class="fas fa-microchip"></i> ESP32 Firebase path: <code>/HELIOS_DATA_LIVE/Vitals</code><br>MQTT bridge active. All data displayed is directly from IoT device.</p></div>
+        <div class="page-section" id="patientsPage"><h2>👤 قائمة المرضى</h2><div class="table-container"><table><thead><tr><th>الاسم</th><th>البريد</th><th>الحالة</th><th>آخر زيارة</th></tr></thead><tbody id="patientsTableBody"></tbody></table></div></div>
+        <div class="page-section" id="doctorsPage"><h2>👨‍⚕️ قائمة الأطباء</h2><div class="table-container"><table><thead><tr><th>الاسم</th><th>البريد</th><th>الحالة</th><th>عدد المرضى</th></tr></thead><tbody id="doctorsTableBody"></tbody></table></div></div>
+        <div class="page-section" id="reportsPage"><h2>📈 رسم بياني حي للعلامات الحيوية</h2><div class="table-container"><canvas id="liveVitalsChart" style="height:300px; width:100%"></canvas></div><button class="btn" id="exportReportBtn">تصدير تقرير سريري PDF</button></div>
+        <div class="page-section" id="settingsPage"><h2>⚙️ إعدادات النظام</h2><div class="form-container"><div class="form-group"><label>اسم المستشفى</label><input type="text" class="form-control" id="hospitalName" placeholder="Helios Medical Center"></div><div class="form-group"><label>حد التنبيه (HR max)</label><input type="number" class="form-control" id="hrThreshold" value="120"></div><button class="btn" id="saveSettings">حفظ الإعدادات</button></div></div>
+        <div class="page-section" id="supportPage"><h2>🆘 الدعم الفني</h2><p><i class="fas fa-microchip"></i> مسار Firebase الخاص بـ ESP32: <code>/HELIOS_DATA_LIVE/Vitals</code><br>يتم عرض جميع البيانات مباشرة من جهاز IoT بدون أي بيانات وهمية.</p></div>
     </main>
 </div>
 
 <script>
-    // --------------------------------------------------------------
-    //  PURE FIREBASE INTEGRATION - NO DEFAULT MOCK DATA
-    //  ESP32 writes to: /HELIOS_DATA_LIVE/Vitals
-    //  Admin panel listens ONLY to that path.
-    // --------------------------------------------------------------
-    
-    // FIREBASE CONFIG (exactly from ESP32 code)
+    // ============================================================
+    //  إعداد Firebase - نفس الإعدادات الموجودة في كود ESP32
+    // ============================================================
     const firebaseConfig = {
         apiKey: "AIzaSyDy29ivSun9rqvqTlYhgBI8PBGJhnLJSc0",
         databaseURL: "https://smart-health-monitoring-f97fb-default-rtdb.firebaseio.com/",
@@ -353,7 +340,7 @@
     }
     const database = firebase.database();
     
-    // ----- Chart for Reports Page (Real-time update) -----
+    // ----- الرسم البياني للتحديث المباشر -----
     let vitalsChart = null;
     const chartHistory = { heart: [], spo2: [], temp: [], timeLabels: [] };
     const MAX_HISTORY = 20;
@@ -367,18 +354,17 @@
             data: {
                 labels: [],
                 datasets: [
-                    { label: 'Heart Rate (BPM)', data: [], borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', tension: 0.2, fill: true, yAxisID: 'y' },
-                    { label: 'SpO₂ (%)', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.2, fill: true, yAxisID: 'y' },
-                    { label: 'Body Temp (°C)', data: [], borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', tension: 0.2, fill: true, yAxisID: 'y1' }
+                    { label: 'نبضات القلب (BPM)', data: [], borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', tension: 0.2, fill: true, yAxisID: 'y' },
+                    { label: 'الأكسجين SpO₂ (%)', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.2, fill: true, yAxisID: 'y' },
+                    { label: 'حرارة الجسم (°C)', data: [], borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', tension: 0.2, fill: true, yAxisID: 'y1' }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                interaction: { mode: 'index', intersect: false },
                 scales: {
                     y: { title: { display: true, text: 'HR / SpO₂' }, min: 40, max: 130 },
-                    y1: { position: 'right', title: { display: true, text: 'Temperature (°C)' }, min: 34, max: 42, grid: { drawOnChartArea: false } }
+                    y1: { position: 'right', title: { display: true, text: 'درجة الحرارة (°C)' }, min: 34, max: 42, grid: { drawOnChartArea: false } }
                 }
             }
         });
@@ -406,100 +392,105 @@
         vitalsChart.update('none');
     }
     
-    // Helper to update UI cards with animation
-    function updateLiveCard(elementId, value, unit) {
+    // دالة تحديث البطاقات مع تأثير بصري
+    function updateCard(elementId, value, unit = '') {
         const el = document.getElementById(elementId);
-        if (el) {
-            el.innerHTML = `${value} <small>${unit}</small>`;
+        if (el && value !== null && value !== undefined && !isNaN(value)) {
+            el.innerHTML = `${typeof value === 'number' ? value.toFixed(1) : value} <small>${unit}</small>`;
             el.classList.add('data-update-pulse');
             setTimeout(() => el.classList.remove('data-update-pulse'), 400);
+            return true;
+        } else if (el) {
+            el.innerHTML = `-- <small>${unit}</small>`;
         }
+        return false;
     }
     
-    // Critical alerts logic (based on actual vitals)
-    let currentAlertCount = 0;
-    function evaluateAlerts(heart, spo2, temp) {
+    // حساب التنبيهات بناءً على القيم الحقيقية
+    function evaluateAlerts(heart, spo2, bodyTemp) {
         let count = 0;
         if (heart !== null && (heart > 120 || heart < 50)) count++;
         if (spo2 !== null && spo2 < 90) count++;
-        if (temp !== null && (temp > 38.5 || temp < 35.0)) count++;
+        if (bodyTemp !== null && (bodyTemp > 38.5 || bodyTemp < 35.0)) count++;
         const alertElem = document.getElementById('activeAlertsCount');
         if (alertElem) {
             alertElem.innerText = count;
-            if (count > 0) alertElem.style.color = '#ef4444';
-            else alertElem.style.color = 'var(--text-primary)';
+            alertElem.style.color = count > 0 ? '#ef4444' : 'var(--text-primary)';
         }
-        currentAlertCount = count;
     }
     
-    // ---------- MAIN FIREBASE LISTENER (ESP32 PATH) ----------
-    // ESP32 writes to "/HELIOS_DATA_LIVE/Vitals" with fields: HeartRate, SpO2, BodyTemp, RoomTemp, Humidity, Motion, Timestamp
+    // ============================================================
+    //  المستمع الرئيسي من Firebase - مسار ESP32 /HELIOS_DATA_LIVE/Vitals
+    //  يتم عرض جميع الحقول: HeartRate, SpO2, BodyTemp, RoomTemp, Humidity, Motion, Timestamp
+    //  لا توجد أي بيانات عشوائية أو افتراضية
+    // ============================================================
     function startESP32FirebaseSync() {
         const vitalsRef = database.ref('/HELIOS_DATA_LIVE/Vitals');
         
         vitalsRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data && typeof data === 'object') {
-                console.log("📡 ESP32 Data Received:", data);
+                console.log("📡 بيانات حقيقية من ESP32:", data);
                 
-                // Extract values (exact keys from ESP32 code)
-                let heartRate = data.HeartRate !== undefined ? data.HeartRate : (data.heartRate !== undefined ? data.heartRate : null);
-                let spo2 = data.SpO2 !== undefined ? data.SpO2 : (data.spo2 !== undefined ? data.spo2 : null);
-                let bodyTemp = data.BodyTemp !== undefined ? data.BodyTemp : (data.bodyTemp !== undefined ? data.bodyTemp : null);
+                // 1. العلامات الحيوية الأساسية
+                const heartRate = data.HeartRate !== undefined ? data.HeartRate : null;
+                const spo2 = data.SpO2 !== undefined ? data.SpO2 : null;
+                const bodyTemp = data.BodyTemp !== undefined ? data.BodyTemp : null;
                 
-                // Also handle possible numeric conversions
-                if (heartRate !== null && !isNaN(heartRate)) {
-                    updateLiveCard('liveHeartRate', Math.round(heartRate), 'bpm');
-                } else {
-                    document.getElementById('liveHeartRate').innerHTML = '-- <small>bpm</small>';
+                // 2. بيانات البيئة والحركة (حقول إضافية من كود ESP32)
+                const roomTemp = data.RoomTemp !== undefined ? data.RoomTemp : null;
+                const humidity = data.Humidity !== undefined ? data.Humidity : null;
+                const motion = data.Motion !== undefined ? data.Motion : null;
+                const timestamp = data.Timestamp !== undefined ? data.Timestamp : null;
+                
+                // تحديث جميع البطاقات بالقيم الحقيقية من الجهاز
+                updateCard('liveHeartRate', heartRate, 'BPM');
+                updateCard('liveSpO2', spo2, '%');
+                updateCard('liveBodyTemp', bodyTemp, '°C');
+                updateCard('liveRoomTemp', roomTemp, '°C');
+                updateCard('liveHumidity', humidity, '%');
+                updateCard('liveMotion', motion, 'm/s²');
+                
+                // تحديث الطابع الزمني
+                const timeEl = document.getElementById('liveTimestamp');
+                if (timestamp && timeEl) {
+                    const date = new Date(timestamp);
+                    timeEl.innerHTML = date.toLocaleTimeString() + '<small></small>';
+                    timeEl.classList.add('data-update-pulse');
+                    setTimeout(() => timeEl.classList.remove('data-update-pulse'), 400);
+                } else if (timeEl) {
+                    timeEl.innerHTML = new Date().toLocaleTimeString() + '<small></small>';
                 }
                 
-                if (spo2 !== null && !isNaN(spo2)) {
-                    updateLiveCard('liveSpO2', Math.round(spo2), '%');
-                } else {
-                    document.getElementById('liveSpO2').innerHTML = '-- <small>%</small>';
-                }
-                
-                if (bodyTemp !== null && !isNaN(bodyTemp)) {
-                    updateLiveCard('liveTemp', parseFloat(bodyTemp).toFixed(1), '°C');
-                } else {
-                    document.getElementById('liveTemp').innerHTML = '-- <small>°C</small>';
-                }
-                
-                // Only update chart and alerts if we have actual numbers
+                // تحديث الرسم البياني والتنبيهات في حالة وجود البيانات الأساسية
                 if (heartRate && spo2 && bodyTemp) {
                     updateChartWithNewVitals(heartRate, spo2, bodyTemp);
                     evaluateAlerts(heartRate, spo2, bodyTemp);
-                } else if (heartRate && spo2) {
-                    updateChartWithNewVitals(heartRate, spo2, bodyTemp || 36.5);
-                    evaluateAlerts(heartRate, spo2, bodyTemp || 36.5);
                 }
                 
-                // Update live status badge
+                // تغيير حالة الاتصال
                 const badgeSpan = document.querySelector('#liveStatusBadge span');
-                if (badgeSpan) badgeSpan.innerHTML = 'ESP32 Online';
+                if (badgeSpan) badgeSpan.innerHTML = 'ESP32 متصل';
                 document.querySelector('#liveStatusBadge i').style.color = '#10b981';
                 
             } else {
-                console.log("⏳ Waiting for ESP32 to push data to /HELIOS_DATA_LIVE/Vitals...");
-                document.getElementById('liveHeartRate').innerHTML = '-- <small>bpm</small>';
-                document.getElementById('liveSpO2').innerHTML = '-- <small>%</small>';
-                document.getElementById('liveTemp').innerHTML = '-- <small>°C</small>';
+                console.log("⏳ جاري انتظار بيانات ESP32 على المسار /HELIOS_DATA_LIVE/Vitals...");
                 const badgeSpan = document.querySelector('#liveStatusBadge span');
-                if (badgeSpan) badgeSpan.innerHTML = 'Waiting for ESP32';
+                if (badgeSpan) badgeSpan.innerHTML = 'بانتظار ESP32';
                 document.querySelector('#liveStatusBadge i').style.color = '#f59e0b';
             }
         }, (error) => {
-            console.error("Firebase connection error:", error);
-            document.getElementById('liveHeartRate').innerHTML = 'ERR <small>bpm</small>';
+            console.error("خطأ في اتصال Firebase:", error);
         });
     }
     
-    // ---------- MOCK USER MANAGEMENT (independent from vitals) ----------
+    // ============================================================
+    //  إدارة المستخدمين (بيانات وهمية للإدارة فقط، لا علاقة لها بـ IoT)
+    // ============================================================
     let currentUsers = [
-        { id: "1", name: "Emily Clark", email: "emily@patient.com", role: "patient", status: "active", lastVisit: "2025-04-01" },
-        { id: "2", name: "Dr. James Wilson", email: "james@doctor.com", role: "doctor", status: "active", patientsAssigned: 14 },
-        { id: "3", name: "Admin Liam", email: "liam@admin.com", role: "admin", status: "active" }
+        { id: "1", name: "أحمد محمد", email: "ahmed@patient.com", role: "patient", status: "active", lastVisit: "2025-04-01" },
+        { id: "2", name: "د. سارة علي", email: "sara@doctor.com", role: "doctor", status: "active", patientsAssigned: 14 },
+        { id: "3", name: "مدير النظام", email: "admin@helios.com", role: "admin", status: "active" }
     ];
     
     function renderUserTable() {
@@ -510,8 +501,8 @@
             const row = tbody.insertRow();
             row.insertCell(0).innerText = u.name;
             row.insertCell(1).innerText = u.email;
-            row.insertCell(2).innerText = u.role;
-            row.insertCell(3).innerHTML = `<span style="color:${u.status==='active'?'#10b981':'#f97316'}">${u.status}</span>`;
+            row.insertCell(2).innerText = u.role === 'patient' ? 'مريض' : (u.role === 'doctor' ? 'طبيب' : 'مدير');
+            row.insertCell(3).innerHTML = `<span style="color:${u.status==='active'?'#10b981':'#f97316'}">${u.status === 'active' ? 'نشط' : 'غير نشط'}</span>`;
             const actions = row.insertCell(4);
             actions.innerHTML = `<i class="fas fa-trash-alt action-icon" data-id="${u.id}" style="color:#ef4444; cursor:pointer;"></i>`;
         });
@@ -529,10 +520,10 @@
         const patientsBody = document.getElementById('patientsTableBody');
         const doctorsBody = document.getElementById('doctorsTableBody');
         if(patientsBody) {
-            patientsBody.innerHTML = currentUsers.filter(u=>u.role==='patient').map(p=>`<tr><td>${p.name}</td><td>${p.email}</td><td>${p.status}</td><td>${p.lastVisit || 'N/A'}</td></tr>`).join('');
+            patientsBody.innerHTML = currentUsers.filter(u=>u.role==='patient').map(p=>`<tr><td>${p.name}</td><td>${p.email}</td><td>${p.status === 'active' ? 'نشط' : 'غير نشط'}</td><td>${p.lastVisit || 'N/A'}</td></tr>`).join('');
         }
         if(doctorsBody) {
-            doctorsBody.innerHTML = currentUsers.filter(u=>u.role==='doctor').map(d=>`<tr><td>${d.name}</td><td>${d.email}</td><td>${d.status}</td><td>${d.patientsAssigned || 5}</td></tr>`).join('');
+            doctorsBody.innerHTML = currentUsers.filter(u=>u.role==='doctor').map(d=>`<tr><td>${d.name}</td><td>${d.email}</td><td>${d.status === 'active' ? 'نشط' : 'غير نشط'}</td><td>${d.patientsAssigned || 5}</td></tr>`).join('');
         }
     }
     
@@ -552,29 +543,33 @@
         e.target.reset();
     });
     
-    // PDF Exports
+    // تصدير التقارير PDF
     document.getElementById('exportBtn')?.addEventListener('click', async () => {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        doc.text("User Management Report - Helios Medical IoT", 14, 10);
+        doc.text("تقرير إدارة المستخدمين - Helios Medical IoT", 14, 10);
         doc.autoTable({ html: '#usersTable', startY: 20 });
         doc.save("users_report.pdf");
     });
     
     document.getElementById('exportReportBtn')?.addEventListener('click', () => {
         const doc = new jspdf.jsPDF();
-        doc.text("IoT Vitals Snapshot - Helios Medical", 14, 10);
+        doc.text("تقرير العلامات الحيوية - Helios Medical", 14, 10);
         const hr = document.getElementById('liveHeartRate')?.innerText || '--';
         const spo = document.getElementById('liveSpO2')?.innerText || '--';
-        const tmp = document.getElementById('liveTemp')?.innerText || '--';
-        doc.text(`Heart Rate: ${hr}`, 14, 30);
-        doc.text(`SpO2: ${spo}`, 14, 40);
-        doc.text(`Temperature: ${tmp}`, 14, 50);
-        doc.text(`Generated from ESP32 live data (Firebase)`, 14, 70);
+        const tmp = document.getElementById('liveBodyTemp')?.innerText || '--';
+        const roomTmp = document.getElementById('liveRoomTemp')?.innerText || '--';
+        const hum = document.getElementById('liveHumidity')?.innerText || '--';
+        doc.text(`معدل نبضات القلب: ${hr}`, 14, 30);
+        doc.text(`تشبع الأكسجين: ${spo}`, 14, 40);
+        doc.text(`حرارة الجسم: ${tmp}`, 14, 50);
+        doc.text(`حرارة الغرفة: ${roomTmp}`, 14, 60);
+        doc.text(`رطوبة الهواء: ${hum}`, 14, 70);
+        doc.text("تم إنشاء هذا التقرير من بيانات حقيقية لجهاز ESP32 عبر Firebase", 14, 90);
         doc.save("clinical_iot_snapshot.pdf");
     });
     
-    // Navigation & Theme
+    // التنقل بين الصفحات والمظهر
     document.querySelectorAll('.menu-item[data-page]').forEach(item => {
         item.addEventListener('click', (e) => {
             const page = item.dataset.page;
@@ -596,27 +591,9 @@
     document.getElementById('saveSettings')?.addEventListener('click', () => {
         localStorage.setItem('hospitalName', document.getElementById('hospitalName').value);
         localStorage.setItem('hrThreshold', document.getElementById('hrThreshold').value);
-        alert("Preferences saved");
+        alert("تم حفظ الإعدادات");
     });
     if(localStorage.getItem('hospitalName')) document.getElementById('hospitalName').value = localStorage.getItem('hospitalName');
-    
-    // Global search filter
-    document.getElementById('globalSearch')?.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        const filtered = currentUsers.filter(u => u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term));
-        const tbody = document.getElementById('usersTableBody');
-        if(tbody) {
-            tbody.innerHTML = '';
-            filtered.forEach(u => {
-                const row = tbody.insertRow();
-                row.insertCell(0).innerText = u.name;
-                row.insertCell(1).innerText = u.email;
-                row.insertCell(2).innerText = u.role;
-                row.insertCell(3).innerText = u.status;
-                row.insertCell(4).innerHTML = `<i class="fas fa-trash-alt action-icon"></i>`;
-            });
-        }
-    });
     
     document.getElementById('collapseSidebar')?.addEventListener('click', () => {
         const sidebar = document.getElementById('sidebar');
@@ -624,13 +601,13 @@
         document.querySelectorAll('.sidebar span').forEach(span => span.style.display = sidebar.style.width === '80px' ? 'none' : 'inline');
     });
     
-    // Initialize chart and start pure Firebase listener (NO defaults)
+    // بدء تشغيل الكود
     initVitalsChart();
-    startESP32FirebaseSync();
+    startESP32FirebaseSync();  // الاستماع فقط لبيانات ESP32 الحقيقية - بدون أي بيانات وهمية
     renderUserTable();
     renderPatientsDoctors();
     
-    console.log("✅ Admin Panel ready — Listening to Firebase path /HELIOS_DATA_LIVE/Vitals from ESP32. No mock data.");
+    console.log("✅ لوحة التحكم جاهزة - تستقبل البيانات من مسار Firebase /HELIOS_DATA_LIVE/Vitals الصادر من ESP32 فقط");
 </script>
 </body>
 </html>
