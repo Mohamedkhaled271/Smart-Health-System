@@ -2,513 +2,522 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient · Smart Health · Personal Dashboard</title>
-    <link rel="stylesheet" href="css/patient.css">
-    <link rel="icon" type="image/png" href="assets\icons\heart-rate.png">
-    <!-- Font Awesome 6 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Helios Medical · Smart Health Admin Panel</title>
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007bff'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --bg: #f4f7fc;
+            --surface: #ffffff;
+            --text-primary: #1e2a3e;
+            --text-secondary: #5a6e7c;
+            --border: #e2e8f0;
+            --primary: #0077b6;
+            --primary-dark: #023e8a;
+            --success: #10b981;
+            --danger: #e11d48;
+            --warning: #f59e0b;
+            --sidebar-bg: #ffffff;
+            --card-shadow: 0 8px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        body.dark {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --primary: #3b82f6;
+            --sidebar-bg: #0f172a;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .app-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            transition: all 0.2s;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--primary);
+        }
+
+        .collapse-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            transition: 0.2s;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 0.85rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+
+        .menu-item i {
+            width: 24px;
+            font-size: 1.2rem;
+        }
+
+        .menu-item.active, .menu-item:hover {
+            background: var(--primary);
+            color: white;
+            border-radius: 12px;
+            margin: 0 12px;
+            padding: 0.85rem 1rem;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 0;
+            border-top: 1px solid var(--border);
+        }
+
+        /* MAIN */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem 2rem;
+            overflow-x: auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-area {
+            display: flex;
+            gap: 12px;
+            background: var(--surface);
+            padding: 0.5rem 1rem;
+            border-radius: 60px;
+            border: 1px solid var(--border);
+            align-items: center;
+        }
+
+        .search-area input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 240px;
+            color: var(--text-primary);
+        }
+
+        .date-badge {
+            background: var(--surface);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            padding: 1.2rem;
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+        }
+
+        .stat-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        .table-container {
+            background: var(--surface);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .btn {
+            background: var(--primary);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .form-container {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 24px;
+            margin: 1rem 0;
+            border: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.7rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+
+        .filter-dropdown, .date-dropdown {
+            display: none;
+            position: absolute;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1rem;
+            z-index: 100;
+            width: 280px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+        }
+
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+            .sidebar span {
+                display: none;
+            }
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        .data-update-pulse {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; transform: scale(0.98);}
+            100% { opacity: 1; transform: scale(1);}
+        }
+        .badge-online { color: #10b981; font-size: 0.7rem; }
+        .action-icon { cursor: pointer; margin: 0 6px; color: var(--primary); }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <!-- Chart.js and ApexCharts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <!-- Include jsPDF library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
-    <div class="app-wrapper">
-        <!-- SIDEBAR (patient version) -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="logo-area">
-                    <i class="fas fa-heartbeat"></i>
-                    <span>SmartHealth</span>
-                </div>
-                <button class="collapse-btn" id="collapseSidebar"><i class="fas fa-chevron-left"></i></button>
+<div class="app-wrapper">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header"><div class="logo-area"><i class="fas fa-heartbeat"></i><span>HeliosMed</span></div><button class="collapse-btn" id="collapseSidebar"><i class="fas fa-chevron-left"></i></button></div>
+        <div class="sidebar-menu">
+            <a href="javascript:void(0)" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+            <a href="javascript:void(0)" class="menu-item" data-page="patients"><i class="fas fa-users"></i><span>Patients</span></a>
+            <a href="javascript:void(0)" class="menu-item" data-page="doctors"><i class="fas fa-user-md"></i><span>Doctors</span></a>
+            <a href="javascript:void(0)" class="menu-item" data-page="reports"><i class="fas fa-file-alt"></i><span>Reports</span></a>
+            <a href="javascript:void(0)" class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
+        </div>
+        <div class="sidebar-footer"><a href="javascript:void(0)" class="menu-item" data-page="support"><i class="fas fa-headset"></i><span>Support</span></a></div>
+    </aside>
+    <main class="main-content">
+        <div class="top-bar">
+            <div class="search-area"><i class="fas fa-search"></i><input type="text" id="globalSearch" placeholder="Search users..."></div>
+            <div style="display: flex; gap: 1rem;"><div class="date-badge" id="dateRangeBadge"><i class="fas fa-calendar-alt"></i><span>Last 30 days</span><i class="fas fa-chevron-down"></i></div>
+            <button class="collapse-btn" id="themeToggle" style="width:45px;height:45px;"><i class="fas fa-moon"></i></button></div>
+        </div>
+        <div id="dateDropdown" class="date-dropdown"><ul><li data-range="7">Last 7 days</li><li data-range="30" class="active">Last 30 days</li><li data-range="90">Last 3 months</li></ul></div>
+
+        <!-- Dashboard -->
+        <div class="page-section active" id="dashboardPage">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-title">❤️ Heart Rate</div><div class="stat-value" id="liveHeartRate">-- <small>BPM</small></div><div class="stat-sub">Real-time from ESP32</div></div>
+                <div class="stat-card"><div class="stat-title">🫀 SpO₂</div><div class="stat-value" id="liveSpO2">-- <small>%</small></div><div class="stat-sub">Oxygen saturation</div></div>
+                <div class="stat-card"><div class="stat-title">🌡️ Body Temp</div><div class="stat-value" id="liveTemp">-- <small>°C</small></div><div class="stat-sub">Infrared sensor</div></div>
+                <div class="stat-card"><div class="stat-title">🏥 Active Alerts</div><div class="stat-value" id="activeAlertsCount">0</div><div class="stat-sub">critical threshold</div></div>
             </div>
-            <div class="sidebar-menu">
-                <a href="javascript:void(0)" class="menu-item active" data-page="dashboard">
-                    <i class="fas fa-chart-pie"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="javascript:void(0)" class="menu-item" data-page="profile">
-                    <i class="fas fa-user-circle"></i>
-                    <span>Profile</span>
-                </a>
-                <a href="javascript:void(0)" class="menu-item" data-page="history">
-                    <i class="fas fa-history"></i>
-                    <span>History</span>
-                </a>
-                <a href="javascript:void(0)" class="menu-item" data-page="appointments">
-                    <i class="fas fa-calendar-check"></i>
-                    <span>Appointments</span>
-                </a>
-                <a href="javascript:void(0)" class="menu-item" data-page="reports">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Reports</span>
-                </a>
-                <a href="javascript:void(0)" class="menu-item" data-page="settings">
-                    <i class="fas fa-cog"></i>
-                    <span>Settings</span>
-                </a>
-            </div>
-            <div class="sidebar-footer">
-                <a href="javascript:void(0)" class="menu-item" data-page="support">
-                    <i class="fas fa-headset"></i>
-                    <span>Support</span>
-                </a>
-            </div>
-        </aside>
-
-        <!-- MAIN CONTENT -->
-        <main class="main-content">
-            <!-- Top bar with search and theme toggle -->
-            <div class="top-bar">
-                <div class="search-area">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="globalSearch" placeholder="Search...">
-                    <button id="filterBtn"><i class="fas fa-sliders-h"></i> Filters</button>
-                </div>
-                <div style="display: flex; gap: 1rem;">
-                    <div class="date-badge">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Last 30 days</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <button class="collapse-btn" id="themeToggle" style="width:45px;height:45px;">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Filter Dropdown (hidden by default) -->
-            <div class="filter-dropdown" id="filterDropdown">
-                <div class="filter-header">
-                    <h4>Filter Options</h4>
-                    <button class="close-filter" id="closeFilter"><i class="fas fa-times"></i></button>
-                </div>
-                <div class="filter-body">
-                    <div class="filter-section">
-                        <label>Status</label>
-                        <select id="filterStatus">
-                            <option value="all">All</option>
-                            <option value="completed">Completed</option>
-                            <option value="ongoing">Ongoing</option>
-                            <option value="scheduled">Scheduled</option>
-                        </select>
-                    </div>
-                    <div class="filter-section">
-                        <label>Doctor</label>
-                        <select id="filterDoctor">
-                            <option value="all">All</option>
-                            <option value="Dr. Emily Davis">Dr. Emily Davis</option>
-                            <option value="Dr. Michael Chen">Dr. Michael Chen</option>
-                            <option value="Dr. Sarah Lee">Dr. Sarah Lee</option>
-                        </select>
-                    </div>
-                    <div class="filter-section">
-                        <label>Date Range</label>
-                        <input type="date" id="filterStartDate"> to <input type="date" id="filterEndDate">
-                    </div>
-                </div>
-                <div class="filter-footer">
-                    <button class="btn" id="applyFilter">Apply</button>
-                    <button class="btn btn-secondary" id="resetFilter">Reset</button>
-                </div>
-            </div>
-
-            <!-- Date Range Dropdown (hidden by default) -->
-            <div class="date-dropdown" id="dateDropdown">
-                <ul>
-                    <li data-range="7">Last 7 days</li>
-                    <li data-range="30" class="active">Last 30 days</li>
-                    <li data-range="90">Last 3 months</li>
-                    <li data-range="custom">Custom range</li>
-                </ul>
-            </div>
-
-            <!-- PAGE SECTIONS -->
-            <!-- DASHBOARD PAGE (active by default) -->
-            <div class="page-section active" id="dashboardPage">
-                <!-- STATS CARDS (Patient overview) -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-title">Health Score</div>
-                        <div class="stat-value" id="healthScore">85</div>
-                        <div class="stat-sub"><i class="fas fa-arrow-up"></i> +2%</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-title">Active Alerts</div>
-                        <div class="stat-value" id="activeAlertsCount">3</div>
-                        <div class="stat-sub"><i class="fas fa-exclamation-triangle" style="color:#e11d48;"></i> 2 critical</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-title">Last Checkup</div>
-                        <div class="stat-value" style="font-size: 2rem;">24 Mar</div>
-                        <div class="stat-sub">7 days ago</div>
-                    </div>
-                </div>
-
-                <!-- VITALS GRID (real-time patient data) -->
-                <div class="cards-grid" id="patientVitals">
-    <div class="card" id="heartCard">
-        <div class="card-header">
-            <i class="fas fa-heartbeat"></i>
-            <h3>Heart Rate</h3>
+            <h2>➕ Add New User</h2>
+            <div class="form-container"><form id="addUserForm"><div class="form-group"><label>Full Name</label><input type="text" class="form-control" id="newName" required></div><div class="form-group"><label>Email</label><input type="email" class="form-control" id="newEmail" required></div><div class="form-group"><label>Password</label><input type="password" class="form-control" id="newPassword" required></div><div class="form-group"><label>Role</label><select class="form-control" id="newRole"><option value="patient">Patient</option><option value="doctor">Doctor</option><option value="admin">Admin</option></select></div><button type="submit" class="btn">Create User</button></form></div>
+            <h2>👥 User Management</h2>
+            <div class="table-container"><table id="usersTable"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersTableBody"></tbody></table></div>
+            <button class="btn" id="exportBtn"><i class="fas fa-download"></i> Export User Report PDF</button>
         </div>
-        <div class="card-value" id="heartValue">-- <span>bpm</span></div>
-        <div class="card-indicator" id="heartIndicator">Waiting...</div>
-        <div class="chart-container">
-            <canvas id="heartChart"></canvas>
-        </div>
-    </div>
-
-    <div class="card" id="spo2Card">
-        <div class="card-header">
-            <i class="fas fa-lungs"></i>
-            <h3>SpO₂ Level</h3>
-        </div>
-        <div class="card-value" id="spo2Value">-- <span>%</span></div>
-        <div class="card-indicator" id="spo2Indicator">Waiting...</div>
-        <div class="chart-container">
-            <canvas id="spo2Chart"></canvas>
-        </div>
-    </div>
-
-    <div class="card" id="bodyTempCard">
-        <div class="card-header">
-            <i class="fas fa-thermometer-high"></i>
-            <h3>Body Temp</h3>
-        </div>
-        <div class="card-value" id="tempValue">-- <span>°C</span></div>
-        <div class="card-indicator" id="tempIndicator">Waiting...</div>
-        <div class="chart-container">
-            <canvas id="tempChart"></canvas>
-        </div>
-    </div>
-
-    <div class="card" id="environmentCard">
-        <div class="card-header">
-            <i class="fas fa-home"></i>
-            <h3>Room Env</h3>
-        </div>
-        <div class="card-value">
-            <span id="roomTempValue">--</span>°C / <span id="humidityValue">--</span>%
-        </div>
-        <div class="card-indicator">Room Status</div>
-        </div>
-
-    <div class="card" id="motionCard">
-        <div class="card-header">
-            <i class="fas fa-walking"></i>
-            <h3>Motion Activity</h3>
-        </div>
-        <div class="card-value" id="motionValue">-- <span>g</span></div>
-        <div class="card-indicator" id="motionIndicator">Status</div>
-        <div class="chart-container">
-            <canvas id="motionChart"></canvas>
-        </div>
-    </div>
+        <div class="page-section" id="patientsPage"><h2>👤 Patients Management</h2><div class="table-container"><table><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Last Visit</th></tr></thead><tbody id="patientsTableBody"></tbody></table></div></div>
+        <div class="page-section" id="doctorsPage"><h2>👨‍⚕️ Doctors</h2><div class="table-container"><table><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Patients Assigned</th></tr></thead><tbody id="doctorsTableBody"></tbody></table></div></div>
+        <div class="page-section" id="reportsPage"><h2>📊 Vitals Historical Chart</h2><div class="card"><canvas id="monthlyReportChart" style="height:300px;"></canvas></div><button class="btn" id="exportReportBtn">Export Clinical PDF</button></div>
+        <div class="page-section" id="settingsPage"><h2>⚙️ System Settings</h2><div class="form-container"><div class="form-group"><label>Hospital Name</label><input type="text" class="form-control" id="hospitalName" placeholder="Helios Medical"></div><div class="form-group"><label>Notification Email</label><input type="email" class="form-control" id="notificationEmail"></div><button class="btn" id="saveSettings">Save Settings</button></div></div>
+        <div class="page-section" id="supportPage"><h2>🆘 Support</h2><p>Contact: support@heliosmed.com | MQTT & Firebase active</p></div>
+    </main>
 </div>
-                
-                <!-- BUTTON EXPORT (optional) -->
-                <button class="export-btn" id="exportBtn"><i class="fas fa-download"></i> Export My Health Report</button>
+<script>
+    // ---------- MOCK & FIREBASE REAL INTEGRATION (ESP32 SYNC) ----------
+    let currentUsers = [
+        { id: "1", name: "John Doe", email: "john@patient.com", role: "patient", status: "active", lastVisit: "2025-03-20" },
+        { id: "2", name: "Dr. Sarah Connor", email: "sarah@doc.com", role: "doctor", status: "active", patientsAssigned: 12 },
+        { id: "3", name: "Admin Alex", email: "alex@admin.com", role: "admin", status: "active" }
+    ];
+    let chartInstance = null;
 
-                <!-- ALERTS SECTION (patient-specific) -->
-                <div class="alerts-section">
-                    <div class="alerts-header">
-                        <h3><i class="fas fa-bell"></i> Your Alerts</h3>
-                        <button class="mute-button" id="muteAlerts"><i class="fas fa-volume-up"></i> Mute</button>
-                    </div>
-                    <div class="alerts-list" id="alertsList">
-                        <!-- Alerts will be injected by JavaScript -->
-                    </div>
-                </div>
+    // Firebase config (exactly as ESP32)
+    const firebaseConfig = {
+        apiKey: "AIzaSyDy29ivSun9rqvqTlYhgBI8PBGJhnLJSc0",
+        databaseURL: "https://smart-health-monitoring-f97fb-default-rtdb.firebaseio.com/",
+        projectId: "smart-health-monitoring-f97fb"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-                <!-- HISTORICAL TRENDS (24h) -->
-                <h2>📈 Your 24h Trends</h2>
-                <div class="cards-grid">
-                    <div class="card">
-                        <h3>Heart Rate Variability</h3>
-                        <div id="heartHistoryChart" style="height: 250px;"></div>
-                    </div>
-                    <div class="card">
-                        <h3>Oxygen Saturation Trend</h3>
-                        <div id="spo2HistoryChart" style="height: 250px;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PROFILE PAGE -->
-            <div class="page-section" id="profilePage">
-                <h2>👤 My Profile</h2>
-                <div class="profile-container">
-                    <!-- Profile Picture Section -->
-                    <div class="profile-picture-section">
-                        <div class="profile-picture">
-                            <img src="https://via.placeholder.com/120" alt="Profile Picture" id="profileImage">
-                            <div class="profile-picture-overlay" id="changePicOverlay">
-                                <i class="fas fa-camera"></i>
-                                <span>Change Photo</span>
-                            </div>
-                            <input type="file" id="profilePicInput" accept="image/*" style="display: none;">
-                        </div>
-                    </div>
-
-                    <!-- Profile Details Form -->
-                    <div class="profile-form">
-                        <!-- Full Name -->
-                        <div class="form-group">
-                            <label><i class="fas fa-user"></i> Full Name</label>
-                            <div class="profile-field">
-                                <input type="text" class="form-control profile-input" id="profileName" value="John Doe" placeholder="Enter your full name" readonly>
-                                <span class="field-icon"><i class="fas fa-pencil-alt edit-icon" data-field="name"></i></span>
-                            </div>
-                        </div>
-
-                        <!-- Email -->
-                        <div class="form-group">
-                            <label><i class="fas fa-envelope"></i> Email</label>
-                            <div class="profile-field">
-                                <input type="email" class="form-control profile-input" id="profileEmail" value="john.doe@example.com" placeholder="Enter your email" readonly>
-                                <span class="field-icon"><i class="fas fa-pencil-alt edit-icon" data-field="email"></i></span>
-                            </div>
-                        </div>
-
-                        <!-- Phone -->
-                        <div class="form-group">
-                            <label><i class="fas fa-phone"></i> Phone Number</label>
-                            <div class="profile-field">
-                                <input type="tel" class="form-control profile-input" id="profilePhone" value="+1 234 567 890" placeholder="Enter phone number" readonly>
-                                <span class="field-icon"><i class="fas fa-pencil-alt edit-icon" data-field="phone"></i></span>
-                            </div>
-                        </div>
-
-                        <!-- Date of Birth -->
-                        <div class="form-group">
-                            <label><i class="fas fa-calendar-alt"></i> Date of Birth</label>
-                            <div class="profile-field">
-                                <input type="date" class="form-control profile-input" id="profileDob" value="1985-05-15" readonly>
-                                <span class="field-icon"><i class="fas fa-pencil-alt edit-icon" data-field="dob"></i></span>
-                            </div>
-                        </div>
-
-                        <!-- Blood Type (dropdown) -->
-                        <div class="form-group">
-                            <label><i class="fas fa-tint"></i> Blood Type</label>
-                            <div class="profile-field">
-                                <select class="form-control profile-input" id="profileBlood" disabled>
-                                    <option value="A+">A+</option>
-                                    <option value="A-">A-</option>
-                                    <option value="B+">B+</option>
-                                    <option value="B-">B-</option>
-                                    <option value="AB+">AB+</option>
-                                    <option value="AB-">AB-</option>
-                                    <option value="O+" selected>O+</option>
-                                    <option value="O-">O-</option>
-                                </select>
-                                <span class="field-icon"><i class="fas fa-pencil-alt edit-icon" data-field="blood"></i></span>
-                            </div>
-                        </div>
-
-                        <!-- Gender -->
-                        <div class="form-group">
-                            <label><i class="fas fa-venus-mars"></i> Gender</label>
-                            <div class="profile-field">
-                                <select class="form-control profile-input" id="profileGender" disabled>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
-                                <span class="field-icon"><i class="fas fa-pencil-alt edit-icon" data-field="gender"></i></span>
-                            </div>
-                        </div>
-
-                        <!-- Address -->
-                        <div class="form-group">
-                            <label><i class="fas fa-map-marker-alt"></i> Address</label>
-                            <div class="profile-field">
-                                <input type="text" class="form-control profile-input" id="profileAddress" value="123 Main St, City, Country" placeholder="Enter address" readonly>
-                                <span class="field-icon"><i class="fas fa-pencil-alt edit-icon" data-field="address"></i></span>
-                            </div>
-                        </div>
-
-                        <!-- Password Change Section (hidden by default) -->
-                        <div class="password-section" id="passwordSection" style="display: none;">
-                            <h4>Change Password</h4>
-                            <div class="form-group">
-                                <label>New Password</label>
-                                <div class="password-input-wrapper">
-                                    <input type="password" class="form-control" id="newPassword" placeholder="Enter new password">
-                                    <span class="password-toggle" onclick="togglePasswordVisibility('newPassword')">
-                                        <i class="fas fa-eye"></i>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Confirm New Password</label>
-                                <div class="password-input-wrapper">
-                                    <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm new password">
-                                    <span class="password-toggle" onclick="togglePasswordVisibility('confirmPassword')">
-                                        <i class="fas fa-eye"></i>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="password-actions">
-                                <button class="btn btn-success" id="savePasswordBtn"><i class="fas fa-save"></i> Save Password</button>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="profile-actions">
-                            <button class="btn btn-primary" id="editProfileBtn"><i class="fas fa-edit"></i> Edit Profile</button>
-                            <button class="btn btn-success" id="saveProfileBtn" style="display: none;"><i class="fas fa-save"></i> Save Changes</button>
-                            <button class="btn btn-secondary" id="cancelProfileBtn" style="display: none;"><i class="fas fa-times"></i> Cancel</button>
-                            <button class="btn btn-link" id="changePasswordBtn"><i class="fas fa-key"></i> Change Password</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- HISTORY PAGE -->
-            <div class="page-section" id="historyPage">
-                <h2>📋 Medical History</h2>
-                <div class="table-container">
-                    <input type="text" id="historySearch" class="form-control" placeholder="Search records..." style="margin-bottom:1rem;">
-                    <table id="historyTable">
-                        <thead>
-                            <tr><th>Date</th><th>Diagnosis</th><th>Doctor</th><th>Status</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>2025-03-10</td><td>Hypertension</td><td>Dr. Emily Davis</td><td><span class="status-badge status-completed">Treated</span></td></tr>
-                            <tr><td>2025-02-22</td><td>Diabetes Check</td><td>Dr. Michael Chen</td><td><span class="status-badge status-ongoing">Follow-up</span></td></tr>
-                            <tr><td>2025-01-15</td><td>General Checkup</td><td>Dr. Sarah Lee</td><td><span class="status-badge status-completed">Completed</span></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- APPOINTMENTS PAGE -->
-            <div class="page-section" id="appointmentsPage">
-                <h2>📅 My Appointments</h2>
-                <div class="table-container">
-                    <input type="text" id="appointmentSearch" class="form-control" placeholder="Search appointments..." style="margin-bottom:1rem;">
-                    <table id="appointmentsTable">
-                        <thead>
-                            <tr><th>Date</th><th>Time</th><th>Doctor</th><th>Status</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>2025-04-05</td><td>10:30</td><td>Dr. Emily Davis</td><td><span class="status-badge status-ongoing">Scheduled</span></td></tr>
-                            <tr><td>2025-04-12</td><td>14:00</td><td>Dr. Michael Chen</td><td><span class="status-badge status-ongoing">Scheduled</span></td></tr>
-                            <tr><td>2025-03-28</td><td>09:15</td><td>Dr. Sarah Lee</td><td><span class="status-badge status-completed">Completed</span></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- REPORTS PAGE -->
-            <div class="page-section" id="reportsPage">
-                <h2>📝 Submit Your Health Report</h2>
-                <form id="patientReportForm" class="report-form">
-                    <!-- Patient Details -->
-                    <div class="form-group">
-                        <label for="patientName">Patient Name</label>
-                        <input type="text" id="patientName" name="patientName" placeholder="Your Name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="patientAge">Age</label>
-                        <input type="number" id="patientAge" name="patientAge" placeholder="Your Age" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="patientGender">Gender</label>
-                        <select id="patientGender" name="patientGender" required>
-                            <option value="">Select Gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                        </select>
-                    </div>
-                    <!-- Doctor Selection -->
-                    <div class="form-group">
-                        <label for="doctorSelect">Send To Doctor</label>
-                        <select id="doctorSelect" name="doctorSelect" required>
-                            <option value="">Select Doctor</option>
-                            <option value="drAhmed">Dr. Ahmed</option>
-                            <option value="drMona">Dr. Mona</option>
-                        </select>
-                    </div>
-                    <!-- Health Report -->
-                    <div class="form-group">
-                        <label for="healthCondition">Health Condition / Symptoms</label>
-                        <textarea id="healthCondition" name="healthCondition" rows="4" placeholder="Describe your health condition..." required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="medications">Medications (if any)</label>
-                        <textarea id="medications" name="medications" rows="3" placeholder="List any medications you are taking..."></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="additionalNotes">Additional Notes</label>
-                        <textarea id="additionalNotes" name="additionalNotes" rows="2" placeholder="Any extra notes..."></textarea>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" class="btn-submit">💾 Save & Send Report</button>
-                </form>
-            </div>
-
-            <!-- SETTINGS PAGE -->
-            <div class="page-section" id="settingsPage">
-                <h2>⚙️ Settings</h2>
-                <div class="form-container">
-                    <div class="form-group">
-                        <label>Notification Email</label>
-                        <input type="email" class="form-control" id="settingsEmail" placeholder="my.email@example.com">
-                    </div>
-                    <div class="form-group">
-                        <label>Language</label>
-                        <select class="form-control" id="settingsLanguage">
-                            <option value="en">English</option>
-                            <option value="ar">Arabic</option>
-                        </select>
-                    </div>
-                    <button class="btn" id="saveSettings">Save Settings</button>
-                </div>
-            </div>
-
-            <!-- SUPPORT PAGE -->
-            <div class="page-section" id="supportPage">
-                <h2>🆘 Support</h2>
-                <p>Contact support at support@smarthealth.com or call 1-800-555-1234.</p>
-            </div>
-        </main>
-    </div>
-
-    <!-- Firebase (commented out – uncomment when backend is ready) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
-    <!-- MQTT library (real connection, currently simulated internally) -->
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-
-    <script src="js/firebase.js"></script> <!--  Firebase configuration -->
-    <script src="js/patient.js"></script> <!-- Main patient dashboard logic -->
-    <script src="js/theme.js"></script> <!-- Theme toggle script -->
-    <script src="js/notifications.js"></script> <!-- Alert system logic -->
-    <!-- 
-        =========================================================================
-        FIREBASE NOTES (commented out)
-        -------------------------------------------------------------------------
-        To enable Firebase backend:
-        1. Uncomment the Firebase SDK scripts in the <head> section.
-        2. Ensure you have a js/firebase.js file with your Firebase config.
-        3. Modify the MQTT simulation to push data to Firebase or read from it.
-        4. Update the login flow (index.html) to authenticate and redirect.
-        Currently the app runs entirely on simulated data, no Firebase required.
-        =========================================================================
-    -->
+    function renderUserTable() {
+        const tbody = document.getElementById('usersTableBody');
+        if(!tbody) return;
+        tbody.innerHTML = '';
+        currentUsers.forEach(u => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerText = u.name;
+            row.insertCell(1).innerText = u.email;
+            row.insertCell(2).innerText = u.role;
+            row.insertCell(3).innerHTML = `<span style="color:${u.status==='active'?'#10b981':'#f97316'}">${u.status}</span>`;
+            const actions = row.insertCell(4);
+            actions.innerHTML = `<i class="fas fa-edit action-icon" data-id="${u.id}"></i> <i class="fas fa-trash-alt action-icon" data-id="${u.id}" style="color:#e11d48;"></i>`;
+        });
+        document.querySelectorAll('.fa-trash-alt').forEach(btn => btn.addEventListener('click', (e) => {
+            const id = e.target.dataset.id;
+            currentUsers = currentUsers.filter(u => u.id !== id);
+            renderUserTable();
+        }));
+    }
+    document.getElementById('addUserForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newUser = {
+            id: Date.now().toString(),
+            name: document.getElementById('newName').value,
+            email: document.getElementById('newEmail').value,
+            role: document.getElementById('newRole').value,
+            status: "active"
+        };
+        currentUsers.push(newUser);
+        renderUserTable();
+        e.target.reset();
+    });
+    function renderPatientsDoctors() {
+        const patientsBody = document.getElementById('patientsTableBody');
+        const doctorsBody = document.getElementById('doctorsTableBody');
+        if(patientsBody) patientsBody.innerHTML = currentUsers.filter(u=>u.role==='patient').map(p=>`<tr><td>${p.name}</td><td>${p.email}</td><td>${p.status}</td><td>${p.lastVisit || '2025-04-01'}</td></tr>`).join('');
+        if(doctorsBody) doctorsBody.innerHTML = currentUsers.filter(u=>u.role==='doctor').map(d=>`<tr><td>${d.name}</td><td>${d.email}</td><td>${d.status}</td><td>${d.patientsAssigned || 8}</td></tr>`).join('');
+    }
+    // ESP32 realtime: listen /HELIOS_DATA_LIVE/Vitals
+    function startLiveSync() {
+        const vitalsRef = db.ref('/HELIOS_DATA_LIVE/Vitals');
+        vitalsRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                if(data.HeartRate) updateLiveCard('liveHeartRate', data.HeartRate, 'BPM');
+                if(data.SpO2) updateLiveCard('liveSpO2', data.SpO2, '%');
+                if(data.BodyTemp) updateLiveCard('liveTemp', parseFloat(data.BodyTemp).toFixed(1), '°C');
+                let alertCount = 0;
+                if(data.HeartRate && (data.HeartRate > 120 || data.HeartRate < 50)) alertCount++;
+                if(data.SpO2 && data.SpO2 < 92) alertCount++;
+                if(data.BodyTemp && (data.BodyTemp > 38.5 || data.BodyTemp < 35.5)) alertCount++;
+                document.getElementById('activeAlertsCount').innerText = alertCount;
+                if(window.updateChartWithData) window.updateChartWithData(data.HeartRate, data.SpO2);
+            }
+        }, err => console.warn("Firebase read error", err));
+    }
+    function updateLiveCard(id, value, unit) {
+        const el = document.getElementById(id);
+        if(el) { el.innerHTML = `${value} <small>${unit}</small>`; el.classList.add('data-update-pulse'); setTimeout(()=>el.classList.remove('data-update-pulse'),400); }
+    }
+    // Chart.js for reports page
+    function initReportsChart() {
+        const ctx = document.getElementById('monthlyReportChart').getContext('2d');
+        if(chartInstance) chartInstance.destroy();
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: { labels: ['Week1','Week2','Week3','Week4'], datasets: [{ label: 'Heart Rate (BPM)', data: [72, 74, 78, 76], borderColor: '#0077b6' }, { label: 'SpO₂ (%)', data: [98,97,96,98], borderColor: '#10b981' }] },
+            options: { responsive: true }
+        });
+        window.updateChartWithData = (hr, spo2) => {
+            if(chartInstance && hr && spo2) {
+                let newHr = chartInstance.data.datasets[0].data.slice(1);
+                newHr.push(hr);
+                chartInstance.data.datasets[0].data = newHr;
+                let newSp = chartInstance.data.datasets[1].data.slice(1);
+                newSp.push(spo2);
+                chartInstance.data.datasets[1].data = newSp;
+                chartInstance.update();
+            }
+        };
+    }
+    // PDF Export
+    document.getElementById('exportBtn')?.addEventListener('click', async () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text("User Management Report - Helios Medical", 14, 10);
+        doc.autoTable({ html: '#usersTable', startY: 20 });
+        doc.save("users_report.pdf");
+    });
+    document.getElementById('exportReportBtn')?.addEventListener('click', () => {
+        const doc = new jspdf.jsPDF();
+        doc.text("Vitals Snapshot Report", 14, 10);
+        doc.text(`Heart Rate: ${document.getElementById('liveHeartRate')?.innerText || '--'}`, 14, 30);
+        doc.text(`SpO2: ${document.getElementById('liveSpO2')?.innerText || '--'}`, 14, 40);
+        doc.text(`Temperature: ${document.getElementById('liveTemp')?.innerText || '--'}`, 14, 50);
+        doc.save("clinical_snapshot.pdf");
+    });
+    // Navigation & Theme
+    document.querySelectorAll('.menu-item[data-page]').forEach(item => {
+        item.addEventListener('click', (e) => {
+            const page = item.dataset.page;
+            document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(`${page}Page`).classList.add('active');
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            item.classList.add('active');
+            if(page === 'reports' && chartInstance) chartInstance.update();
+            if(page === 'patients' || page === 'doctors') renderPatientsDoctors();
+        });
+    });
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle?.addEventListener('click', () => { document.body.classList.toggle('dark'); localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light'); });
+    if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
+    // Date badge mock
+    document.getElementById('dateRangeBadge')?.addEventListener('click', () => { document.getElementById('dateDropdown').style.display = document.getElementById('dateDropdown').style.display === 'block' ? 'none' : 'block'; });
+    document.querySelectorAll('#dateDropdown li').forEach(li => li.addEventListener('click', function() { document.getElementById('dateRangeBadge').querySelector('span').innerText = this.innerText; document.getElementById('dateDropdown').style.display = 'none'; }));
+    // Settings persistence
+    document.getElementById('saveSettings')?.addEventListener('click', () => { localStorage.setItem('hospitalName', document.getElementById('hospitalName').value); localStorage.setItem('notifyEmail', document.getElementById('notificationEmail').value); alert("Settings saved"); });
+    if(localStorage.getItem('hospitalName')) document.getElementById('hospitalName').value = localStorage.getItem('hospitalName');
+    // Global Search filter
+    document.getElementById('globalSearch')?.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = currentUsers.filter(u => u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term));
+        const tbody = document.getElementById('usersTableBody');
+        if(tbody) {
+            tbody.innerHTML = '';
+            filtered.forEach(u => {
+                const row = tbody.insertRow();
+                row.insertCell(0).innerText = u.name;
+                row.insertCell(1).innerText = u.email;
+                row.insertCell(2).innerText = u.role;
+                row.insertCell(3).innerText = u.status;
+                row.insertCell(4).innerHTML = `<i class="fas fa-trash-alt action-icon"></i>`;
+            });
+        }
+    });
+    // Simulate periodic fallback if firebase lacks data (mock generator for demo consistency with ESP32 pattern)
+    function fallbackMockVitals() {
+        setInterval(() => {
+            const mockHR = Math.floor(Math.random() * (95 - 65 + 1) + 65);
+            const mockSp = Math.floor(Math.random() * (99 - 94 + 1) + 94);
+            const mockTemp = (36.2 + Math.random() * 1.2).toFixed(1);
+            if(!document.getElementById('liveHeartRate').innerText.includes('--')) return;
+            updateLiveCard('liveHeartRate', mockHR, 'BPM');
+            updateLiveCard('liveSpO2', mockSp, '%');
+            updateLiveCard('liveTemp', mockTemp, '°C');
+        }, 8000);
+    }
+    // MQTT visual note: we integrate via firebase, but the ESP32 code publishes MQTT too. We'll just reflect firebase as main.
+    // Collapse sidebar
+    document.getElementById('collapseSidebar')?.addEventListener('click', () => {
+        document.getElementById('sidebar').style.width = document.getElementById('sidebar').style.width === '80px' ? '260px' : '80px';
+        document.querySelectorAll('.sidebar span').forEach(span => span.style.display = document.getElementById('sidebar').style.width === '80px' ? 'none' : 'inline');
+    });
+    renderUserTable();
+    renderPatientsDoctors();
+    initReportsChart();
+    startLiveSync();
+    fallbackMockVitals();
+    // small mqtt bridge simulation: additional realtime from ESP's published topics would be visible in firebase
+    console.log("✅ Admin panel ready - Firebase sync active with ESP32 path /HELIOS_DATA_LIVE/Vitals");
+</script>
 </body>
 </html>
