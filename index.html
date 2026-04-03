@@ -2,222 +2,612 @@
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Health System</title>
-  <link rel="icon" type="image/png" href="assets\icons\heart-rate.png">
-  <!-- ==================== FONTS & ICONS ==================== -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>MediFlow | Smart Health System</title>
+  <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300b4d8'%3E%3Cpath d='M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5 2,5.41 4.42,3 7.5,3c1.74,0 3.41.81 4.5,2.08C13.09,3.81 14.76,3 16.5,3 19.58,3 22,5.41 22,8.5c0,3.77-3.4,6.86-8.55,11.54L12,21.35Z'/%3E%3C/svg%3E">
+  <!-- Google Fonts + Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="css/index.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-gradient-start: #f0f9ff;
+      --bg-gradient-end: #e6f0fa;
+      --card-bg: rgba(255, 255, 255, 0.96);
+      --text-primary: #0a2b3e;
+      --text-secondary: #2c5a6e;
+      --accent-primary: #1a7f9e;
+      --accent-glow: #2fa6cc;
+      --border-light: rgba(0, 180, 216, 0.2);
+      --shadow-sm: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+      --shadow-focus: 0 0 0 3px rgba(31, 147, 184, 0.25);
+      --toast-bg: #0f2b35;
+      --toast-text: #ffffff;
+    }
+
+    [data-theme="dark"] {
+      --bg-gradient-start: #0b1a22;
+      --bg-gradient-end: #071117;
+      --card-bg: rgba(18, 30, 36, 0.96);
+      --text-primary: #eef4ff;
+      --text-secondary: #bdd4e2;
+      --accent-primary: #2ba9cf;
+      --accent-glow: #4fc3f7;
+      --border-light: rgba(43, 169, 207, 0.3);
+      --shadow-sm: 0 20px 35px -12px rgba(0, 0, 0, 0.4);
+      --toast-bg: #1e2f38;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 10% 30%, var(--bg-gradient-start), var(--bg-gradient-end));
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      position: relative;
+      transition: background 0.3s ease;
+    }
+
+    /* animated medical shapes */
+    .bg-shapes {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .shape {
+      position: absolute;
+      background: rgba(31, 147, 184, 0.08);
+      border-radius: 60% 40% 70% 30%;
+      filter: blur(70px);
+      animation: floatShape 25s infinite alternate;
+    }
+    .shape-1 { width: 500px; height: 500px; top: -200px; left: -150px; }
+    .shape-2 { width: 400px; height: 400px; bottom: -100px; right: -80px; background: rgba(79, 195, 247, 0.08); animation-duration: 20s; }
+    .shape-3 { width: 300px; height: 300px; bottom: 30%; left: 20%; background: rgba(16, 185, 129, 0.05); animation-duration: 28s; }
+    @keyframes floatShape {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      100% { transform: translate(30px, -30px) rotate(5deg); }
+    }
+
+    /* ecg line decoration */
+    .ecg-line {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(90deg, transparent, var(--accent-primary), #4fc3f7, transparent);
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* AI Assistant */
+    .ai-assistant {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 56px;
+      height: 56px;
+      background: var(--accent-primary);
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.8rem;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      transition: 0.2s;
+      z-index: 200;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .ai-assistant:hover { transform: scale(1.05); background: #0f6b86; }
+    .ai-popup {
+      position: fixed;
+      bottom: 6rem;
+      right: 2rem;
+      width: 280px;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 1rem;
+      box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+      border: 1px solid var(--border-light);
+      z-index: 210;
+      display: none;
+      transition: 0.2s;
+    }
+    .ai-popup.show { display: block; }
+
+    /* Toast notification */
+    #toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 360px;
+    }
+    .toast-message {
+      background: var(--toast-bg);
+      backdrop-filter: blur(8px);
+      color: var(--toast-text);
+      padding: 12px 20px;
+      border-radius: 60px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      border-left: 4px solid var(--accent-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.3s ease;
+      font-family: monospace;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.8rem;
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      width: 44px;
+      height: 44px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      z-index: 99;
+      font-size: 1.3rem;
+      border: 1px solid var(--border-light);
+      color: var(--text-primary);
+    }
+
+    /* MAIN CARD */
+    .login-wrapper {
+      width: 100%;
+      max-width: 520px;
+      margin: auto;
+      position: relative;
+      z-index: 10;
+    }
+    .login-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(14px);
+      border-radius: 48px;
+      padding: 2rem 1.8rem 2rem 1.8rem;
+      box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255,255,255,0.1);
+      transition: all 0.3s;
+      border: 1px solid var(--border-light);
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 1.8rem;
+    }
+    .logo-animation i {
+      font-size: 3rem;
+      background: linear-gradient(135deg, var(--accent-primary), #4fc3f7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: pulseBeat 1.5s infinite;
+    }
+    @keyframes pulseBeat {
+      0% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.08); opacity: 1; text-shadow: 0 0 6px #00b4d8; }
+      100% { transform: scale(1); opacity: 0.8; }
+    }
+    .login-header h2 {
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-top: 0.5rem;
+      font-size: 1.8rem;
+      letter-spacing: -0.3px;
+    }
+
+    /* TABS */
+    .auth-tabs {
+      display: flex;
+      gap: 0.6rem;
+      background: rgba(0,0,0,0.05);
+      padding: 0.3rem;
+      border-radius: 60px;
+      margin-bottom: 2rem;
+    }
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 0.7rem;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    .tab-btn.active {
+      background: var(--accent-primary);
+      color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* forms */
+    .auth-form.hidden { display: none; }
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      color: var(--text-secondary);
+    }
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      color: var(--accent-primary);
+      font-size: 1rem;
+      opacity: 0.7;
+    }
+    .form-control, select.form-control {
+      width: 100%;
+      padding: 0.85rem 1rem 0.85rem 2.4rem;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--border-light);
+      border-radius: 28px;
+      font-size: 0.9rem;
+      transition: 0.2s;
+      color: var(--text-primary);
+      background-color: rgba(0,0,0,0.02);
+    }
+    [data-theme="dark"] .form-control {
+      background: rgba(255,255,255,0.05);
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: var(--shadow-focus);
+    }
+    .toggle-password {
+      position: absolute;
+      right: 16px;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+    .security-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 1rem 0;
+      font-size: 0.7rem;
+    }
+    .fake-recaptcha {
+      background: rgba(0,0,0,0.05);
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+    }
+    .btn-login {
+      width: 100%;
+      background: linear-gradient(95deg, var(--accent-primary), #2f9ebf);
+      border: none;
+      padding: 0.9rem;
+      border-radius: 40px;
+      font-weight: 700;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-top: 0.5rem;
+    }
+    .btn-login:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+    .error-msg { color: #e5484d; font-size: 0.75rem; margin-top: 8px; text-align: center; }
+    .social-login {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 1.8rem 0 1rem;
+    }
+    .social-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 40px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-light);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .social-btn:hover { transform: scale(1.05); background: var(--accent-primary); color: white; }
+    .login-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+    .strength-meter {
+      margin: 0.5rem 0 0.8rem;
+    }
+    .meter-bar {
+      background: #ddd;
+      border-radius: 20px;
+      height: 5px;
+      overflow: hidden;
+    }
+    .meter-fill {
+      width: 0%;
+      height: 100%;
+      background: #e5484d;
+      transition: 0.2s;
+    }
+    .file-upload .file-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+    #profilePreview {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--accent-primary);
+    }
+    .terms {
+      margin: 1rem 0;
+      display: flex;
+      gap: 8px;
+      font-size: 0.8rem;
+    }
+  </style>
 </head>
 <body>
-  <!-- Preloader -->
-  <div id="preloader">
-    <div class="heartbeat-loader"><i class="fas fa-heartbeat"></i></div>
-  </div>
-
-  <!-- ==================== ANIMATED BACKGROUND SHAPES ==================== -->
-  <div class="bg-shapes">
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
-    <div class="shape shape-3"></div>
-  </div>
+  <div class="bg-shapes"><div class="shape shape-1"></div><div class="shape shape-2"></div><div class="shape shape-3"></div></div>
   <div class="ecg-line"></div>
-
-  <!-- AI Assistant -->
   <div class="ai-assistant" id="aiBtn"><i class="fas fa-robot"></i></div>
   <div class="ai-popup" id="aiPopup">
-    <h4 style="color:var(--text-primary); margin-bottom:10px;">🩺 MediAI</h4>
-    <p style="color:var(--text-secondary); font-size:0.9rem;">I can help with symptoms, trends, or explain readings. (Demo)</p>
-    <input type="text" placeholder="Ask something..." style="width:100%; padding:8px; border-radius:20px; border:none; margin-top:8px;">
+    <h4 style="margin:0 0 6px;">🩺 MediAI Assistant</h4>
+    <p style="font-size:0.8rem;">Describe symptoms or ask about health trends. (Demo simulation)</p>
+    <input type="text" id="aiQuery" placeholder="e.g., chest discomfort, fever..." style="width:100%; padding:8px; border-radius:30px; border:1px solid #ccc; margin-top:6px;">
+    <button id="sendAiQuery" style="margin-top:8px; background:var(--accent-primary); border:none; border-radius:30px; padding:6px; width:100%; color:white;">Ask</button>
   </div>
-
-  <!-- Toast -->
   <div id="toast"></div>
+  <div class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></div>
 
   <div class="login-wrapper">
-    <div class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode">
-      <i class="fas fa-sun"></i>
-    </div>
-
     <div class="login-card">
-      <div class="login-header">
-        <div class="logo-animation">
-          <i class="fas fa-heartbeat"></i>
-        </div>
-        <h2>Smart Health System</h2>
-      </div>
-
-      <!-- TABS -->
-      <div class="auth-tabs">
-        <button class="tab-btn active" id="loginTab"><i class="fas fa-sign-in-alt"></i> Sign In</button>
-        <button class="tab-btn" id="registerTab"><i class="fas fa-user-plus"></i> Create Account</button>
-      </div>
-
-      <!-- FORMS -->
+      <div class="login-header"><div class="logo-animation"><i class="fas fa-heartbeat"></i></div><h2>MediFlow Health</h2><p style="font-size:0.8rem; color:var(--text-secondary)">Secure · Intelligent · HIPAA Ready</p></div>
+      <div class="auth-tabs"><button class="tab-btn active" id="loginTab"><i class="fas fa-sign-in-alt"></i> Sign In</button><button class="tab-btn" id="registerTab"><i class="fas fa-user-plus"></i> Create Account</button></div>
       <div class="auth-forms">
-        <!-- LOGIN FORM -->
         <form id="loginForm" class="auth-form">
-          <div class="form-group">
-            <label for="loginEmail"><i class="far fa-envelope"></i> Email</label>
-            <div class="input-wrapper">
-              <i class="fas fa-envelope input-icon"></i>
-              <input type="email" class="form-control" id="loginEmail" placeholder="doctor@hospital.com" required>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="loginPassword"><i class="fas fa-lock"></i> Password</label>
-            <div class="input-wrapper">
-              <i class="fas fa-key input-icon"></i>
-              <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required>
-              <i class="fas fa-eye toggle-password" data-target="loginPassword"></i>
-            </div>
-          </div>
-
-          <div class="form-options">
-            <label class="remember"><input type="checkbox" id="rememberMe"> Remember me</label>
-            <a href="#" class="forgot-link" id="forgotPassword"><i class="fas fa-question-circle"></i> Forgot?</a>
-          </div>
-
-          <!-- fake recaptcha + 2FA badge -->
-          <div class="security-row">
-            <div class="fake-recaptcha"><i class="fab fa-google"></i> I'm not a robot</div>
-            <span><i class="fas fa-shield-alt"></i> 2FA enabled</span>
-          </div>
-
-          <button type="submit" class="btn-login" id="loginBtn"><i class="fas fa-arrow-right-to-bracket"></i> Sign In</button>
+          <div class="form-group"><label><i class="far fa-envelope"></i> Email</label><div class="input-wrapper"><i class="fas fa-envelope input-icon"></i><input type="email" class="form-control" id="loginEmail" placeholder="clinical@mediflow.com" required></div></div>
+          <div class="form-group"><label><i class="fas fa-lock"></i> Password</label><div class="input-wrapper"><i class="fas fa-key input-icon"></i><input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required><i class="fas fa-eye toggle-password" data-target="loginPassword"></i></div></div>
+          <div class="form-options" style="display:flex; justify-content:space-between; margin:0.5rem 0;"><label class="remember"><input type="checkbox" id="rememberMe"> Remember me</label><a href="#" id="forgotPassword" style="color:var(--accent-primary);">Forgot?</a></div>
+          <div class="security-row"><div class="fake-recaptcha"><i class="fab fa-google"></i> Protected by reCAPTCHA</div><span><i class="fas fa-shield-alt"></i> 2FA ready</span></div>
+          <button type="submit" class="btn-login"><i class="fas fa-arrow-right-to-bracket"></i> Secure Sign In</button>
           <div id="loginError" class="error-msg"></div>
         </form>
-
-        <!-- REGISTER FORM -->
         <form id="registerForm" class="auth-form hidden">
-          <!-- Profile image upload -->
-          <div class="form-group file-upload">
-            <label><i class="fas fa-camera"></i> Profile picture</label>
-            <input type="file" id="profileUpload" accept="image/*">
-            <div class="file-label">
-              <img id="profilePreview" src="https://via.placeholder.com/40" alt="preview">
-              <span>Click to upload photo</span>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label><i class="fas fa-user"></i> Full name</label>
-            <div class="input-wrapper">
-              <i class="fas fa-user input-icon"></i>
-              <input type="text" class="form-control" id="regName" required>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label><i class="far fa-envelope"></i> Email</label>
-            <div class="input-wrapper">
-              <i class="fas fa-envelope input-icon"></i>
-              <input type="email" class="form-control" id="regEmail" required>
-            </div>
-            <div class="validation-hint" id="emailHint"></div>
-          </div>
-
-          <div class="form-group">
-            <label><i class="fas fa-user-md"></i> Role</label>
-            <div class="input-wrapper">
-              <i class="fas fa-briefcase input-icon"></i>
-              <select class="form-control" id="regRole" required>
-                <option value="" disabled selected>– Select –</option>
-                <option value="patient">Patient</option>
-                <option value="doctor">Doctor</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="row-fields" style="display:flex; gap:0.8rem; flex-wrap:wrap;">
-            <div class="form-group" style="flex:1;">
-              <label><i class="fas fa-lock"></i> Password</label>
-              <div class="input-wrapper">
-                <i class="fas fa-key input-icon"></i>
-                <input type="password" class="form-control" id="regPassword" required>
-                <i class="fas fa-eye toggle-password" data-target="regPassword"></i>
-              </div>
-            </div>
-            <div class="form-group" style="flex:1;">
-              <label><i class="fas fa-check-circle"></i> Confirm</label>
-              <div class="input-wrapper">
-                <i class="fas fa-key input-icon"></i>
-                <input type="password" class="form-control" id="regConfirm" required>
-                <i class="fas fa-eye toggle-password" data-target="regConfirm"></i>
-              </div>
-            </div>
-          </div>
-
-          <!-- Password strength -->
-          <div class="strength-meter">
-            <div class="meter-bar"><div class="meter-fill" id="strengthFill"></div></div>
-            <div class="strength-text" style="display:flex; justify-content:space-between;"><span>Strength</span> <span id="strengthLabel">Weak</span></div>
-          </div>
-
-          <!-- Terms & conditions -->
-          <div class="terms">
-            <input type="checkbox" id="termsCheck" required>
-            <label for="termsCheck">I agree to <a href="#">Terms</a> and <a href="#">Privacy</a></label>
-          </div>
-
-          <button type="submit" class="btn-login" id="registerBtn"><i class="fas fa-user-plus"></i> Create Account</button>
+          <div class="form-group file-upload"><label>Profile photo</label><input type="file" id="profileUpload" accept="image/*" style="display:none;"><div class="file-label" id="fileLabelTrigger"><img id="profilePreview" src="https://ui-avatars.com/api/?background=1a7f9e&color=fff&name=User"><span>Upload picture</span></div></div>
+          <div class="form-group"><label>Full name</label><div class="input-wrapper"><i class="fas fa-user input-icon"></i><input type="text" class="form-control" id="regName" placeholder="Dr. Sarah Chen" required></div></div>
+          <div class="form-group"><label>Email</label><div class="input-wrapper"><i class="fas fa-envelope input-icon"></i><input type="email" class="form-control" id="regEmail" placeholder="contact@example.com" required></div><div class="validation-hint" id="emailHint" style="font-size:0.7rem;"></div></div>
+          <div class="form-group"><label>Role</label><div class="input-wrapper"><i class="fas fa-briefcase input-icon"></i><select class="form-control" id="regRole"><option value="patient">Patient</option><option value="doctor">Doctor</option><option value="admin">Admin</option></select></div></div>
+          <div style="display:flex; gap:0.8rem;"><div class="form-group" style="flex:1"><label>Password</label><div class="input-wrapper"><i class="fas fa-key input-icon"></i><input type="password" class="form-control" id="regPassword" required><i class="fas fa-eye toggle-password" data-target="regPassword"></i></div></div><div class="form-group" style="flex:1"><label>Confirm</label><div class="input-wrapper"><i class="fas fa-check-circle input-icon"></i><input type="password" class="form-control" id="regConfirm" required><i class="fas fa-eye toggle-password" data-target="regConfirm"></i></div></div></div>
+          <div class="strength-meter"><div class="meter-bar"><div class="meter-fill" id="strengthFill"></div></div><div style="display:flex; justify-content:space-between;"><span>Password strength</span><span id="strengthLabel">Weak</span></div></div>
+          <div class="terms"><input type="checkbox" id="termsCheck"> <label>I agree to <a href="#">Terms of Service</a> & <a href="#">Privacy Policy</a></label></div>
+          <button type="submit" class="btn-login"><i class="fas fa-user-shield"></i> Create secure account</button>
           <div id="registerError" class="error-msg"></div>
         </form>
       </div>
-
-      <!-- Multi-social login -->
-      <div class="social-login">
-        <button class="social-btn" id="googleBtn"><i class="fab fa-google"></i></button>
-        <button class="social-btn" id="appleBtn"><i class="fab fa-apple"></i></button>
-        <button class="social-btn" id="microsoftBtn"><i class="fab fa-microsoft"></i></button>
-      </div>
-
-      <!-- Security badge (enhanced) -->
-      <div style="display:flex; justify-content:center; gap:1.5rem; font-size:0.8rem; color:var(--text-secondary);">
-        <span><i class="fas fa-check-circle" style="color:#10b981;"></i> HIPAA Ready</span>
-        <span><i class="fas fa-lock"></i> 256-bit encrypted</span>
-      </div>
-
-      <!-- Demo access (original)
-      <div class="demo-section">
-        <p><i class="fas fa-flask"></i> Demo access (bypass login)</p>
-        <div class="demo-buttons">
-          <a href="patient.html" class="demo-btn"><i class="fas fa-user"></i> Patient</a>
-          <a href="doctor.html" class="demo-btn"><i class="fas fa-stethoscope"></i> Doctor</a>
-          <a href="admin.html" class="demo-btn"><i class="fas fa-user-cog"></i> Admin</a>
-        </div>
-      </div> -->
-
-      <!-- Login activity (fake)
-      <div style="text-align:center; margin-top:1rem; font-size:0.7rem; color:var(--text-secondary);">
-        <i class="fas fa-clock"></i> Last login: Today 09:24 · Cairo
-      </div> -->
-
-      <!-- Footer -->
-      <div class="login-footer">
-        © 2026 Smart Health
-      </div>
+      <div class="social-login"><button class="social-btn" id="googleBtn"><i class="fab fa-google"></i></button><button class="social-btn" id="appleBtn"><i class="fab fa-apple"></i></button><button class="social-btn" id="microsoftBtn"><i class="fab fa-microsoft"></i></button></div>
+      <div style="display:flex; justify-content:center; gap:1.2rem; margin-top:0.5rem;"><span><i class="fas fa-check-circle" style="color:#10b981;"></i> HIPAA Ready</span><span><i class="fas fa-lock"></i> AES-256</span></div>
+      <div class="login-footer">© 2026 MediFlow — Next‑gen Digital Health</div>
     </div>
   </div>
-    <!-- ==================== FIREBASE & SCRIPTS (as requested) ==================== -->
-      <!-- Firebase SDK (v8 compat) - commented for demo, uncomment when ready -->
-      
-      <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-      <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-      <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-      <script src="js/firebase.js"></script>
-     
-    <!-- MQTT library (real connection, currently simulated internally) -->
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
-  <!-- Local Firebase config placeholder -->
-  <!-- <script src="js/firebase.js"></script> -->
-  <script src="js/index.js"></script>
-  <script src="js/theme.js"></script>
-  <script src="js/auth.js"></script>
+  <script>
+    // ========== Enhanced Notification System ==========
+    function showNotification(message, type = "info") {
+      const toastContainer = document.getElementById("toast");
+      const toast = document.createElement("div");
+      toast.className = "toast-message";
+      let icon = '<i class="fas fa-info-circle"></i>';
+      if (type === "success") icon = '<i class="fas fa-check-circle" style="color:#2ecc71;"></i>';
+      if (type === "error") icon = '<i class="fas fa-exclamation-triangle" style="color:#e74c3c;"></i>';
+      if (type === "warning") icon = '<i class="fas fa-bell" style="color:#f39c12;"></i>';
+      toast.innerHTML = `${icon} <span>${message}</span>`;
+      toastContainer.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 4000);
+    }
+
+    // demo simulated 2FA / security alerts
+    window.addEventListener('load', () => {
+      showNotification("🔐 System ready — End-to-end encrypted session", "success");
+      setTimeout(() => showNotification("🩺 Welcome to MediFlow. Your health data is protected with AI monitoring.", "info"), 1000);
+    });
+
+    // theme toggle with improved icon
+    const themeToggle = document.getElementById('themeToggle');
+    const root = document.documentElement;
+    themeToggle.addEventListener('click', () => {
+      const current = root.getAttribute('data-theme');
+      const newTheme = current === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', newTheme);
+      themeToggle.innerHTML = newTheme === 'light' ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+      showNotification(`🌓 ${newTheme === 'dark' ? 'Dark mode' : 'Light mode'} activated`, "info");
+    });
+
+    // tabs logic
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const loginFormDiv = document.getElementById('loginForm');
+    const registerFormDiv = document.getElementById('registerForm');
+    loginTab.addEventListener('click', () => {
+      loginTab.classList.add('active'); registerTab.classList.remove('active');
+      loginFormDiv.classList.remove('hidden'); registerFormDiv.classList.add('hidden');
+    });
+    registerTab.addEventListener('click', () => {
+      registerTab.classList.add('active'); loginTab.classList.remove('active');
+      loginFormDiv.classList.add('hidden'); registerFormDiv.classList.remove('hidden');
+    });
+
+    // password toggle
+    document.querySelectorAll('.toggle-password').forEach(icon => {
+      icon.addEventListener('click', function() {
+        const targetId = this.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        if (input.type === 'password') { input.type = 'text'; this.classList.remove('fa-eye'); this.classList.add('fa-eye-slash'); }
+        else { input.type = 'password'; this.classList.remove('fa-eye-slash'); this.classList.add('fa-eye'); }
+      });
+    });
+
+    // password strength + validation
+    const regPass = document.getElementById('regPassword');
+    const strengthFill = document.getElementById('strengthFill');
+    const strengthLabel = document.getElementById('strengthLabel');
+    regPass.addEventListener('input', function() {
+      const val = this.value;
+      let strength = 0;
+      if (val.length >= 6) strength += 1;
+      if (val.length >= 10) strength += 1;
+      if (/[A-Z]/.test(val)) strength += 1;
+      if (/[0-9]/.test(val)) strength += 1;
+      if (/[^A-Za-z0-9]/.test(val)) strength += 1;
+      const percent = Math.min(100, strength * 20);
+      strengthFill.style.width = `${percent}%`;
+      if (percent < 40) { strengthFill.style.background = "#e5484d"; strengthLabel.innerText = "Weak"; }
+      else if (percent < 70) { strengthFill.style.background = "#f59e0b"; strengthLabel.innerText = "Fair"; }
+      else { strengthFill.style.background = "#10b981"; strengthLabel.innerText = "Strong"; }
+    });
+
+    // avatar upload
+    const profileUpload = document.getElementById('profileUpload');
+    const profilePreview = document.getElementById('profilePreview');
+    document.getElementById('fileLabelTrigger').addEventListener('click', () => profileUpload.click());
+    profileUpload.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (ev) => profilePreview.src = ev.target.result;
+        reader.readAsDataURL(e.target.files[0]);
+        showNotification("📸 Profile picture updated", "success");
+      }
+    });
+
+    // demo login validation + enhanced alerts
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass = document.getElementById('loginPassword').value.trim();
+      if (!email || !pass) { showNotification("Please fill email & password", "error"); return; }
+      if (!email.includes('@')) { showNotification("Invalid email format", "error"); return; }
+      // demo successful login simulation (redirect simulation)
+      showNotification(`✅ Welcome back, ${email.split('@')[0]}. Redirecting to dashboard...`, "success");
+      setTimeout(() => { showNotification("🔔 Demo: full dashboard would load here (simulated)", "info"); }, 1500);
+      // In real system: firebase auth etc, here we just simulate professional behavior
+    });
+
+    // registration validation
+    const regForm = document.getElementById('registerForm');
+    regForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const role = document.getElementById('regRole').value;
+      const pwd = document.getElementById('regPassword').value;
+      const confirm = document.getElementById('regConfirm').value;
+      const terms = document.getElementById('termsCheck').checked;
+      if (!name || !email || !role) { showNotification("All fields required", "error"); return; }
+      if (pwd !== confirm) { showNotification("Passwords do not match", "error"); return; }
+      if (pwd.length < 6) { showNotification("Password must be at least 6 characters", "error"); return; }
+      if (!terms) { showNotification("Please accept Terms & Privacy", "warning"); return; }
+      showNotification(`🎉 Account created for ${name} (${role}). Verification email sent.`, "success");
+      setTimeout(() => { loginTab.click(); }, 1500);
+    });
+
+    // Forgot password interactive alert
+    document.getElementById('forgotPassword').addEventListener('click', (e) => {
+      e.preventDefault();
+      showNotification("📧 Password reset link will be sent to your registered email (demo flow).", "info");
+    });
+
+    // Social login demo notifications
+    document.getElementById('googleBtn').addEventListener('click', () => showNotification("Google SSO demo — enterprise ready", "success"));
+    document.getElementById('appleBtn').addEventListener('click', () => showNotification("Apple ID secure authentication (simulated)", "info"));
+    document.getElementById('microsoftBtn').addEventListener('click', () => showNotification("Microsoft Entra ID integration", "info"));
+
+    // AI assistant popup + smart health suggestions
+    const aiBtn = document.getElementById('aiBtn');
+    const aiPopup = document.getElementById('aiPopup');
+    aiBtn.addEventListener('click', () => { aiPopup.classList.toggle('show'); });
+    const sendAi = document.getElementById('sendAiQuery');
+    const aiInput = document.getElementById('aiQuery');
+    function aiResponse(query) {
+      if (!query) return "Please describe your symptom or health query.";
+      const lower = query.toLowerCase();
+      if (lower.includes("headache") || lower.includes("migraine")) return "💡 Frequent headaches may be stress or hydration related. Consider tracking patterns in your health log.";
+      if (lower.includes("fever")) return "🌡️ Fever indicates immune response. Monitor temperature and rest. Consult a doctor if persists >48h.";
+      if (lower.includes("heart") || lower.includes("chest")) return "❤️ Chest discomfort requires attention. Our AI suggests scheduling a teleconsultation for further evaluation.";
+      return "🩺 Thank you. I'll log your symptom. For urgent medical issues, please contact a physician immediately. (Demo response)";
+    }
+    sendAi.addEventListener('click', () => {
+      const query = aiInput.value.trim();
+      const reply = aiResponse(query);
+      showNotification(`🤖 MediAI: ${reply.substring(0, 100)}`, "info");
+      aiInput.value = '';
+      aiPopup.classList.remove('show');
+    });
+
+    // Email realtime hint (professional validation)
+    const regEmail = document.getElementById('regEmail');
+    const emailHint = document.getElementById('emailHint');
+    regEmail.addEventListener('input', () => {
+      const val = regEmail.value;
+      if (val.includes('@') && val.includes('.')) emailHint.innerHTML = '<i class="fas fa-check-circle" style="color:#10b981;"></i> Valid format';
+      else if (val.length > 0) emailHint.innerHTML = '<i class="fas fa-exclamation-circle" style="color:#e5484d;"></i> Enter valid email';
+      else emailHint.innerHTML = '';
+    });
+
+    // extra smooth: AI popup close on outside click (basic)
+    document.addEventListener('click', (e) => {
+      if (!aiBtn.contains(e.target) && !aiPopup.contains(e.target)) aiPopup.classList.remove('show');
+    });
+
+    // Professional security demo alert: remember me option
+    const rememberCheck = document.getElementById('rememberMe');
+    rememberCheck?.addEventListener('change', (e) => {
+      if(e.target.checked) showNotification("🔒 This device will be remembered for 30 days (encrypted)", "info");
+    });
+    // simulated 2FA badge interactive
+    const securityBadge = document.querySelector('.security-row span');
+    if(securityBadge) securityBadge.addEventListener('click', () => showNotification("Two-Factor Authentication ready via authenticator app / SMS", "info"));
+  </script>
 </body>
 </html>
