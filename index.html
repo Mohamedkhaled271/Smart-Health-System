@@ -1,24 +1,23 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="light">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Care Sync | منصة صحية ذكية</title>
+  <title>Care Sync | Intelligent Health Platform</title>
   <link rel="icon" type="image/png" href="assets/icons/heart-rate.png">
   
   <!-- Google Fonts + Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   
   <!-- CSS Files -->
   <link rel="stylesheet" href="css/index.css">
   
   <style>
-    /* Additional styles for better UX */
     .toast-container {
       position: fixed;
       top: 20px;
-      left: 20px;
+      right: 20px;
       z-index: 10000;
       display: flex;
       flex-direction: column;
@@ -40,14 +39,8 @@
     }
     
     @keyframes slideInRight {
-      from {
-        opacity: 0;
-        transform: translateX(100px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
+      from { opacity: 0; transform: translateX(100px); }
+      to { opacity: 1; transform: translateX(0); }
     }
     
     .role-modal {
@@ -73,24 +66,57 @@
       text-align: center;
     }
     
-    .loading-spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 2px solid #fff;
-      border-radius: 50%;
-      border-top-color: transparent;
-      animation: spin 0.6s linear infinite;
+    .form-row {
+      display: flex;
+      gap: 1rem;
     }
     
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .form-row .form-group {
+      flex: 1;
+    }
+    
+    .strength-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+    }
+    
+    .security-badges {
+      display: flex;
+      justify-content: center;
+      gap: 1.2rem;
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    
+    .forgot-link {
+      color: var(--accent-primary);
+      text-decoration: none;
+      font-size: 0.8rem;
+    }
+    
+    .validation-hint {
+      font-size: 0.7rem;
+      margin-top: 0.25rem;
     }
   </style>
 </head>
 <body>
   <div id="toastContainer" class="toast-container"></div>
   
+  <div class="bg-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+  <div class="ecg-line"></div>
+  
+  <div class="theme-toggle" id="themeToggle">
+    <i class="fas fa-moon"></i>
+  </div>
+
   <div class="login-wrapper">
     <div class="login-card">
       <div class="login-header">
@@ -98,15 +124,15 @@
           <i class="fas fa-heartbeat"></i>
         </div>
         <h2>Care Sync</h2>
-        <p>منصة صحية متكاملة · آمنة · ذكية</p>
+        <p>Unified · Secure · Intelligent Health Coordination</p>
       </div>
       
       <div class="auth-tabs">
         <button class="tab-btn active" id="loginTab">
-          <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+          <i class="fas fa-sign-in-alt"></i> Sign In
         </button>
         <button class="tab-btn" id="registerTab">
-          <i class="fas fa-user-plus"></i> إنشاء حساب
+          <i class="fas fa-user-plus"></i> Create Account
         </button>
       </div>
       
@@ -114,15 +140,15 @@
         <!-- Login Form -->
         <form id="loginForm" class="auth-form">
           <div class="form-group">
-            <label>البريد الإلكتروني</label>
+            <label>Email Address</label>
             <div class="input-wrapper">
               <i class="fas fa-envelope input-icon"></i>
-              <input type="email" class="form-control" id="loginEmail" placeholder="example@domain.com" required>
+              <input type="email" class="form-control" id="loginEmail" placeholder="doctor@caresync.com" required>
             </div>
           </div>
           
           <div class="form-group">
-            <label>كلمة المرور</label>
+            <label>Password</label>
             <div class="input-wrapper">
               <i class="fas fa-lock input-icon"></i>
               <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required>
@@ -132,13 +158,13 @@
           
           <div class="form-options">
             <label class="remember">
-              <input type="checkbox" id="rememberMe"> تذكرني
+              <input type="checkbox" id="rememberMe"> Remember me
             </label>
-            <a href="#" id="forgotPassword" class="forgot-link">نسيت كلمة المرور؟</a>
+            <a href="#" id="forgotPassword" class="forgot-link">Forgot Password?</a>
           </div>
           
           <button type="submit" class="btn-login" id="loginBtn">
-            <i class="fas fa-arrow-right-to-bracket"></i> دخول
+            <i class="fas fa-arrow-right-to-bracket"></i> Secure Sign In
           </button>
           <div id="loginError" class="error-msg"></div>
         </form>
@@ -146,48 +172,48 @@
         <!-- Register Form -->
         <form id="registerForm" class="auth-form hidden">
           <div class="form-group">
-            <label>الصورة الشخصية</label>
+            <label>Profile Photo</label>
             <div class="file-upload">
               <input type="file" id="profileUpload" accept="image/*" style="display:none;">
               <div class="file-label" id="fileLabelTrigger">
                 <img id="profilePreview" src="https://ui-avatars.com/api/?background=1a7f9e&color=fff&name=User">
-                <span>رفع صورة</span>
+                <span>Upload Picture</span>
               </div>
             </div>
           </div>
           
           <div class="form-group">
-            <label>الاسم الكامل</label>
+            <label>Full Name</label>
             <div class="input-wrapper">
               <i class="fas fa-user input-icon"></i>
-              <input type="text" class="form-control" id="regName" placeholder="أحمد محمد" required>
+              <input type="text" class="form-control" id="regName" placeholder="Dr. Sarah Chen" required>
             </div>
           </div>
           
           <div class="form-group">
-            <label>البريد الإلكتروني</label>
+            <label>Email Address</label>
             <div class="input-wrapper">
               <i class="fas fa-envelope input-icon"></i>
-              <input type="email" class="form-control" id="regEmail" placeholder="example@domain.com" required>
+              <input type="email" class="form-control" id="regEmail" placeholder="contact@example.com" required>
             </div>
             <div id="emailHint" class="validation-hint"></div>
           </div>
           
           <div class="form-group">
-            <label>نوع الحساب</label>
+            <label>Account Role</label>
             <div class="input-wrapper">
               <i class="fas fa-briefcase input-icon"></i>
               <select class="form-control" id="regRole">
-                <option value="patient">مريض</option>
-                <option value="doctor">طبيب</option>
-                <option value="admin">مدير</option>
+                <option value="patient">Patient</option>
+                <option value="doctor">Doctor</option>
+                <option value="admin">Admin</option>
               </select>
             </div>
           </div>
           
           <div class="form-row">
             <div class="form-group">
-              <label>كلمة المرور</label>
+              <label>Password</label>
               <div class="input-wrapper">
                 <i class="fas fa-key input-icon"></i>
                 <input type="password" class="form-control" id="regPassword" required>
@@ -196,7 +222,7 @@
             </div>
             
             <div class="form-group">
-              <label>تأكيد كلمة المرور</label>
+              <label>Confirm Password</label>
               <div class="input-wrapper">
                 <i class="fas fa-check-circle input-icon"></i>
                 <input type="password" class="form-control" id="regConfirm" required>
@@ -210,18 +236,18 @@
               <div class="meter-fill" id="strengthFill"></div>
             </div>
             <div class="strength-labels">
-              <span>قوة كلمة المرور</span>
-              <span id="strengthLabel">ضعيفة</span>
+              <span>Password Strength</span>
+              <span id="strengthLabel">Weak</span>
             </div>
           </div>
           
           <div class="terms">
             <input type="checkbox" id="termsCheck">
-            <label>أوافق على <a href="#">الشروط والأحكام</a> و <a href="#">سياسة الخصوصية</a></label>
+            <label>I agree to <a href="#">Terms of Service</a> & <a href="#">Privacy Policy</a></label>
           </div>
           
           <button type="submit" class="btn-login" id="registerBtn">
-            <i class="fas fa-user-shield"></i> إنشاء حساب
+            <i class="fas fa-user-shield"></i> Create Account
           </button>
           <div id="registerError" class="error-msg"></div>
         </form>
@@ -240,13 +266,13 @@
       </div>
       
       <div class="security-badges">
-        <span><i class="fas fa-check-circle"></i> متوافق مع HIPAA</span>
-        <span><i class="fas fa-lock"></i> تشفير AES-256</span>
-        <span><i class="fas fa-shield-alt"></i> حماية بيانات</span>
+        <span><i class="fas fa-check-circle"></i> HIPAA Ready</span>
+        <span><i class="fas fa-lock"></i> AES-256</span>
+        <span><i class="fas fa-shield-alt"></i> Data Protection</span>
       </div>
       
       <div class="login-footer">
-        © 2026 Care Sync — المنصة الصحية المتكاملة
+        © 2026 Care Sync — Next-gen Health Orchestration
       </div>
     </div>
   </div>
