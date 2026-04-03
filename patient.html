@@ -1,12 +1,9 @@
-Here is the complete HTML document that creates a patient dashboard exactly matching your requested design, with all medical data coming directly from the ESP32 device via Firebase (no random/mock data).
-
-```html
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient · Smart Health · Personal Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>HELIOS · Patient Dashboard · Real-time IoT Vitals</title>
     <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007bff'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E">
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -29,18 +26,21 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
         }
 
         :root {
-            --bg: #f4f7fc;
+            --bg: #f0f4f8;
             --surface: #ffffff;
-            --text-primary: #1e2a3e;
-            --text-secondary: #5a6e7c;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
             --border: #e2e8f0;
-            --primary: #0077b6;
-            --primary-dark: #023e8a;
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --primary-gradient: linear-gradient(135deg, #0284c7, #0369a1);
             --success: #10b981;
-            --danger: #e11d48;
+            --danger: #ef4444;
             --warning: #f59e0b;
+            --info: #8b5cf6;
             --sidebar-bg: #ffffff;
-            --card-shadow: 0 8px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,0,0,0.05);
+            --card-shadow: 0 8px 20px rgba(0,0,0,0.04), 0 2px 4px rgba(0,0,0,0.02);
+            --glass-effect: rgba(255,255,255,0.7);
         }
 
         body.dark {
@@ -49,14 +49,16 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
             --text-primary: #f1f5f9;
             --text-secondary: #94a3b8;
             --border: #334155;
-            --primary: #3b82f6;
+            --primary: #38bdf8;
+            --primary-dark: #0284c7;
             --sidebar-bg: #0f172a;
+            --glass-effect: rgba(30,41,59,0.8);
         }
 
         body {
             background: var(--bg);
             color: var(--text-primary);
-            transition: background 0.2s, color 0.2s;
+            transition: background 0.3s, color 0.3s;
         }
 
         .app-wrapper {
@@ -66,7 +68,7 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
 
         /* SIDEBAR */
         .sidebar {
-            width: 260px;
+            width: 270px;
             background: var(--sidebar-bg);
             border-right: 1px solid var(--border);
             display: flex;
@@ -74,7 +76,8 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
             position: sticky;
             top: 0;
             height: 100vh;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
         }
 
         .sidebar-header {
@@ -89,8 +92,18 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
             display: flex;
             align-items: center;
             gap: 10px;
-            font-weight: 700;
-            font-size: 1.3rem;
+            font-weight: 800;
+            font-size: 1.4rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-area i {
+            background: none;
+            -webkit-background-clip: unset;
+            background-clip: unset;
             color: var(--primary);
         }
 
@@ -101,23 +114,35 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
             font-size: 1.2rem;
             color: var(--text-secondary);
             transition: 0.2s;
+            width: 35px;
+            height: 35px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .collapse-btn:hover {
+            background: var(--border);
         }
 
         .sidebar-menu {
             flex: 1;
-            padding: 1rem 0;
+            padding: 1.5rem 0;
         }
 
         .menu-item {
             display: flex;
             align-items: center;
             gap: 14px;
-            padding: 0.85rem 1.5rem;
+            padding: 0.9rem 1.5rem;
             color: var(--text-secondary);
             text-decoration: none;
-            transition: 0.2s;
+            transition: all 0.2s;
             font-weight: 500;
             cursor: pointer;
+            margin: 4px 12px;
+            border-radius: 14px;
         }
 
         .menu-item i {
@@ -126,11 +151,9 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
         }
 
         .menu-item.active, .menu-item:hover {
-            background: var(--primary);
+            background: var(--primary-gradient);
             color: white;
-            border-radius: 12px;
-            margin: 0 12px;
-            padding: 0.85rem 1rem;
+            box-shadow: 0 4px 12px rgba(2,132,199,0.3);
         }
 
         .sidebar-footer {
@@ -141,7 +164,7 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
         /* MAIN */
         .main-content {
             flex: 1;
-            padding: 1.5rem 2rem;
+            padding: 1.8rem 2.2rem;
             overflow-x: auto;
         }
 
@@ -162,27 +185,31 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
             border-radius: 60px;
             border: 1px solid var(--border);
             align-items: center;
+            box-shadow: var(--card-shadow);
         }
 
         .search-area input {
             border: none;
             background: transparent;
             outline: none;
-            width: 240px;
+            width: 260px;
             color: var(--text-primary);
         }
 
         .date-badge {
             background: var(--surface);
-            padding: 0.5rem 1rem;
+            padding: 0.5rem 1.2rem;
             border-radius: 40px;
             display: flex;
             gap: 8px;
             align-items: center;
             cursor: pointer;
             border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+            font-weight: 500;
         }
 
+        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -192,38 +219,51 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
 
         .stat-card {
             background: var(--surface);
-            padding: 1.2rem;
-            border-radius: 24px;
+            padding: 1.2rem 1.5rem;
+            border-radius: 28px;
             box-shadow: var(--card-shadow);
             border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.08);
         }
 
         .stat-title {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             color: var(--text-secondary);
+            font-weight: 600;
         }
 
         .stat-value {
             font-size: 2rem;
-            font-weight: 700;
+            font-weight: 800;
             margin: 0.5rem 0;
         }
 
+        /* Cards Grid for Vitals */
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .card {
             background: var(--surface);
-            border-radius: 24px;
-            padding: 1.2rem;
+            border-radius: 28px;
+            padding: 1.3rem;
             border: 1px solid var(--border);
             box-shadow: var(--card-shadow);
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
         }
 
         .card-header {
@@ -234,13 +274,18 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
         }
 
         .card-header i {
-            font-size: 1.8rem;
-            color: var(--primary);
+            font-size: 2rem;
+        }
+
+        .card-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
         }
 
         .card-value {
-            font-size: 2.2rem;
-            font-weight: 700;
+            font-size: 2.5rem;
+            font-weight: 800;
             margin: 0.5rem 0;
         }
 
@@ -254,8 +299,8 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
             display: inline-block;
             padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            font-size: 0.7rem;
+            font-weight: 700;
             margin: 0.5rem 0;
         }
 
@@ -270,30 +315,54 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
         }
 
         .indicator-danger {
-            background: #e11d4820;
-            color: #e11d48;
+            background: #ef444420;
+            color: #ef4444;
         }
 
         .chart-container {
-            height: 100px;
+            height: 90px;
             margin-top: 10px;
         }
 
-        .export-btn {
-            background: var(--primary);
-            border: none;
-            padding: 0.7rem 1.5rem;
-            border-radius: 40px;
-            color: white;
-            font-weight: 500;
-            cursor: pointer;
-            margin: 1rem 0;
+        /* Environment Grid */
+        .env-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
         }
 
+        .env-card {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .env-card i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .env-card .env-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .env-card .env-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        /* Alerts Section */
         .alerts-section {
             background: var(--surface);
-            border-radius: 24px;
-            padding: 1.2rem;
+            border-radius: 28px;
+            padding: 1.3rem;
             margin: 1.5rem 0;
             border: 1px solid var(--border);
         }
@@ -311,10 +380,15 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
             padding: 0.4rem 1rem;
             border-radius: 20px;
             cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .mute-button:hover {
+            background: var(--border);
         }
 
         .alerts-list {
-            max-height: 200px;
+            max-height: 180px;
             overflow-y: auto;
         }
 
@@ -323,68 +397,41 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
             align-items: center;
             gap: 12px;
             padding: 0.8rem;
-            border-bottom: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 8px;
+            background: var(--bg);
         }
 
         .alert-item.danger {
-            border-right: 3px solid var(--danger);
-            background: var(--bg);
+            border-right: 4px solid var(--danger);
         }
 
-        .table-container {
-            background: var(--surface);
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            overflow-x: auto;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            text-align: left;
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.7rem;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text-primary);
-        }
-
-        .btn {
-            background: var(--primary);
+        .export-btn {
+            background: var(--primary-gradient);
             border: none;
-            padding: 0.6rem 1.2rem;
+            padding: 0.8rem 1.8rem;
             border-radius: 40px;
             color: white;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
+            margin: 1rem 0;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(2,132,199,0.3);
         }
 
-        .filter-dropdown, .date-dropdown {
-            display: none;
-            position: absolute;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1rem;
-            z-index: 100;
-            width: 280px;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+        .export-btn:hover {
+            transform: translateY(-2px);
         }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .status-completed { background: #10b98120; color: #10b981; }
+        .status-ongoing { background: #f59e0b20; color: #f59e0b; }
 
         .page-section {
             display: none;
@@ -392,6 +439,12 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
 
         .page-section.active {
             display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .data-update-pulse {
@@ -403,85 +456,50 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
             100% { opacity: 1; transform: scale(1);}
         }
 
-        .status-badge {
-            padding: 4px 10px;
+        .filter-dropdown, .date-dropdown {
+            display: none;
+            position: absolute;
+            background: var(--surface);
+            border: 1px solid var(--border);
             border-radius: 20px;
-            font-size: 0.75rem;
-        }
-
-        .status-completed { background: #10b98120; color: #10b981; }
-        .status-ongoing { background: #f59e0b20; color: #f59e0b; }
-
-        .profile-container {
-            display: flex;
-            gap: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .profile-picture-section {
-            text-align: center;
-        }
-
-        .profile-picture {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .profile-picture img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .profile-form {
-            flex: 1;
-        }
-
-        .profile-field {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .profile-field .form-control {
-            flex: 1;
-        }
-
-        .field-icon {
-            cursor: pointer;
-            color: var(--primary);
-        }
-
-        .profile-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
+            padding: 1rem;
+            z-index: 100;
+            width: 280px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.15);
         }
 
         @media (max-width: 768px) {
             .sidebar { width: 80px; }
             .sidebar span { display: none; }
             .main-content { padding: 1rem; }
+            .cards-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Live indicator */
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--success);
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            color: white;
         }
     </style>
 </head>
 <body>
     <div class="app-wrapper">
-        <!-- SIDEBAR -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo-area">
                     <i class="fas fa-heartbeat"></i>
-                    <span>SmartHealth</span>
+                    <span>HELIOS</span>
                 </div>
                 <button class="collapse-btn" id="collapseSidebar"><i class="fas fa-chevron-left"></i></button>
             </div>
             <div class="sidebar-menu">
-                <a href="javascript:void(0)" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+                <a href="javascript:void(0)" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
                 <a href="javascript:void(0)" class="menu-item" data-page="profile"><i class="fas fa-user-circle"></i><span>Profile</span></a>
                 <a href="javascript:void(0)" class="menu-item" data-page="history"><i class="fas fa-history"></i><span>History</span></a>
                 <a href="javascript:void(0)" class="menu-item" data-page="appointments"><i class="fas fa-calendar-check"></i><span>Appointments</span></a>
@@ -493,82 +511,103 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
             </div>
         </aside>
 
-        <!-- MAIN CONTENT -->
         <main class="main-content">
             <div class="top-bar">
                 <div class="search-area">
                     <i class="fas fa-search"></i>
                     <input type="text" id="globalSearch" placeholder="Search...">
-                    <button id="filterBtn"><i class="fas fa-sliders-h"></i> Filters</button>
                 </div>
-                <div style="display: flex; gap: 1rem;">
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <div class="live-indicator" id="liveStatusBadge">
+                        <i class="fas fa-circle" style="font-size: 0.6rem;"></i>
+                        <span>ESP32 Live</span>
+                    </div>
                     <div class="date-badge" id="dateRangeBadge">
                         <i class="fas fa-calendar-alt"></i>
-                        <span>Last 30 days</span>
-                        <i class="fas fa-chevron-down"></i>
+                        <span>Real-time</span>
+                        <i class="fas fa-microchip"></i>
                     </div>
-                    <button class="collapse-btn" id="themeToggle" style="width:45px;height:45px;">
+                    <button class="collapse-btn" id="themeToggle" style="width:40px;height:40px;">
                         <i class="fas fa-moon"></i>
                     </button>
                 </div>
             </div>
 
-            <div class="filter-dropdown" id="filterDropdown" style="display:none;">
-                <div class="filter-header"><h4>Filter Options</h4><button class="close-filter" id="closeFilter"><i class="fas fa-times"></i></button></div>
-                <div class="filter-body">
-                    <div class="filter-section"><label>Status</label><select id="filterStatus"><option value="all">All</option><option value="completed">Completed</option><option value="ongoing">Ongoing</option></select></div>
-                </div>
-                <div class="filter-footer"><button class="btn" id="applyFilter">Apply</button></div>
-            </div>
-
-            <div class="date-dropdown" id="dateDropdown" style="display:none;">
-                <ul><li data-range="7">Last 7 days</li><li data-range="30" class="active">Last 30 days</li><li data-range="90">Last 3 months</li></ul>
-            </div>
-
             <!-- DASHBOARD PAGE -->
             <div class="page-section active" id="dashboardPage">
+                <!-- Stats Cards -->
                 <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-title">Health Score</div><div class="stat-value" id="healthScore">--</div><div class="stat-sub">Based on vitals</div></div>
-                    <div class="stat-card"><div class="stat-title">Active Alerts</div><div class="stat-value" id="activeAlertsCount">0</div><div class="stat-sub">Critical threshold</div></div>
-                    <div class="stat-card"><div class="stat-title">Last Update</div><div class="stat-value" style="font-size:1.2rem;" id="lastUpdate">--</div><div class="stat-sub">From ESP32</div></div>
+                    <div class="stat-card">
+                        <div class="stat-title"><i class="fas fa-chart-simple"></i> Health Score</div>
+                        <div class="stat-value" id="healthScore">--</div>
+                        <div class="stat-sub">Based on live vitals</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title"><i class="fas fa-bell"></i> Active Alerts</div>
+                        <div class="stat-value" id="activeAlertsCount">0</div>
+                        <div class="stat-sub">Critical threshold</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title"><i class="fas fa-clock"></i> Last Update</div>
+                        <div class="stat-value" style="font-size:1.2rem;" id="lastUpdate">--</div>
+                        <div class="stat-sub">From ESP32 device</div>
+                    </div>
                 </div>
 
-                <div class="cards-grid" id="patientVitals">
-                    <div class="card" id="heartCard">
-                        <div class="card-header"><i class="fas fa-heart"></i><h3>Heart Rate</h3></div>
+                <!-- Main Vitals Cards -->
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-heart" style="color:#ef4444;"></i><h3>Heart Rate</h3></div>
                         <div class="card-value" id="heartValue">-- <span>bpm</span></div>
                         <div class="card-indicator indicator-normal" id="heartIndicator">Normal</div>
                         <div class="chart-container"><canvas id="heartChart"></canvas></div>
                     </div>
-                    <div class="card" id="spo2Card">
-                        <div class="card-header"><i class="fas fa-lungs"></i><h3>SpO₂</h3></div>
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-lungs" style="color:#10b981;"></i><h3>Oxygen Saturation</h3></div>
                         <div class="card-value" id="spo2Value">-- <span>%</span></div>
                         <div class="card-indicator indicator-normal" id="spo2Indicator">Normal</div>
                         <div class="chart-container"><canvas id="spo2Chart"></canvas></div>
                     </div>
-                    <div class="card" id="tempCard">
-                        <div class="card-header"><i class="fas fa-thermometer-half"></i><h3>Body Temp</h3></div>
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-thermometer-half" style="color:#f59e0b;"></i><h3>Body Temperature</h3></div>
                         <div class="card-value" id="tempValue">-- <span>°C</span></div>
                         <div class="card-indicator indicator-normal" id="tempIndicator">Normal</div>
                         <div class="chart-container"><canvas id="tempChart"></canvas></div>
                     </div>
                 </div>
-                
-                <button class="export-btn" id="exportBtn"><i class="fas fa-download"></i> Export My Health Report</button>
 
+                <!-- Environment Data (Additional IoT Data) -->
+                <h3 style="margin-bottom: 1rem;"><i class="fas fa-microchip"></i> Environmental & Motion Data</h3>
+                <div class="env-grid">
+                    <div class="env-card"><i class="fas fa-temperature-low"></i><div class="env-label">Room Temperature</div><div class="env-value" id="roomTempValue">-- °C</div></div>
+                    <div class="env-card"><i class="fas fa-tint"></i><div class="env-label">Humidity</div><div class="env-value" id="humidityValue">-- %</div></div>
+                    <div class="env-card"><i class="fas fa-shoe-prints"></i><div class="env-label">Motion Index</div><div class="env-value" id="motionValue">-- m/s²</div></div>
+                </div>
+                
+                <button class="export-btn" id="exportBtn"><i class="fas fa-download"></i> Export Health Report</button>
+
+                <!-- Alerts Section -->
                 <div class="alerts-section">
-                    <div class="alerts-header"><h3><i class="fas fa-bell"></i> Your Alerts</h3><button class="mute-button" id="muteAlerts"><i class="fas fa-volume-up"></i> Mute</button></div>
-                    <div class="alerts-list" id="alertsList"><div class="alert-item">✅ No active alerts. Your vitals are normal.</div></div>
+                    <div class="alerts-header">
+                        <h3><i class="fas fa-bell"></i> Critical Alerts</h3>
+                        <button class="mute-button" id="muteAlerts"><i class="fas fa-volume-up"></i> Mute</button>
+                    </div>
+                    <div class="alerts-list" id="alertsList">
+                        <div class="alert-item">✅ All vitals are within normal range</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Other pages (simplified) -->
-            <div class="page-section" id="profilePage"><h2>👤 My Profile</h2><div class="profile-container"><div class="profile-form"><div class="form-group"><label>Full Name</label><input type="text" class="form-control" id="profileName" value="Patient Name"></div></div></div></div>
-            <div class="page-section" id="historyPage"><h2>📋 Medical History</h2><div class="table-container"><table><thead><tr><th>Date</th><th>Diagnosis</th></tr></thead><tbody><tr><td>2025-03-10</td><td>Regular Checkup</td></tr></tbody></table></div></div>
-            <div class="page-section" id="appointmentsPage"><h2>📅 Appointments</h2><div class="table-container"><table><thead><tr><th>Date</th><th>Doctor</th></tr></thead><tbody><tr><td>2025-04-10</td><td>Dr. Smith</td></tr></tbody></table></div></div>
-            <div class="page-section" id="reportsPage"><h2>📝 Health Reports</h2><form id="reportForm"><div class="form-group"><textarea class="form-control" placeholder="Your message"></textarea></div><button class="btn" type="submit">Submit</button></form></div>
-            <div class="page-section" id="settingsPage"><h2>⚙️ Settings</h2><div class="form-container"><button class="btn" id="saveSettings">Save Settings</button></div></div>
-            <div class="page-section" id="supportPage"><h2>🆘 Support</h2><p>Contact support@smarthealth.com</p></div>
+            <!-- Other Pages (simplified but functional) -->
+            <div class="page-section" id="profilePage">
+                <h2><i class="fas fa-user-circle"></i> My Profile</h2>
+                <div class="card" style="margin-top:1rem;"><div class="form-group"><label>Full Name</label><input type="text" class="form-control" style="width:100%;padding:0.8rem;border-radius:16px;border:1px solid var(--border);background:var(--bg);" value="HELIOS Patient" id="profileName"></div></div>
+            </div>
+            <div class="page-section" id="historyPage"><h2><i class="fas fa-history"></i> Medical History</h2><div class="card"><p>Historical records will appear here</p></div></div>
+            <div class="page-section" id="appointmentsPage"><h2><i class="fas fa-calendar-check"></i> Appointments</h2><div class="card"><p>Upcoming appointments</p></div></div>
+            <div class="page-section" id="reportsPage"><h2><i class="fas fa-file-alt"></i> Health Reports</h2><div class="card"><p>Submit or view reports</p></div></div>
+            <div class="page-section" id="settingsPage"><h2><i class="fas fa-cog"></i> Settings</h2><div class="card"><button class="btn" id="saveSettingsBtn">Save Preferences</button></div></div>
+            <div class="page-section" id="supportPage"><h2><i class="fas fa-headset"></i> Support</h2><div class="card"><p>Email: support@helios.com</p></div></div>
         </main>
     </div>
 
@@ -576,6 +615,7 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
         // ============================================================
         // FIREBASE CONFIGURATION - ESP32 DATA PATH
         // Data from ESP32 at: /HELIOS_DATA_LIVE/Vitals
+        // Fields: HeartRate, SpO2, BodyTemp, RoomTemp, Humidity, Motion, Timestamp
         // NO RANDOM DATA - ONLY REAL ESP32 DATA
         // ============================================================
         
@@ -603,22 +643,22 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
             if (heartCtx) {
                 heartChart = new Chart(heartCtx, {
                     type: 'line',
-                    data: { labels: [], datasets: [{ label: 'Heart Rate', data: [], borderColor: '#e11d48', tension: 0.3, fill: false }] },
-                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { min: 40, max: 140 } } }
+                    data: { labels: [], datasets: [{ label: 'BPM', data: [], borderColor: '#ef4444', backgroundColor: '#ef444410', tension: 0.3, fill: true }] },
+                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { min: 40, max: 140, grid: { color: 'var(--border)' } } } }
                 });
             }
             if (spo2Ctx) {
                 spo2Chart = new Chart(spo2Ctx, {
                     type: 'line',
-                    data: { labels: [], datasets: [{ label: 'SpO₂', data: [], borderColor: '#10b981', tension: 0.3, fill: false }] },
-                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { min: 85, max: 100 } } }
+                    data: { labels: [], datasets: [{ label: 'SpO₂', data: [], borderColor: '#10b981', backgroundColor: '#10b98110', tension: 0.3, fill: true }] },
+                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { min: 85, max: 100, grid: { color: 'var(--border)' } } } }
                 });
             }
             if (tempCtx) {
                 tempChart = new Chart(tempCtx, {
                     type: 'line',
-                    data: { labels: [], datasets: [{ label: 'Temperature', data: [], borderColor: '#f59e0b', tension: 0.3, fill: false }] },
-                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { min: 35, max: 40 } } }
+                    data: { labels: [], datasets: [{ label: '°C', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b10', tension: 0.3, fill: true }] },
+                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { min: 35, max: 40, grid: { color: 'var(--border)' } } } }
                 });
             }
         }
@@ -657,10 +697,11 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
             }
         }
         
-        function updateValue(elementId, value, unit) {
+        function updateValue(elementId, value, unit, decimals = 0) {
             const el = document.getElementById(elementId);
             if (el && value !== null && !isNaN(value)) {
-                el.innerHTML = `${Math.round(value)} <span>${unit}</span>`;
+                const displayValue = decimals === 1 ? value.toFixed(1) : Math.round(value);
+                el.innerHTML = `${displayValue} <span>${unit}</span>`;
                 el.classList.add('data-update-pulse');
                 setTimeout(() => el.classList.remove('data-update-pulse'), 400);
                 return true;
@@ -668,25 +709,15 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
             return false;
         }
         
-        let alertCount = 0;
-        let lastHeart = null, lastSpo2 = null, lastTemp = null;
-        
-        function checkAlerts(heart, spo2, temp) {
-            let count = 0;
-            let alerts = [];
-            if (heart !== null && (heart > 120 || heart < 50)) { count++; alerts.push(`⚠️ Abnormal Heart Rate: ${heart} BPM`); }
-            if (spo2 !== null && spo2 < 90) { count++; alerts.push(`⚠️ Low Oxygen Level: ${spo2}%`); }
-            if (temp !== null && (temp > 38.5 || temp < 35.5)) { count++; alerts.push(`⚠️ Abnormal Temperature: ${temp}°C`); }
-            
-            document.getElementById('activeAlertsCount').innerText = count;
-            
-            const alertsContainer = document.getElementById('alertsList');
-            if (alerts.length > 0 && alertsContainer) {
-                alertsContainer.innerHTML = alerts.map(a => `<div class="alert-item danger"><i class="fas fa-exclamation-circle"></i>${a}</div>`).join('');
-            } else if (alertsContainer) {
-                alertsContainer.innerHTML = '<div class="alert-item">✅ All vitals are within normal range.</div>';
+        function updateEnvValue(elementId, value, unit, decimals = 1) {
+            const el = document.getElementById(elementId);
+            if (el && value !== null && !isNaN(value)) {
+                el.innerHTML = `${value.toFixed(decimals)} ${unit}`;
+                el.classList.add('data-update-pulse');
+                setTimeout(() => el.classList.remove('data-update-pulse'), 400);
+                return true;
             }
-            return count;
+            return false;
         }
         
         let alertSoundEnabled = true;
@@ -695,19 +726,16 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
             this.innerHTML = alertSoundEnabled ? '<i class="fas fa-volume-up"></i> Mute' : '<i class="fas fa-volume-mute"></i> Unmute';
         });
         
-        // Calculate health score based on vitals
         function calculateHealthScore(heart, spo2, temp) {
             let score = 100;
-            if (heart && (heart > 100 || heart < 60)) score -= 15;
-            if (spo2 && spo2 < 95) score -= 20;
-            if (temp && (temp > 37.5 || temp < 36.0)) score -= 10;
+            if (heart && (heart > 100 || heart < 60)) score -= 20;
+            if (spo2 && spo2 < 95) score -= 25;
+            if (temp && (temp > 37.5 || temp < 36.0)) score -= 15;
             return Math.max(0, Math.min(100, score));
         }
         
         // ============================================================
-        // MAIN FIREBASE LISTENER - ESP32 DATA ONLY (NO RANDOM)
-        // Path: /HELIOS_DATA_LIVE/Vitals
-        // Fields: HeartRate, SpO2, BodyTemp, RoomTemp, Humidity, Motion, Timestamp
+        // MAIN FIREBASE LISTENER - ESP32 DATA ONLY
         // ============================================================
         function startESP32Listener() {
             const vitalsRef = database.ref('/HELIOS_DATA_LIVE/Vitals');
@@ -715,47 +743,79 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
             vitalsRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data && typeof data === 'object') {
-                    console.log("📡 ESP32 Real Data Received:", data);
+                    console.log("📡 HELIOS ESP32 Data:", data);
                     
+                    // Main vitals
                     const heartRate = data.HeartRate !== undefined ? data.HeartRate : null;
                     const spo2 = data.SpO2 !== undefined ? data.SpO2 : null;
                     const bodyTemp = data.BodyTemp !== undefined ? data.BodyTemp : null;
+                    
+                    // Environment data
+                    const roomTemp = data.RoomTemp !== undefined ? data.RoomTemp : null;
+                    const humidity = data.Humidity !== undefined ? data.Humidity : null;
+                    const motion = data.Motion !== undefined ? data.Motion : null;
                     const timestamp = data.Timestamp;
                     
-                    if (heartRate !== null && !isNaN(heartRate)) {
+                    // Update main vitals
+                    if (heartRate !== null) {
                         updateValue('heartValue', heartRate, 'bpm');
                         updateIndicator('heartIndicator', heartRate, 60, 100, 55, 110);
-                        lastHeart = heartRate;
                     }
-                    if (spo2 !== null && !isNaN(spo2)) {
+                    if (spo2 !== null) {
                         updateValue('spo2Value', spo2, '%');
                         updateIndicator('spo2Indicator', spo2, 95, 100, 90, 100);
-                        lastSpo2 = spo2;
                     }
-                    if (bodyTemp !== null && !isNaN(bodyTemp)) {
-                        updateValue('tempValue', bodyTemp, '°C');
+                    if (bodyTemp !== null) {
+                        updateValue('tempValue', bodyTemp, '°C', 1);
                         updateIndicator('tempIndicator', bodyTemp, 36.0, 37.5, 35.5, 38.0);
-                        lastTemp = bodyTemp;
                     }
                     
+                    // Update environment data
+                    if (roomTemp !== null) updateEnvValue('roomTempValue', roomTemp, '°C', 1);
+                    if (humidity !== null) updateEnvValue('humidityValue', humidity, '%', 0);
+                    if (motion !== null) updateEnvValue('motionValue', motion, 'm/s²', 2);
+                    
+                    // Update charts and alerts
                     if (heartRate && spo2 && bodyTemp) {
                         updateCharts(heartRate, spo2, bodyTemp);
-                        checkAlerts(heartRate, spo2, bodyTemp);
+                        
+                        // Check alerts
+                        let alerts = [];
+                        if (heartRate > 120 || heartRate < 50) alerts.push(`⚠️ Abnormal Heart Rate: ${heartRate} BPM`);
+                        if (spo2 < 90) alerts.push(`⚠️ Low Oxygen: ${spo2}%`);
+                        if (bodyTemp > 38.5 || bodyTemp < 35.5) alerts.push(`⚠️ Abnormal Temperature: ${bodyTemp}°C`);
+                        
+                        const alertCount = alerts.length;
+                        document.getElementById('activeAlertsCount').innerText = alertCount;
+                        
+                        const alertsContainer = document.getElementById('alertsList');
+                        if (alerts.length > 0) {
+                            alertsContainer.innerHTML = alerts.map(a => `<div class="alert-item danger"><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i>${a}</div>`).join('');
+                        } else {
+                            alertsContainer.innerHTML = '<div class="alert-item">✅ All vitals are within normal range</div>';
+                        }
+                        
                         const score = calculateHealthScore(heartRate, spo2, bodyTemp);
                         document.getElementById('healthScore').innerHTML = score;
                     }
                     
                     if (timestamp) {
-                        const date = new Date(timestamp);
-                        document.getElementById('lastUpdate').innerHTML = date.toLocaleTimeString();
+                        document.getElementById('lastUpdate').innerHTML = new Date(timestamp).toLocaleTimeString();
                     } else {
                         document.getElementById('lastUpdate').innerHTML = new Date().toLocaleTimeString();
                     }
                     
-                    document.querySelector('#dateRangeBadge span').innerHTML = 'ESP32 Live';
+                    // Update status badge
+                    const badge = document.getElementById('liveStatusBadge');
+                    badge.style.background = '#10b981';
+                    badge.querySelector('span').innerHTML = 'ESP32 Online';
+                    
                 } else {
                     console.log("⏳ Waiting for ESP32 data at /HELIOS_DATA_LIVE/Vitals...");
-                    document.getElementById('lastUpdate').innerHTML = 'Waiting for ESP32...';
+                    document.getElementById('lastUpdate').innerHTML = 'Waiting...';
+                    const badge = document.getElementById('liveStatusBadge');
+                    badge.style.background = '#f59e0b';
+                    badge.querySelector('span').innerHTML = 'Waiting for ESP32';
                 }
             }, (error) => {
                 console.error("Firebase error:", error);
@@ -784,40 +844,32 @@ Here is the complete HTML document that creates a patient dashboard exactly matc
         // Export PDF
         document.getElementById('exportBtn')?.addEventListener('click', () => {
             const doc = new jspdf.jsPDF();
-            doc.text("Patient Health Report - SmartHealth", 14, 10);
-            doc.text(`Heart Rate: ${document.getElementById('heartValue')?.innerText || '--'}`, 14, 30);
-            doc.text(`SpO₂: ${document.getElementById('spo2Value')?.innerText || '--'}`, 14, 40);
-            doc.text(`Body Temperature: ${document.getElementById('tempValue')?.innerText || '--'}`, 14, 50);
-            doc.text(`Generated from ESP32 IoT Device Data`, 14, 70);
-            doc.save("health_report.pdf");
+            doc.setFontSize(18);
+            doc.text("HELIOS - Health Report", 14, 20);
+            doc.setFontSize(12);
+            doc.text(`Heart Rate: ${document.getElementById('heartValue')?.innerText || '--'}`, 14, 45);
+            doc.text(`Oxygen Saturation: ${document.getElementById('spo2Value')?.innerText || '--'}`, 14, 55);
+            doc.text(`Body Temperature: ${document.getElementById('tempValue')?.innerText || '--'}`, 14, 65);
+            doc.text(`Room Temperature: ${document.getElementById('roomTempValue')?.innerText || '--'}`, 14, 75);
+            doc.text(`Humidity: ${document.getElementById('humidityValue')?.innerText || '--'}`, 14, 85);
+            doc.text(`Motion Index: ${document.getElementById('motionValue')?.innerText || '--'}`, 14, 95);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 110);
+            doc.text("Data from ESP32 IoT Device - Real-time", 14, 125);
+            doc.save("helios_health_report.pdf");
         });
         
+        // Sidebar collapse
         document.getElementById('collapseSidebar')?.addEventListener('click', () => {
             const sidebar = document.getElementById('sidebar');
-            sidebar.style.width = sidebar.style.width === '80px' ? '260px' : '80px';
+            sidebar.style.width = sidebar.style.width === '80px' ? '270px' : '80px';
             document.querySelectorAll('.sidebar span').forEach(span => span.style.display = sidebar.style.width === '80px' ? 'none' : 'inline');
-        });
-        
-        document.getElementById('dateRangeBadge')?.addEventListener('click', () => {
-            const dd = document.getElementById('dateDropdown');
-            dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
-        });
-        
-        document.getElementById('filterBtn')?.addEventListener('click', () => {
-            const fd = document.getElementById('filterDropdown');
-            fd.style.display = fd.style.display === 'block' ? 'none' : 'block';
-        });
-        
-        document.getElementById('closeFilter')?.addEventListener('click', () => {
-            document.getElementById('filterDropdown').style.display = 'none';
         });
         
         // Initialize
         initCharts();
         startESP32Listener();
         
-        console.log("✅ Patient dashboard ready - Waiting for ESP32 data from Firebase path /HELIOS_DATA_LIVE/Vitals");
+        console.log("✅ HELIOS Patient Dashboard Ready - Listening to ESP32 Firebase Path: /HELIOS_DATA_LIVE/Vitals");
     </script>
 </body>
-</html>
-```
+</html>`
