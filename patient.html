@@ -2,488 +2,843 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient · Smart Health · Personal Dashboard</title>
-    <link rel="stylesheet" href="css/patient.css">
-    <link rel="icon" type="image/png" href="assets\icons\heart-rate.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>HELIOS · Medical Dashboard · Pure ESP32 Data</title>
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007bff'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E">
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <!-- Chart.js and ApexCharts -->
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js & ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <!-- Include jsPDF library -->
+    <!-- jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: linear-gradient(135deg, #eef2f7 0%, #e2e8f0 100%);
+            --surface: rgba(255,255,255,0.95);
+            --surface-glass: rgba(255,255,255,0.7);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: rgba(226,232,240,0.8);
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --primary-gradient: linear-gradient(135deg, #0284c7, #0369a1, #0ea5e9);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #8b5cf6;
+            --sidebar-bg: rgba(255,255,255,0.98);
+            --card-shadow: 0 20px 35px -10px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.02);
+            --glow: 0 0 20px rgba(2,132,199,0.3);
+        }
+
+        body.dark {
+            --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --surface: rgba(30,41,59,0.95);
+            --surface-glass: rgba(30,41,59,0.7);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: rgba(51,65,85,0.8);
+            --sidebar-bg: rgba(15,23,42,0.98);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            font-family: 'Inter', 'Poppins', sans-serif;
+            min-height: 100vh;
+        }
+
+        .app-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--surface-glass);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.8rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-area i {
+            background: none;
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        .collapse-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .collapse-btn:hover {
+            background: var(--border);
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 1.5rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 0.9rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 6px 12px;
+            border-radius: 16px;
+        }
+
+        .menu-item i {
+            width: 26px;
+            font-size: 1.2rem;
+        }
+
+        .menu-item.active, .menu-item:hover {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: var(--glow);
+            transform: translateX(4px);
+        }
+
+        .sidebar-footer {
+            padding: 1rem 0;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 1.8rem 2.2rem;
+            overflow-x: auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .time-clock {
+            background: var(--surface-glass);
+            backdrop-filter: blur(8px);
+            padding: 0.6rem 1.3rem;
+            border-radius: 50px;
+            font-family: monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            border: 1px solid var(--border);
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .live-indicator.waiting {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .live-indicator.offline {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            padding: 1.3rem 1.5rem;
+            border-radius: 32px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0.5rem 0;
+        }
+
+        /* Vitals Grid */
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .vital-card {
+            background: var(--surface);
+            border-radius: 32px;
+            padding: 1.3rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vital-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .vital-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .vital-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .vital-header i {
+            font-size: 2rem;
+        }
+
+        .vital-value {
+            font-size: 2.3rem;
+            font-weight: 800;
+        }
+
+        .vital-value span {
+            font-size: 0.9rem;
+            font-weight: normal;
+        }
+
+        .gauge-container {
+            height: 130px;
+            margin: 0.5rem 0;
+        }
+
+        /* Environment Grid */
+        .env-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .env-card {
+            background: var(--surface-glass);
+            backdrop-filter: blur(8px);
+            border-radius: 24px;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .env-card i {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .env-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        /* Charts Row */
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .chart-card {
+            background: var(--surface);
+            border-radius: 28px;
+            padding: 1.2rem;
+            border: 1px solid var(--border);
+        }
+
+        .chart-card h4 {
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        /* Alerts Section */
+        .alerts-section {
+            background: var(--surface-glass);
+            backdrop-filter: blur(8px);
+            border-radius: 28px;
+            padding: 1.3rem;
+            margin: 1.5rem 0;
+            border: 1px solid var(--border);
+        }
+
+        .alerts-list {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .alert-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.8rem;
+            border-radius: 20px;
+            margin-bottom: 8px;
+            background: var(--surface);
+        }
+
+        .export-btn {
+            background: var(--primary-gradient);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 1rem 0;
+            transition: all 0.3s;
+        }
+
+        .export-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .data-update-pulse {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; transform: scale(0.98);}
+            100% { opacity: 1; transform: scale(1);}
+        }
+
+        .indicator-normal { color: #10b981; font-weight: 600; }
+        .indicator-warning { color: #f59e0b; font-weight: 600; }
+        .indicator-danger { color: #ef4444; font-weight: 600; }
+
+        @media (max-width: 1200px) {
+            .vitals-grid { grid-template-columns: 1fr; }
+            .env-grid { grid-template-columns: repeat(2, 1fr); }
+            .charts-row { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 80px; }
+            .sidebar span { display: none; }
+            .main-content { padding: 1rem; }
+        }
+
+        .waiting-text {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
     <div class="app-wrapper">
-        <!-- SIDEBAR (patient version) -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="logo-area">
-                    <i class="fas fa-heartbeat"></i>
-                    <span>SmartHealth</span>
-                </div>
+                <div class="logo-area"><i class="fas fa-heartbeat"></i><span>HELIOS</span></div>
                 <button class="collapse-btn" id="collapseSidebar"><i class="fas fa-chevron-left"></i></button>
             </div>
             <div class="sidebar-menu">
-                <a href="javascript:void(0)" class="menu-item active" data-page="dashboard">
-                    <i class="fas fa-chart-pie"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="javascript:void(0)" class="menu-item" data-page="profile">
-                    <i class="fas fa-user-circle"></i>
-                    <span>Profile</span>
-                </a>
-                <a href="javascript:void(0)" class="menu-item" data-page="history">
-                    <i class="fas fa-history"></i>
-                    <span>History</span>
-                </a>
-                <a href="javascript:void(0)" class="menu-item" data-page="appointments">
-                    <i class="fas fa-calendar-check"></i>
-                    <span>Appointments</span>
-                </a>
-                <a href="javascript:void(0)" class="menu-item" data-page="reports">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Reports</span>
-                </a>
-                <a href="javascript:void(0)" class="menu-item" data-page="settings">
-                    <i class="fas fa-cog"></i>
-                    <span>Settings</span>
-                </a>
+                <a href="javascript:void(0)" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+                <a href="javascript:void(0)" class="menu-item" data-page="profile"><i class="fas fa-user-circle"></i><span>Profile</span></a>
+                <a href="javascript:void(0)" class="menu-item" data-page="history"><i class="fas fa-history"></i><span>History</span></a>
+                <a href="javascript:void(0)" class="menu-item" data-page="appointments"><i class="fas fa-calendar-check"></i><span>Appointments</span></a>
+                <a href="javascript:void(0)" class="menu-item" data-page="reports"><i class="fas fa-file-alt"></i><span>Reports</span></a>
+                <a href="javascript:void(0)" class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
             </div>
             <div class="sidebar-footer">
-                <a href="javascript:void(0)" class="menu-item" data-page="support">
-                    <i class="fas fa-headset"></i>
-                    <span>Support</span>
-                </a>
+                <a href="javascript:void(0)" class="menu-item" data-page="support"><i class="fas fa-headset"></i><span>Support</span></a>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT -->
         <main class="main-content">
-            <!-- Top bar with search and theme toggle -->
             <div class="top-bar">
-                <div class="search-area">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="globalSearch" placeholder="Search...">
-                    <button id="filterBtn"><i class="fas fa-sliders-h"></i> Filters</button>
-                </div>
-                <div style="display: flex; gap: 1rem;">
-                    <div class="date-badge">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Last 30 days</span>
-                        <i class="fas fa-chevron-down"></i>
+                <div class="time-clock" id="liveClock">--:--:-- --</div>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <div class="live-indicator waiting" id="liveStatusBadge">
+                        <i class="fas fa-circle" style="font-size: 0.6rem;"></i>
+                        <span>Waiting for ESP32</span>
                     </div>
-                    <button class="collapse-btn" id="themeToggle" style="width:45px;height:45px;">
-                        <i class="fas fa-moon"></i>
-                    </button>
+                    <button class="collapse-btn" id="themeToggle" style="width:42px;height:42px;"><i class="fas fa-moon"></i></button>
                 </div>
             </div>
 
-            <!-- Filter Dropdown (hidden by default) -->
-            <div class="filter-dropdown" id="filterDropdown">
-                <div class="filter-header">
-                    <h4>Filter Options</h4>
-                    <button class="close-filter" id="closeFilter"><i class="fas fa-times"></i></button>
-                </div>
-                <div class="filter-body">
-                    <div class="filter-section">
-                        <label>Status</label>
-                        <select id="filterStatus">
-                            <option value="all">All</option>
-                            <option value="completed">Completed</option>
-                            <option value="ongoing">Ongoing</option>
-                            <option value="scheduled">Scheduled</option>
-                        </select>
-                    </div>
-                    <div class="filter-section">
-                        <label>Doctor</label>
-                        <select id="filterDoctor">
-                            <option value="all">All</option>
-                            <option value="Dr. Emily Davis">Dr. Emily Davis</option>
-                            <option value="Dr. Michael Chen">Dr. Michael Chen</option>
-                            <option value="Dr. Sarah Lee">Dr. Sarah Lee</option>
-                        </select>
-                    </div>
-                    <div class="filter-section">
-                        <label>Date Range</label>
-                        <input type="date" id="filterStartDate"> to <input type="date" id="filterEndDate">
-                    </div>
-                </div>
-                <div class="filter-footer">
-                    <button class="btn" id="applyFilter">Apply</button>
-                    <button class="btn btn-secondary" id="resetFilter">Reset</button>
-                </div>
-            </div>
-
-            <!-- Date Range Dropdown (hidden by default) -->
-            <div class="date-dropdown" id="dateDropdown">
-                <ul>
-                    <li data-range="7">Last 7 days</li>
-                    <li data-range="30" class="active">Last 30 days</li>
-                    <li data-range="90">Last 3 months</li>
-                    <li data-range="custom">Custom range</li>
-                </ul>
-            </div>
-
-            <!-- PAGE SECTIONS -->
-            <!-- DASHBOARD PAGE (active by default) -->
+            <!-- DASHBOARD PAGE -->
             <div class="page-section active" id="dashboardPage">
-                <!-- STATS CARDS (Patient overview) -->
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-title">Health Score</div>
-                        <div class="stat-value" id="healthScore">85</div>
-                        <div class="stat-sub"><i class="fas fa-arrow-up"></i> +2%</div>
+                    <div class="stat-card"><div class="stat-title">HEALTH SCORE</div><div class="stat-value" id="healthScore">--</div><div class="stat-sub">From ESP32 data</div></div>
+                    <div class="stat-card"><div class="stat-title">ACTIVE ALERTS</div><div class="stat-value" id="activeAlertsCount">0</div><div class="stat-sub">Critical threshold</div></div>
+                    <div class="stat-card"><div class="stat-title">LAST UPDATE</div><div class="stat-value" style="font-size:1.2rem;" id="lastUpdate">--</div><div class="stat-sub">ESP32 sync</div></div>
+                </div>
+
+                <!-- Main Vitals with Gauge Charts -->
+                <div class="vitals-grid">
+                    <div class="vital-card">
+                        <div class="vital-header"><i class="fas fa-heart" style="color:#ef4444; font-size:2rem;"></i><h3>Heart Rate</h3></div>
+                        <div class="vital-value" id="heartValue">-- <span>bpm</span></div>
+                        <div id="heartGauge" class="gauge-container"></div>
+                        <div class="card-indicator" id="heartIndicator" style="font-weight:600;">--</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-title">Active Alerts</div>
-                        <div class="stat-value" id="activeAlertsCount">3</div>
-                        <div class="stat-sub"><i class="fas fa-exclamation-triangle" style="color:#e11d48;"></i> 2 critical</div>
+                    <div class="vital-card">
+                        <div class="vital-header"><i class="fas fa-lungs" style="color:#10b981; font-size:2rem;"></i><h3>Oxygen Saturation</h3></div>
+                        <div class="vital-value" id="spo2Value">-- <span>%</span></div>
+                        <div id="spo2Gauge" class="gauge-container"></div>
+                        <div class="card-indicator" id="spo2Indicator" style="font-weight:600;">--</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-title">Last Checkup</div>
-                        <div class="stat-value" style="font-size: 2rem;">24 Mar</div>
-                        <div class="stat-sub">7 days ago</div>
+                    <div class="vital-card">
+                        <div class="vital-header"><i class="fas fa-thermometer-half" style="color:#f59e0b; font-size:2rem;"></i><h3>Body Temperature</h3></div>
+                        <div class="vital-value" id="tempValue">-- <span>°C</span></div>
+                        <div id="tempGauge" class="gauge-container"></div>
+                        <div class="card-indicator" id="tempIndicator" style="font-weight:600;">--</div>
                     </div>
                 </div>
 
-                <!-- VITALS GRID (real-time patient data) -->
-                <div class="cards-grid" id="patientVitals">
-                    <div class="card" id="heartCard">
-                        <div class="card-header">
-                            <i class="fas fa-heart"></i>
-                            <h3>Heart Rate</h3>
-                        </div>
-                        <div class="card-value" id="heartValue">-- <span>bpm</span></div>
-                        <div class="card-indicator indicator-normal" id="heartIndicator">Normal</div>
-                        <div class="chart-container">
-                            <canvas id="heartChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="card" id="spo2Card">
-                        <div class="card-header">
-                            <i class="fas fa-lungs"></i>
-                            <h3>SpO₂</h3>
-                        </div>
-                        <div class="card-value" id="spo2Value">-- <span>%</span></div>
-                        <div class="card-indicator indicator-normal" id="spo2Indicator">Normal</div>
-                        <div class="chart-container">
-                            <canvas id="spo2Chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="card" id="tempCard">
-                        <div class="card-header">
-                            <i class="fas fa-thermometer-half"></i>
-                            <h3>Body Temp</h3>
-                        </div>
-                        <div class="card-value" id="tempValue">-- <span>°C</span></div>
-                        <div class="card-indicator indicator-normal" id="tempIndicator">Normal</div>
-                        <div class="chart-container">
-                            <canvas id="tempChart"></canvas>
-                        </div>
-                    </div>
+                <!-- Environment Data -->
+                <div class="env-grid">
+                    <div class="env-card"><i class="fas fa-temperature-low" style="color:#3b82f6;"></i><div class="env-label">Room Temp</div><div class="env-value" id="roomTempValue">-- °C</div></div>
+                    <div class="env-card"><i class="fas fa-tint" style="color:#06b6d4;"></i><div class="env-label">Humidity</div><div class="env-value" id="humidityValue">-- %</div></div>
+                    <div class="env-card"><i class="fas fa-shoe-prints" style="color:#a855f7;"></i><div class="env-label">Motion Index</div><div class="env-value" id="motionValue">-- m/s²</div></div>
+                    <div class="env-card"><i class="fas fa-microchip"></i><div class="env-label">ESP32 Status</div><div class="env-value" id="esp32Status">--</div></div>
+                </div>
+
+                <!-- Trend Charts -->
+                <div class="charts-row">
+                    <div class="chart-card"><h4><i class="fas fa-chart-line"></i> Heart Rate Trend (24h)</h4><canvas id="heartTrendChart" style="height:200px;"></canvas></div>
+                    <div class="chart-card"><h4><i class="fas fa-chart-line"></i> SpO₂ & Temperature Trend</h4><canvas id="multiTrendChart" style="height:200px;"></canvas></div>
                 </div>
                 
-                <!-- BUTTON EXPORT (optional) -->
-                <button class="export-btn" id="exportBtn"><i class="fas fa-download"></i> Export My Health Report</button>
+                <button class="export-btn" id="exportBtn"><i class="fas fa-download"></i> Export Comprehensive Report</button>
 
-                <!-- ALERTS SECTION (patient-specific) -->
                 <div class="alerts-section">
-                    <div class="alerts-header">
-                        <h3><i class="fas fa-bell"></i> Your Alerts</h3>
-                        <button class="mute-button" id="muteAlerts"><i class="fas fa-volume-up"></i> Mute</button>
-                    </div>
-                    <div class="alerts-list" id="alertsList">
-                        <!-- Alerts will be injected by JavaScript -->
-                    </div>
-                </div>
-
-                <!-- HISTORICAL TRENDS (24h) -->
-                <h2>📈 Your 24h Trends</h2>
-                <div class="cards-grid">
-                    <div class="card">
-                        <h3>Heart Rate Variability</h3>
-                        <div id="heartHistoryChart" style="height: 250px;"></div>
-                    </div>
-                    <div class="card">
-                        <h3>Oxygen Saturation Trend</h3>
-                        <div id="spo2HistoryChart" style="height: 250px;"></div>
-                    </div>
+                    <div class="alerts-header"><h3><i class="fas fa-bell"></i> Critical Alerts</h3><button class="mute-button" id="muteAlerts" style="background:transparent;border:1px solid var(--border);padding:0.3rem 1rem;border-radius:20px;">Mute</button></div>
+                    <div class="alerts-list" id="alertsList"><div class="alert-item">⏳ Waiting for ESP32 data...</div></div>
                 </div>
             </div>
 
-            <!-- PROFILE PAGE -->
-            <div class="page-section" id="profilePage">
-                <h2>👤 My Profile</h2>
-                <div class="profile-container">
-                    <!-- Profile Picture Section -->
-                    <div class="profile-picture-section">
-                        <div class="profile-picture">
-                            <img src="https://via.placeholder.com/120" alt="Profile Picture" id="profileImage">
-                            <div class="profile-picture-overlay" id="changePicOverlay">
-                                <i class="fas fa-camera"></i>
-                                <span>Change Photo</span>
-                            </div>
-                            <input type="file" id="profilePicInput" accept="image/*" style="display: none;">
-                        </div>
-                    </div>
-
-                    <!-- Profile Details Form -->
-                    <div class="profile-form">
-                        <!-- Full Name -->
-                        <div class="form-group">
-                            <label><i class="fas fa-user"></i> Full Name</label>
-                            <div class="profile-field">
-                                <input type="text" class="form-control profile-input" id="profileName" value="John Doe" placeholder="Enter your full name" readonly>
-                                <span class="field-icon"><i class="fas fa-pencil-alt edit-icon" data-field="name"></i></span>
-                            </div>
-                        </div>
-
-                        <!-- Email -->
-                        <div class="form-group">
-                            <label><i class="fas fa-envelope"></i> Email</label>
-                            <div class="profile-field">
-                                <input type="email" class="form-control profile-input" id="profileEmail" value="john.doe@example.com" placeholder="Enter your email" readonly>
-                                <span class="field-icon"><i class="fas fa-pencil-alt edit-icon" data-field="email"></i></span>
-                            </div>
-                        </div>
-
-                        <!-- Phone -->
-                        <div class="form-group">
-                            <label><i class="fas fa-phone"></i> Phone Number</label>
-                            <div class="profile-field">
-                                <input type="tel" class="form-control profile-input" id="profilePhone" value="+1 234 567 890" placeholder="Enter phone number" readonly>
-                                <span class="field-icon"><i class="fas fa-pencil-alt edit-icon" data-field="phone"></i></span>
-                            </div>
-                        </div>
-
-                        <!-- Date of Birth -->
-                        <div class="form-group">
-                            <label><i class="fas fa-calendar-alt"></i> Date of Birth</label>
-                            <div class="profile-field">
-                                <input type="date" class="form-control profile-input" id="profileDob" value="1985-05-15" readonly>
-                                <span class="field-icon"><i class="fas fa-pencil-alt edit-icon" data-field="dob"></i></span>
-                            </div>
-                        </div>
-
-                        <!-- Blood Type (dropdown) -->
-                        <div class="form-group">
-                            <label><i class="fas fa-tint"></i> Blood Type</label>
-                            <div class="profile-field">
-                                <select class="form-control profile-input" id="profileBlood" disabled>
-                                    <option value="A+">A+</option>
-                                    <option value="A-">A-</option>
-                                    <option value="B+">B+</option>
-                                    <option value="B-">B-</option>
-                                    <option value="AB+">AB+</option>
-                                    <option value="AB-">AB-</option>
-                                    <option value="O+" selected>O+</option>
-                                    <option value="O-">O-</option>
-                                </select>
-                                <span class="field-icon"><i class="fas fa-pencil-alt edit-icon" data-field="blood"></i></span>
-                            </div>
-                        </div>
-
-                        <!-- Gender -->
-                        <div class="form-group">
-                            <label><i class="fas fa-venus-mars"></i> Gender</label>
-                            <div class="profile-field">
-                                <select class="form-control profile-input" id="profileGender" disabled>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
-                                <span class="field-icon"><i class="fas fa-pencil-alt edit-icon" data-field="gender"></i></span>
-                            </div>
-                        </div>
-
-                        <!-- Address -->
-                        <div class="form-group">
-                            <label><i class="fas fa-map-marker-alt"></i> Address</label>
-                            <div class="profile-field">
-                                <input type="text" class="form-control profile-input" id="profileAddress" value="123 Main St, City, Country" placeholder="Enter address" readonly>
-                                <span class="field-icon"><i class="fas fa-pencil-alt edit-icon" data-field="address"></i></span>
-                            </div>
-                        </div>
-
-                        <!-- Password Change Section (hidden by default) -->
-                        <div class="password-section" id="passwordSection" style="display: none;">
-                            <h4>Change Password</h4>
-                            <div class="form-group">
-                                <label>New Password</label>
-                                <div class="password-input-wrapper">
-                                    <input type="password" class="form-control" id="newPassword" placeholder="Enter new password">
-                                    <span class="password-toggle" onclick="togglePasswordVisibility('newPassword')">
-                                        <i class="fas fa-eye"></i>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Confirm New Password</label>
-                                <div class="password-input-wrapper">
-                                    <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm new password">
-                                    <span class="password-toggle" onclick="togglePasswordVisibility('confirmPassword')">
-                                        <i class="fas fa-eye"></i>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="password-actions">
-                                <button class="btn btn-success" id="savePasswordBtn"><i class="fas fa-save"></i> Save Password</button>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="profile-actions">
-                            <button class="btn btn-primary" id="editProfileBtn"><i class="fas fa-edit"></i> Edit Profile</button>
-                            <button class="btn btn-success" id="saveProfileBtn" style="display: none;"><i class="fas fa-save"></i> Save Changes</button>
-                            <button class="btn btn-secondary" id="cancelProfileBtn" style="display: none;"><i class="fas fa-times"></i> Cancel</button>
-                            <button class="btn btn-link" id="changePasswordBtn"><i class="fas fa-key"></i> Change Password</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- HISTORY PAGE -->
-            <div class="page-section" id="historyPage">
-                <h2>📋 Medical History</h2>
-                <div class="table-container">
-                    <input type="text" id="historySearch" class="form-control" placeholder="Search records..." style="margin-bottom:1rem;">
-                    <table id="historyTable">
-                        <thead>
-                            <tr><th>Date</th><th>Diagnosis</th><th>Doctor</th><th>Status</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>2025-03-10</td><td>Hypertension</td><td>Dr. Emily Davis</td><td><span class="status-badge status-completed">Treated</span></td></tr>
-                            <tr><td>2025-02-22</td><td>Diabetes Check</td><td>Dr. Michael Chen</td><td><span class="status-badge status-ongoing">Follow-up</span></td></tr>
-                            <tr><td>2025-01-15</td><td>General Checkup</td><td>Dr. Sarah Lee</td><td><span class="status-badge status-completed">Completed</span></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- APPOINTMENTS PAGE -->
-            <div class="page-section" id="appointmentsPage">
-                <h2>📅 My Appointments</h2>
-                <div class="table-container">
-                    <input type="text" id="appointmentSearch" class="form-control" placeholder="Search appointments..." style="margin-bottom:1rem;">
-                    <table id="appointmentsTable">
-                        <thead>
-                            <tr><th>Date</th><th>Time</th><th>Doctor</th><th>Status</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>2025-04-05</td><td>10:30</td><td>Dr. Emily Davis</td><td><span class="status-badge status-ongoing">Scheduled</span></td></tr>
-                            <tr><td>2025-04-12</td><td>14:00</td><td>Dr. Michael Chen</td><td><span class="status-badge status-ongoing">Scheduled</span></td></tr>
-                            <tr><td>2025-03-28</td><td>09:15</td><td>Dr. Sarah Lee</td><td><span class="status-badge status-completed">Completed</span></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- REPORTS PAGE -->
-            <div class="page-section" id="reportsPage">
-                <h2>📝 Submit Your Health Report</h2>
-                <form id="patientReportForm" class="report-form">
-                    <!-- Patient Details -->
-                    <div class="form-group">
-                        <label for="patientName">Patient Name</label>
-                        <input type="text" id="patientName" name="patientName" placeholder="Your Name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="patientAge">Age</label>
-                        <input type="number" id="patientAge" name="patientAge" placeholder="Your Age" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="patientGender">Gender</label>
-                        <select id="patientGender" name="patientGender" required>
-                            <option value="">Select Gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                        </select>
-                    </div>
-                    <!-- Doctor Selection -->
-                    <div class="form-group">
-                        <label for="doctorSelect">Send To Doctor</label>
-                        <select id="doctorSelect" name="doctorSelect" required>
-                            <option value="">Select Doctor</option>
-                            <option value="drAhmed">Dr. Ahmed</option>
-                            <option value="drMona">Dr. Mona</option>
-                        </select>
-                    </div>
-                    <!-- Health Report -->
-                    <div class="form-group">
-                        <label for="healthCondition">Health Condition / Symptoms</label>
-                        <textarea id="healthCondition" name="healthCondition" rows="4" placeholder="Describe your health condition..." required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="medications">Medications (if any)</label>
-                        <textarea id="medications" name="medications" rows="3" placeholder="List any medications you are taking..."></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="additionalNotes">Additional Notes</label>
-                        <textarea id="additionalNotes" name="additionalNotes" rows="2" placeholder="Any extra notes..."></textarea>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" class="btn-submit">💾 Save & Send Report</button>
-                </form>
-            </div>
-
-            <!-- SETTINGS PAGE -->
-            <div class="page-section" id="settingsPage">
-                <h2>⚙️ Settings</h2>
-                <div class="form-container">
-                    <div class="form-group">
-                        <label>Notification Email</label>
-                        <input type="email" class="form-control" id="settingsEmail" placeholder="my.email@example.com">
-                    </div>
-                    <div class="form-group">
-                        <label>Language</label>
-                        <select class="form-control" id="settingsLanguage">
-                            <option value="en">English</option>
-                            <option value="ar">Arabic</option>
-                        </select>
-                    </div>
-                    <button class="btn" id="saveSettings">Save Settings</button>
-                </div>
-            </div>
-
-            <!-- SUPPORT PAGE -->
-            <div class="page-section" id="supportPage">
-                <h2>🆘 Support</h2>
-                <p>Contact support at support@smarthealth.com or call 1-800-555-1234.</p>
-            </div>
+            <!-- Other Pages -->
+            <div class="page-section" id="profilePage"><h2>My Profile</h2><div class="stat-card"><p>Patient profile information</p></div></div>
+            <div class="page-section" id="historyPage"><h2>Medical History</h2><div class="stat-card"><p>Historical records will appear here</p></div></div>
+            <div class="page-section" id="appointmentsPage"><h2>Appointments</h2><div class="stat-card"><p>Upcoming appointments</p></div></div>
+            <div class="page-section" id="reportsPage"><h2>Health Reports</h2><div class="stat-card"><p>Submit or view reports</p></div></div>
+            <div class="page-section" id="settingsPage"><h2>Settings</h2><div class="stat-card"><button class="export-btn" id="saveSettingsBtn">Save Preferences</button></div></div>
+            <div class="page-section" id="supportPage"><h2>Support</h2><div class="stat-card"><p>Email: support@helios.com</p></div></div>
         </main>
     </div>
 
-    <!-- Firebase (commented out – uncomment when backend is ready) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
-    <!-- MQTT library (real connection, currently simulated internally) -->
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-
-    <script src="js/firebase.js"></script> <!--  Firebase configuration -->
-    <script src="js/patient.js"></script> <!-- Main patient dashboard logic -->
-    <script src="js/theme.js"></script> <!-- Theme toggle script -->
-    <script src="js/notifications.js"></script> <!-- Alert system logic -->
-    <!-- 
-        =========================================================================
-        FIREBASE NOTES (commented out)
-        -------------------------------------------------------------------------
-        To enable Firebase backend:
-        1. Uncomment the Firebase SDK scripts in the <head> section.
-        2. Ensure you have a js/firebase.js file with your Firebase config.
-        3. Modify the MQTT simulation to push data to Firebase or read from it.
-        4. Update the login flow (index.html) to authenticate and redirect.
-        Currently the app runs entirely on simulated data, no Firebase required.
-        =========================================================================
-    -->
+    <script>
+        // ============================================================
+        // FIREBASE CONFIGURATION - ESP32 DATA ONLY
+        // NO RANDOM DATA - PURE ESP32 DATA FROM /HELIOS_DATA_LIVE/Vitals
+        // ============================================================
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDy29ivSun9rqvqTlYhgBI8PBGJhnLJSc0",
+            databaseURL: "https://smart-health-monitoring-f97fb-default-rtdb.firebaseio.com/",
+            projectId: "smart-health-monitoring-f97fb"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+        
+        // Chart instances
+        let heartGauge, spo2Gauge, tempGauge;
+        let heartTrendChart, multiTrendChart;
+        const heartHistory = [], spo2History = [], tempHistory = [], timeLabels = [];
+        const MAX_HISTORY = 12;
+        
+        // Flags to track if we received real data
+        let hasReceivedData = false;
+        
+        function initGauges() {
+            heartGauge = new ApexCharts(document.querySelector("#heartGauge"), {
+                series: [0], chart: { type: 'radialBar', height: 130, sparkline: { enabled: true } }, 
+                plotOptions: { radialBar: { startAngle: -90, endAngle: 90, track: { background: '#e2e8f0', strokeWidth: '97%' }, 
+                dataLabels: { name: { show: false }, value: { fontSize: '20px', fontWeight: 700, color: '#ef4444', formatter: function(val) { return val === 0 ? '--' : Math.round(val); } } } } }, 
+                colors: ['#ef4444']
+            });
+            heartGauge.render();
+            
+            spo2Gauge = new ApexCharts(document.querySelector("#spo2Gauge"), {
+                series: [0], chart: { type: 'radialBar', height: 130, sparkline: { enabled: true } }, 
+                plotOptions: { radialBar: { startAngle: -90, endAngle: 90, track: { background: '#e2e8f0' }, 
+                dataLabels: { name: { show: false }, value: { fontSize: '20px', fontWeight: 700, color: '#10b981', formatter: function(val) { return val === 0 ? '--' : Math.round(val); } } } } }, 
+                colors: ['#10b981']
+            });
+            spo2Gauge.render();
+            
+            tempGauge = new ApexCharts(document.querySelector("#tempGauge"), {
+                series: [0], chart: { type: 'radialBar', height: 130, sparkline: { enabled: true } }, 
+                plotOptions: { radialBar: { startAngle: -90, endAngle: 90, track: { background: '#e2e8f0' }, 
+                dataLabels: { name: { show: false }, value: { fontSize: '20px', fontWeight: 700, color: '#f59e0b', formatter: function(val) { return val === 0 ? '--' : ((val / 100) * 5 + 35).toFixed(1); } } } } }, 
+                colors: ['#f59e0b']
+            });
+            tempGauge.render();
+        }
+        
+        function initTrendCharts() {
+            const heartCtx = document.getElementById('heartTrendChart')?.getContext('2d');
+            const multiCtx = document.getElementById('multiTrendChart')?.getContext('2d');
+            
+            if(heartCtx) {
+                heartTrendChart = new Chart(heartCtx, {
+                    type: 'line', 
+                    data: { labels: [], datasets: [{ label: 'Heart Rate (BPM)', data: [], borderColor: '#ef4444', backgroundColor: '#ef444410', tension: 0.3, fill: true, borderWidth: 3 }] },
+                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } }, scales: { y: { min: 40, max: 140, title: { display: true, text: 'BPM' } } } }
+                });
+            }
+            if(multiCtx) {
+                multiTrendChart = new Chart(multiCtx, {
+                    type: 'line', 
+                    data: { labels: [], datasets: [
+                        { label: 'SpO₂ (%)', data: [], borderColor: '#10b981', tension: 0.3, borderWidth: 2, yAxisID: 'y' },
+                        { label: 'Temp (°C)', data: [], borderColor: '#f59e0b', tension: 0.3, borderWidth: 2, yAxisID: 'y1' }
+                    ] },
+                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } }, 
+                    scales: { y: { min: 85, max: 100, title: { display: true, text: 'SpO₂ (%)' } }, 
+                              y1: { position: 'right', min: 35, max: 40, title: { display: true, text: 'Temperature (°C)' }, grid: { drawOnChartArea: false } } } }
+                });
+            }
+        }
+        
+        function updateGauges(heart, spo2, temp) {
+            if(heartGauge && heart !== null) heartGauge.updateSeries([heart]);
+            if(spo2Gauge && spo2 !== null) spo2Gauge.updateSeries([spo2]);
+            if(tempGauge && temp !== null) tempGauge.updateSeries([((temp - 35) / 5) * 100]);
+        }
+        
+        function updateTrends(heart, spo2, temp) {
+            if(heart === null || spo2 === null || temp === null) return;
+            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            timeLabels.push(now);
+            heartHistory.push(heart);
+            spo2History.push(spo2);
+            tempHistory.push(temp);
+            if(timeLabels.length > MAX_HISTORY) {
+                timeLabels.shift(); heartHistory.shift(); spo2History.shift(); tempHistory.shift();
+            }
+            if(heartTrendChart) { heartTrendChart.data.labels = [...timeLabels]; heartTrendChart.data.datasets[0].data = [...heartHistory]; heartTrendChart.update('none'); }
+            if(multiTrendChart) { multiTrendChart.data.labels = [...timeLabels]; multiTrendChart.data.datasets[0].data = [...spo2History]; multiTrendChart.data.datasets[1].data = [...tempHistory]; multiTrendChart.update('none'); }
+        }
+        
+        function updateValue(id, value, unit, decimals=0) {
+            const el = document.getElementById(id);
+            if(el && value !== null && !isNaN(value) && value !== undefined) {
+                const displayValue = decimals === 1 ? value.toFixed(1) : Math.round(value);
+                el.innerHTML = `${displayValue} <span>${unit}</span>`;
+                el.classList.add('data-update-pulse');
+                setTimeout(() => el.classList.remove('data-update-pulse'), 400);
+                return true;
+            } else if(el && !hasReceivedData) {
+                el.innerHTML = `-- <span>${unit}</span>`;
+            }
+            return false;
+        }
+        
+        function updateEnvValue(id, value, unit) {
+            const el = document.getElementById(id);
+            if(el && value !== null && !isNaN(value) && value !== undefined) {
+                el.innerHTML = `${value.toFixed(1)} ${unit}`;
+                el.classList.add('data-update-pulse');
+                setTimeout(() => el.classList.remove('data-update-pulse'), 400);
+                return true;
+            } else if(el && !hasReceivedData) {
+                el.innerHTML = `-- ${unit}`;
+            }
+            return false;
+        }
+        
+        function updateIndicator(id, value, normalMin, normalMax, warnMin, warnMax) {
+            const el = document.getElementById(id);
+            if(!el) return;
+            if(value === null || value === undefined || isNaN(value)) {
+                el.innerHTML = '--';
+                el.className = '';
+                return;
+            }
+            if(value < normalMin || value > normalMax) { el.className = 'indicator-danger'; el.innerHTML = 'Critical'; }
+            else if((warnMin && value < warnMin) || (warnMax && value > warnMax)) { el.className = 'indicator-warning'; el.innerHTML = 'Warning'; }
+            else { el.className = 'indicator-normal'; el.innerHTML = 'Normal'; }
+        }
+        
+        function calculateHealthScore(heart, spo2, temp) {
+            if(heart === null || spo2 === null || temp === null) return null;
+            let score = 100;
+            if(heart > 100 || heart < 60) score -= 20;
+            if(spo2 < 95) score -= 25;
+            if(temp > 37.5 || temp < 36.0) score -= 15;
+            return Math.max(0, Math.min(100, score));
+        }
+        
+        // Live Clock (12-hour format)
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            document.getElementById('liveClock').innerHTML = `${hours.toString().padStart(2,'0')}:${minutes}:${seconds} ${ampm}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+        
+        let alertSoundEnabled = true;
+        document.getElementById('muteAlerts')?.addEventListener('click', function() {
+            alertSoundEnabled = !alertSoundEnabled;
+            this.innerHTML = alertSoundEnabled ? 'Mute' : 'Unmute';
+        });
+        
+        // ============================================================
+        // MAIN FIREBASE LISTENER - PURE ESP32 DATA ONLY
+        // NO RANDOM DATA - NO MOCK VALUES
+        // ============================================================
+        function startESP32Listener() {
+            const vitalsRef = database.ref('/HELIOS_DATA_LIVE/Vitals');
+            
+            vitalsRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                
+                if(data && typeof data === 'object' && Object.keys(data).length > 0) {
+                    hasReceivedData = true;
+                    console.log("📡 ESP32 Real Data Received:", data);
+                    
+                    // Extract values - ONLY from ESP32, no defaults
+                    const heart = (data.HeartRate !== undefined && data.HeartRate !== null) ? data.HeartRate : null;
+                    const spo2 = (data.SpO2 !== undefined && data.SpO2 !== null) ? data.SpO2 : null;
+                    const temp = (data.BodyTemp !== undefined && data.BodyTemp !== null) ? data.BodyTemp : null;
+                    const roomTemp = (data.RoomTemp !== undefined && data.RoomTemp !== null) ? data.RoomTemp : null;
+                    const humidity = (data.Humidity !== undefined && data.Humidity !== null) ? data.Humidity : null;
+                    const motion = (data.Motion !== undefined && data.Motion !== null) ? data.Motion : null;
+                    
+                    // Update main vitals
+                    updateValue('heartValue', heart, 'bpm');
+                    updateIndicator('heartIndicator', heart, 60, 100, 55, 110);
+                    
+                    updateValue('spo2Value', spo2, '%');
+                    updateIndicator('spo2Indicator', spo2, 95, 100, 90, 100);
+                    
+                    updateValue('tempValue', temp, '°C', 1);
+                    updateIndicator('tempIndicator', temp, 36.0, 37.5, 35.5, 38.0);
+                    
+                    // Update environment data
+                    updateEnvValue('roomTempValue', roomTemp, '°C');
+                    updateEnvValue('humidityValue', humidity, '%');
+                    updateEnvValue('motionValue', motion, 'm/s²');
+                    
+                    // Update gauges and trends
+                    if(heart !== null && spo2 !== null && temp !== null) {
+                        updateGauges(heart, spo2, temp);
+                        updateTrends(heart, spo2, temp);
+                        const score = calculateHealthScore(heart, spo2, temp);
+                        document.getElementById('healthScore').innerHTML = (score !== null) ? score : '--';
+                        
+                        // Generate alerts based ONLY on real ESP32 data
+                        let alerts = [];
+                        if(heart !== null && (heart > 120 || heart < 50)) alerts.push(`⚠️ Abnormal Heart Rate: ${heart} BPM`);
+                        if(spo2 !== null && spo2 < 90) alerts.push(`⚠️ Low Oxygen Level: ${spo2}%`);
+                        if(temp !== null && (temp > 38.5 || temp < 35.5)) alerts.push(`⚠️ Abnormal Temperature: ${temp}°C`);
+                        
+                        document.getElementById('activeAlertsCount').innerText = alerts.length;
+                        const alertsContainer = document.getElementById('alertsList');
+                        if(alerts.length > 0) {
+                            alertsContainer.innerHTML = alerts.map(a => `<div class="alert-item"><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i>${a}</div>`).join('');
+                        } else {
+                            alertsContainer.innerHTML = '<div class="alert-item">✅ All vitals are within normal range</div>';
+                        }
+                    }
+                    
+                    // Update timestamp
+                    const timestamp = data.Timestamp;
+                    if(timestamp) {
+                        document.getElementById('lastUpdate').innerHTML = new Date(timestamp).toLocaleTimeString();
+                    } else {
+                        document.getElementById('lastUpdate').innerHTML = new Date().toLocaleTimeString();
+                    }
+                    
+                    // Update ESP32 status
+                    document.getElementById('esp32Status').innerHTML = 'Online';
+                    const badge = document.getElementById('liveStatusBadge');
+                    badge.className = 'live-indicator';
+                    badge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.6rem;"></i><span>ESP32 Online</span>';
+                    
+                } else {
+                    console.log("⏳ No ESP32 data yet. Waiting for device to send data to /HELIOS_DATA_LIVE/Vitals");
+                    if(!hasReceivedData) {
+                        // Keep showing "--" for all values - NO RANDOM DATA
+                        document.getElementById('esp32Status').innerHTML = 'Waiting';
+                        const badge = document.getElementById('liveStatusBadge');
+                        badge.className = 'live-indicator waiting';
+                        badge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.6rem;"></i><span>Waiting for ESP32</span>';
+                        document.getElementById('alertsList').innerHTML = '<div class="alert-item">⏳ Waiting for ESP32 device to send data...</div>';
+                    }
+                }
+            }, (error) => {
+                console.error("Firebase connection error:", error);
+                document.getElementById('esp32Status').innerHTML = 'Error';
+                const badge = document.getElementById('liveStatusBadge');
+                badge.className = 'live-indicator offline';
+                badge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.6rem;"></i><span>Connection Error</span>';
+            });
+        }
+        
+        // Navigation
+        document.querySelectorAll('.menu-item[data-page]').forEach(item => {
+            item.addEventListener('click', function() {
+                const page = this.dataset.page;
+                document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+                document.getElementById(`${page}Page`).classList.add('active');
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle?.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        });
+        if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
+        
+        // Export PDF
+        document.getElementById('exportBtn')?.addEventListener('click', () => {
+            const doc = new jspdf.jsPDF();
+            doc.setFontSize(22);
+            doc.text("HELIOS - Medical Health Report", 14, 20);
+            doc.setFontSize(12);
+            doc.text(`Heart Rate: ${document.getElementById('heartValue')?.innerText || '--'}`, 14, 45);
+            doc.text(`Oxygen Saturation: ${document.getElementById('spo2Value')?.innerText || '--'}`, 14, 55);
+            doc.text(`Body Temperature: ${document.getElementById('tempValue')?.innerText || '--'}`, 14, 65);
+            doc.text(`Room Temperature: ${document.getElementById('roomTempValue')?.innerText || '--'}`, 14, 75);
+            doc.text(`Humidity: ${document.getElementById('humidityValue')?.innerText || '--'}`, 14, 85);
+            doc.text(`Motion Index: ${document.getElementById('motionValue')?.innerText || '--'}`, 14, 95);
+            doc.text(`Health Score: ${document.getElementById('healthScore')?.innerText || '--'}`, 14, 105);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 120);
+            doc.text("Data Source: ESP32 IoT Device (HELIOS_DATA_LIVE/Vitals)", 14, 135);
+            doc.save("helios_medical_report.pdf");
+        });
+        
+        document.getElementById('collapseSidebar')?.addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.style.width = sidebar.style.width === '80px' ? '280px' : '80px';
+            document.querySelectorAll('.sidebar span').forEach(span => span.style.display = sidebar.style.width === '80px' ? 'none' : 'inline');
+        });
+        
+        // Initialize all components
+        initGauges();
+        initTrendCharts();
+        startESP32Listener();
+        
+        console.log("✅ HELIOS Dashboard Ready - Waiting for ESP32 data from Firebase path: /HELIOS_DATA_LIVE/Vitals");
+        console.log("⚠️ NO RANDOM DATA - All values come exclusively from ESP32 device");
+    </script>
 </body>
 </html>
