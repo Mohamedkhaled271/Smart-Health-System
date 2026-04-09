@@ -29,6 +29,352 @@
     // ==================== GLOBAL VARIABLES ====================
     let mqttSimInterval;                // Interval for simulated MQTT updates
     let alertSoundEnabled = true;        // Sound toggle state
+    // ==================== FIREBASE REAL-TIME DATA (PATIENT VITALS FROM CARE SYNC) ====================
+// هذا القسم يجلب البيانات الحقيقية من تطبيق Care Sync PIMA Edition
+
+let firebaseVitalsInterval = null;
+let currentPatientId = null;
+let lastAlertTime = 0;
+const ALERT_COOLDOWN = 30000; // 30 seconds between same alert
+
+// أسماء العناصر في Firebase (حسب هيكل البيانات من تطبيق Python)
+const FIREBASE_PATHS = {
+    vitals: (patientId, timestamp) => `patients/${patientId}/readings/${timestamp}/vitals`,
+    clinical: (patientId, timestamp) => `patients/${patientId}/readings/${timestamp}/clinical`
+};
+
+// دالة لجلب أحدث مريض من Firebase
+async function getLatestPatientId() {
+    if (typeof firebase === 'undefined') {
+        console.warn('Firebase not loaded');
+        return null;
+    }
+    
+    try {
+        const snapshot = await firebase.database().ref('patients').once('value');
+        const patients = snapshot.val();
+        if (!patients) return null;
+        
+        // جلب أحدث مريض (آخر من أرسل بيانات)
+        const patientIds = Object.keys(patients);
+        // ترتيب حسب وقت آخر قراءة
+        let latestPatient = null;
+        let latestTime = 0;
+        
+        for (const pid of patientIds) {
+            const readings = patients[pid]?.readings;
+            if (readings) {
+                const times = Object.keys(readings);
+                if (times.length > 0) {
+                    const lastTime = parseInt(times[times.length - 1]);
+                    if (lastTime > latestTime) {
+                        latestTime = lastTime;
+                        latestPatient = pid;
+                    }
+                }
+            }
+        }
+        
+        return latestPatient;
+    } catch (error) {
+        console.error('Error getting patient ID:', error);
+        return null;
+    }
+}
+
+// دالة لجلب آخر قراءة من Firebase
+async function getLatestVitalsFromFirebase(patientId) {
+    if (!patientId || typeof firebase === 'undefined') return null;
+    
+    try {
+        const readingsRef = firebase.database().ref(`patients/${patientId}/readings`);
+        const snapshot = await readingsRef.orderByKey().limitToLast(1).once('value');
+        const readings = snapshot.val();
+        
+        if (!readings) return null;
+        
+        const timestamps = Object.keys(readings);
+        const latestTimestamp = timestamps[timestamps.length - 1];
+        const latestData = readings[latestTimestamp];
+        
+        if (latestData && latestData.vitals) {
+            return {
+                sbp: latestData.vitals.systolic_bp || 0,
+                dbp: latestData.vitals.diastolic_bp || 0,
+                glucose: latestData.vitals.glucose || 0,
+                hr: latestData.vitals.heart_rate || 0,
+                timestamp: latestTimestamp,
+                glucose_class: latestData.clinical?.glucose_class || 'NORMOGLYCEMIA',
+                bp_class: latestData.clinical?.bp_class || 'OPTIMAL',
+                hba1c: latestData.clinical?.hba1c || 0,
+                trend: latestData.clinical?.trend || 'STABLE'
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching vitals:', error);
+        return null;
+    }
+}
+
+// دالة لتحديث واجهة المستخدم بالبيانات الجديدة (دمج مع البيانات الموجودة)
+function updateUIVitalsFromFirebase(vitals) {
+    if (!vitals) return;
+    
+    // تحديث قيم الضغط (Systolic و Diastolic)
+    const bpValueElement = document.getElementById('bpValue');
+    if (bpValueElement) {
+        bpValueElement.innerHTML = `${vitals.sbp}/${vitals.dbp} <span>mmHg</span>`;
+    }
+    
+    // تحديث السكر (Glucose) - نضيف عنصر جديد إذا لم يكن موجود
+    let glucoseElement = document.getElementById('glucoseValue');
+    if (!glucoseElement) {
+        // إنشاء عنصر جديد للسكر في الـ dashboard
+        const vitalsGrid = document.querySelector('.vitals-grid');
+        if (vitalsGrid && vitalsGrid.children.length <= 3) {
+            const newCard = document.createElement('div');
+            newCard.className = 'vital-card';
+            newCard.innerHTML = `
+                <div class="vital-label">GLUCOSE</div>
+                <div class="vital-value" id="glucoseValue">${vitals.glucose} <span>mg/dL</span></div>
+                <div class="card-indicator" id="glucoseIndicator">Normal</div>
+            `;
+            vitalsGrid.appendChild(newCard);
+            glucoseElement = document.getElementById('glucoseValue');
+        }
+    } else {
+        glucoseElement.innerHTML = `${vitals.glucose} <span>mg/dL</span>`;
+    }
+    
+    // تحديث مؤشر السكر
+    const glucoseInd = document.getElementById('glucoseIndicator');
+    if (glucoseInd && vitals.glucose > 0) {
+        if (vitals.glucose >= 200) {
+            glucoseInd.className = 'card-indicator indicator-danger';
+            glucoseInd.innerText = 'Critical';
+        } else if (vitals.glucose >= 126) {
+            glucoseInd.className = 'card-indicator indicator-warning';
+            glucoseInd.innerText = 'Warning';
+        } else if (vitals.glucose >= 100) {
+            glucoseInd.className = 'card-indicator indicator-warning';
+            glucoseInd.innerText = 'Prediabetes';
+        } else {
+            glucoseInd.className = 'card-indicator indicator-normal';
+            glucoseInd.innerText = 'Normal';
+        }
+    }
+    
+    // تحديث مؤشر الضغط (إضافة تفاصيل أكثر)
+    const bpInd = document.getElementById('bpIndicator');
+    if (bpInd && vitals.sbp > 0) {
+        if (vitals.sbp >= 180 || vitals.dbp >= 120) {
+            bpInd.className = 'card-indicator indicator-danger';
+            bpInd.innerText = 'Crisis';
+        } else if (vitals.sbp >= 140 || vitals.dbp >= 90) {
+            bpInd.className = 'card-indicator indicator-warning';
+            bpInd.innerText = 'Hypertension';
+        } else if (vitals.sbp >= 120) {
+            bpInd.className = 'card-indicator indicator-warning';
+            bpInd.innerText = 'Elevated';
+        } else {
+            bpInd.className = 'card-indicator indicator-normal';
+            bpInd.innerText = 'Normal';
+        }
+    }
+    
+    // إضافة نبضات القلب من Firebase (إذا كانت مختلفة عن المحاكاة)
+    const heartElement = document.getElementById('heartValue');
+    if (heartElement && vitals.hr > 0) {
+        heartElement.innerHTML = `${vitals.hr} <span>bpm</span>`;
+    }
+    
+    // إضافة تنبيهات للقيم الحرجة من Firebase
+    const now = Date.now();
+    let alertMsg = null;
+    
+    if (vitals.glucose >= 300 && (now - lastAlertTime) > ALERT_COOLDOWN) {
+        alertMsg = `Critical: Blood glucose ${vitals.glucose} mg/dL - Diabetic emergency!`;
+    } else if (vitals.glucose >= 200 && (now - lastAlertTime) > ALERT_COOLDOWN) {
+        alertMsg = `Warning: High blood glucose ${vitals.glucose} mg/dL`;
+    } else if (vitals.sbp >= 180 && (now - lastAlertTime) > ALERT_COOLDOWN) {
+        alertMsg = `Critical: Severe hypertension ${vitals.sbp}/${vitals.dbp} mmHg`;
+    } else if (vitals.sbp >= 140 && (now - lastAlertTime) > ALERT_COOLDOWN) {
+        alertMsg = `Warning: High blood pressure ${vitals.sbp}/${vitals.dbp} mmHg`;
+    } else if (vitals.hr > 120 && (now - lastAlertTime) > ALERT_COOLDOWN) {
+        alertMsg = `Warning: High heart rate ${vitals.hr} bpm`;
+    } else if (vitals.hr < 50 && (now - lastAlertTime) > ALERT_COOLDOWN) {
+        alertMsg = `Warning: Low heart rate ${vitals.hr} bpm`;
+    }
+    
+    if (alertMsg) {
+        lastAlertTime = now;
+        showNotification(alertMsg, 'warning');
+        alertSound('danger');
+        
+        // إضافة إلى قائمة التنبيهات
+        const alertsList = document.getElementById('alertsList');
+        if (alertsList) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert-item';
+            alertDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i><div class="alert-content"><div class="alert-title">${alertMsg}</div><div class="alert-time">${new Date().toLocaleTimeString()}</div></div>`;
+            alertsList.prepend(alertDiv);
+            if (alertsList.children.length > 10) {
+                alertsList.removeChild(alertsList.lastChild);
+            }
+        }
+    }
+    
+    // تحديث الرسم البياني بالقيم الجديدة (إذا أردنا دمجها)
+    if (vitals.hr > 0) {
+        updateCharts(vitals.hr, null, null);
+    }
+}
+
+// دالة للاستماع المباشر للتغييرات في Firebase (Realtime)
+function listenToFirebaseRealtime() {
+    if (typeof firebase === 'undefined') {
+        console.warn('Firebase not available for realtime listening');
+        return;
+    }
+    
+    getLatestPatientId().then(patientId => {
+        if (!patientId) {
+            console.log('No patient data found in Firebase yet. Waiting for data from Care Sync...');
+            setTimeout(listenToFirebaseRealtime, 10000);
+            return;
+        }
+        
+        currentPatientId = patientId;
+        console.log(`Listening to Firebase patient: ${patientId}`);
+        
+        // الاستماع للتغييرات في آخر قراءة
+        const latestReadingsRef = firebase.database().ref(`patients/${patientId}/readings`);
+        
+        latestReadingsRef.on('child_added', (snapshot) => {
+            const reading = snapshot.val();
+            if (reading && reading.vitals) {
+                const vitals = {
+                    sbp: reading.vitals.systolic_bp,
+                    dbp: reading.vitals.diastolic_bp,
+                    glucose: reading.vitals.glucose,
+                    hr: reading.vitals.heart_rate,
+                    timestamp: snapshot.key,
+                    glucose_class: reading.clinical?.glucose_class,
+                    bp_class: reading.clinical?.bp_class
+                };
+                updateUIVitalsFromFirebase(vitals);
+                
+                // إظهار إشعار بوصول بيانات جديدة
+                const lastUpdate = document.getElementById('lastUpdateTime');
+                if (lastUpdate) {
+                    lastUpdate.innerText = new Date().toLocaleTimeString();
+                }
+            }
+        });
+        
+        // جلب آخر قراءة حالية
+        getLatestVitalsFromFirebase(patientId).then(vitals => {
+            if (vitals) {
+                updateUIVitalsFromFirebase(vitals);
+            }
+        });
+    }).catch(error => {
+        console.error('Firebase listening error:', error);
+    });
+}
+
+// دالة لإضافة عناصر واجهة Firebase (بدون تعديل الموجود)
+function addFirebaseUIElements() {
+    // إضافة عنصر عرض آخر تحديث في الـ header إذا وجد
+    const headerStats = document.querySelector('.header-stats');
+    if (headerStats && !document.getElementById('firebaseStatus')) {
+        const fbStatus = document.createElement('div');
+        fbStatus.className = 'stat-item';
+        fbStatus.id = 'firebaseStatus';
+        fbStatus.innerHTML = `
+            <i class="fas fa-fire" style="color: #ff6b35;"></i>
+            <div>
+                <div>Care Sync</div>
+                <small id="lastUpdateTime">Waiting for data...</small>
+            </div>
+        `;
+        headerStats.appendChild(fbStatus);
+    }
+    
+    // إضافة عنصر عرض السكر في الـ vitals-grid إذا لم يكن موجود
+    const vitalsGrid = document.querySelector('.vitals-grid');
+    if (vitalsGrid && vitalsGrid.children.length === 3) {
+        // إضافة كارد السكر إذا كان موجود فقط 3 كروت (HR, SpO2, Temp)
+        const glucoseCard = document.createElement('div');
+        glucoseCard.className = 'vital-card';
+        glucoseCard.innerHTML = `
+            <div class="vital-label">GLUCOSE</div>
+            <div class="vital-value" id="glucoseValue">-- <span>mg/dL</span></div>
+            <div class="card-indicator" id="glucoseIndicator">--</div>
+        `;
+        vitalsGrid.appendChild(glucoseCard);
+    }
+    
+    // إضافة عنصر عرض الضغط إذا لم يكن موجود
+    if (!document.getElementById('bpValue')) {
+        const bpCard = document.createElement('div');
+        bpCard.className = 'vital-card';
+        bpCard.innerHTML = `
+            <div class="vital-label">BLOOD PRESSURE</div>
+            <div class="vital-value" id="bpValue">--/-- <span>mmHg</span></div>
+            <div class="card-indicator" id="bpIndicator">--</div>
+        `;
+        if (vitalsGrid) {
+            vitalsGrid.insertBefore(bpCard, vitalsGrid.firstChild);
+        }
+    }
+}
+
+// بدء جلب البيانات من Firebase (مع الحفاظ على المحاكاة الحالية)
+function startFirebaseSync() {
+    if (typeof firebase !== 'undefined' && firebase.database) {
+        console.log('🔥 Firebase connected - Starting real-time patient data sync');
+        addFirebaseUIElements();
+        listenToFirebaseRealtime();
+        
+        // تحديث كل 30 ثانية للتأكد من الاتصال (fallback)
+        firebaseVitalsInterval = setInterval(() => {
+            if (currentPatientId) {
+                getLatestVitalsFromFirebase(currentPatientId).then(vitals => {
+                    if (vitals) updateUIVitalsFromFirebase(vitals);
+                });
+            } else {
+                getLatestPatientId().then(pid => {
+                    if (pid) {
+                        currentPatientId = pid;
+                        getLatestVitalsFromFirebase(pid).then(vitals => {
+                            if (vitals) updateUIVitalsFromFirebase(vitals);
+                        });
+                    }
+                });
+            }
+        }, 30000);
+    } else {
+        console.warn('Firebase not loaded, retrying in 5 seconds...');
+        setTimeout(startFirebaseSync, 5000);
+    }
+}
+
+// بدء المزامنة مع Firebase بعد تحميل الصفحة
+document.addEventListener('DOMContentLoaded', () => {
+    // تأخير بسيط للتأكد من تحميل Firebase
+    setTimeout(startFirebaseSync, 2000);
+});
+
+// تعديل دالة cleanup لإيقاف Firebase listeners
+const originalCleanup = window.addEventListener('beforeunload');
+window.addEventListener('beforeunload', () => {
+    if (firebaseVitalsInterval) clearInterval(firebaseVitalsInterval);
+    if (typeof firebase !== 'undefined' && currentPatientId) {
+        firebase.database().ref(`patients/${currentPatientId}/readings`).off();
+    }
+});
 
     // -------------------- Alert Sound using Web Audio API --------------------
     const alertSound = (() => {
