@@ -1,11 +1,10 @@
 {
-  "name": "frontend-app",
+  "name": "my-static-site",
   "version": "1.0.0",
-  "description": "Static frontend for Azure App Service",
   "scripts": {
-    "start": "npx serve -s . -l 8080"
+    "start": "serve -s . -l $PORT"
   },
   "dependencies": {
-    "serve": "^14.2.0"
+    "serve": "^14.2.6"
   }
 }
