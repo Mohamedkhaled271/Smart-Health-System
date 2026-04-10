@@ -40,10 +40,23 @@
         if (typeof firebase !== 'undefined' && firebase.database) {
             database = firebase.database();
             console.log("✅ Firebase database initialized");
+            
+            // Load patients immediately after database is ready
+            loadPatientsFromUsers();
+            
+            // Start listeners
             startDoctorFirebaseSync();
             startSimulation();
-            loadPatientsFromUsers();
             setupDoctorNameListener();
+            
+            // Auto-select first patient after loading
+            setTimeout(() => {
+                const firstPatient = document.getElementById('labPatientSelect')?.value;
+                if(firstPatient) {
+                    startVitalsListener(firstPatient);
+                    startDataListener(firstPatient);
+                }
+            }, 1500);
         } else {
             console.log("⏳ Waiting for Firebase...");
             setTimeout(waitForFirebase, 500);
@@ -293,6 +306,14 @@
         if (el) el.innerHTML = value.toFixed(1) + ' <span>m/s²</span>';
     }
 
+    function updateDoctorIndicator(id, value, normalMin, normalMax, warnMin, warnMax) {
+        const el = document.getElementById(id);
+        if(!el) return;
+        if(value < normalMin || value > normalMax) { el.className = 'indicator-danger'; el.innerHTML = 'Critical'; }
+        else if((warnMin && value < warnMin) || (warnMax && value > warnMax)) { el.className = 'indicator-warning'; el.innerHTML = 'Warning'; }
+        else { el.className = 'indicator-normal'; el.innerHTML = 'Normal'; }
+    }
+
     // ==================== ESP32 + AI DATA LISTENER (Patient Data Page) ====================
     function startDataListener(patientId) {
         if(!patientId || !database) return;
@@ -369,18 +390,11 @@
         });
     }
 
-    function updateDoctorIndicator(id, value, normalMin, normalMax, warnMin, warnMax) {
-        const el = document.getElementById(id);
-        if(!el) return;
-        if(value < normalMin || value > normalMax) { el.className = 'indicator-danger'; el.innerHTML = 'Critical'; }
-        else if((warnMin && value < warnMin) || (warnMax && value > warnMax)) { el.className = 'indicator-warning'; el.innerHTML = 'Warning'; }
-        else { el.className = 'indicator-normal'; el.innerHTML = 'Normal'; }
-    }
-
     // ==================== LOAD PATIENTS FROM USERS ====================
     async function loadPatientsFromUsers() {
         if (!database) {
-            console.log("Waiting for database...");
+            console.log("⏳ Database not ready, retrying...");
+            setTimeout(loadPatientsFromUsers, 500);
             return;
         }
         
@@ -875,19 +889,8 @@
     // ==================== INITIAL PAGE ====================
     showPage('dashboard');
     
-    setTimeout(() => {
-        loadPatientsFromUsers();
-    }, 500);
-    
+    // Start everything
     setTimeout(() => {
         waitForFirebase();
-    }, 1000);
-    
-    setTimeout(() => {
-        const firstPatient = document.getElementById('labPatientSelect')?.value;
-        if(firstPatient) {
-            startVitalsListener(firstPatient);
-            startDataListener(firstPatient);
-        }
-    }, 2000);
+    }, 500);
 })();
