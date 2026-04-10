@@ -5,642 +5,225 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor · Smart Health · Clinical Dashboard</title>
     <link rel="stylesheet" href="css/doctor.css">
-    <link rel="icon" type="image/png" href="assets/icons/heart-rate.png">
+    <link rel="icon" type="image/png" href="assets\icons\heart-rate.png">
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <!-- Chart.js and ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
 <div class="app-wrapper">
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-area">
-                <i class="fas fa-heartbeat"></i>
-                <span>SmartHealth</span>
-            </div>
-            <button class="collapse-btn" id="collapseSidebar"><i class="fas fa-chevron-left"></i></button>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-area">
+            <i class="fas fa-heartbeat"></i>
+            <span>SmartHealth</span>
         </div>
-        <div class="sidebar-menu">
-            <a href="javascript:void(0)" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
-            <a href="javascript:void(0)" class="menu-item" data-page="patientVitals"><i class="fas fa-heartbeat"></i><span>Patient Vitals</span></a>
-            <a href="javascript:void(0)" class="menu-item" data-page="labResults"><i class="fas fa-microscope"></i><span>Lab Results</span></a>
-            <a href="javascript:void(0)" class="menu-item" data-page="appointments"><i class="fas fa-calendar-check"></i><span>Appointments</span></a>
-            <a href="javascript:void(0)" class="menu-item" data-page="patients"><i class="fas fa-users"></i><span>Patients</span></a>
-            <a href="javascript:void(0)" class="menu-item" data-page="timelog"><i class="fas fa-clock"></i><span>Time log</span></a>
-            <a href="javascript:void(0)" class="menu-item" data-page="reports"><i class="fas fa-file-alt"></i><span>Reports</span></a>
-            <a href="javascript:void(0)" class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
+        <button class="collapse-btn" id="collapseSidebar"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    <div class="sidebar-menu">
+        <a href="javascript:void(0)" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+        <a href="javascript:void(0)" class="menu-item" data-page="patientVitals"><i class="fas fa-heartbeat"></i><span>Patient Vitals</span></a>
+        <a href="javascript:void(0)" class="menu-item" data-page="labResults"><i class="fas fa-microscope"></i><span>Lab Results</span></a>
+        <a href="javascript:void(0)" class="menu-item" data-page="appointments"><i class="fas fa-calendar-check"></i><span>Appointments</span></a>
+        <a href="javascript:void(0)" class="menu-item" data-page="patients"><i class="fas fa-users"></i><span>Patients</span></a>
+        <a href="javascript:void(0)" class="menu-item" data-page="timelog"><i class="fas fa-clock"></i><span>Time log</span></a>
+        <a href="javascript:void(0)" class="menu-item" data-page="reports"><i class="fas fa-file-alt"></i><span>Reports</span></a>
+        <a href="javascript:void(0)" class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
+    </div>
+    <div class="sidebar-footer">
+        <a href="javascript:void(0)" class="menu-item" data-page="support"><i class="fas fa-headset"></i><span>Support</span></a>
+    </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+    <div class="top-bar">
+        <div class="search-area">
+            <i class="fas fa-search"></i>
+            <input type="text" id="globalSearch" placeholder="Search patients...">
+            <button id="filterBtn"><i class="fas fa-sliders-h"></i> Filters</button>
         </div>
-        <div class="sidebar-footer">
-            <a href="javascript:void(0)" class="menu-item" data-page="support"><i class="fas fa-headset"></i><span>Support</span></a>
+        <div style="display: flex; gap: 1rem;">
+            <div class="date-badge"><i class="fas fa-calendar-alt"></i><span>Last 30 days</span><i class="fas fa-chevron-down"></i></div>
+            <button class="collapse-btn" id="themeToggle" style="width:45px;height:45px;"><i class="fas fa-moon"></i></button>
         </div>
-    </aside>
+    </div>
 
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-        <div class="top-bar">
-            <div class="search-area">
-                <i class="fas fa-search"></i>
-                <input type="text" id="globalSearch" placeholder="Search patients...">
-                <button id="filterBtn"><i class="fas fa-sliders-h"></i> Filters</button>
-            </div>
-            <div style="display: flex; gap: 1rem;">
-                <div class="date-badge"><i class="fas fa-calendar-alt"></i><span>Last 30 days</span><i class="fas fa-chevron-down"></i></div>
-                <button class="collapse-btn" id="themeToggle" style="width:45px;height:45px;"><i class="fas fa-moon"></i></button>
-            </div>
+    <!-- Filter Dropdown -->
+    <div class="filter-dropdown" id="filterDropdown">
+        <div class="filter-header"><h4>Filter Options</h4><button class="close-filter" id="closeFilter"><i class="fas fa-times"></i></button></div>
+        <div class="filter-body">
+            <div class="filter-section"><label>Status</label><select id="filterStatus"><option value="all">All</option><option value="stable">Stable</option><option value="at risk">At risk</option><option value="critical">Critical</option><option value="follow-up">Follow-up</option></select></div>
+            <div class="filter-section"><label>Condition</label><select id="filterCondition"><option value="all">All</option><option value="post-surgery">Post-surgery</option><option value="arrhythmia">Arrhythmia</option><option value="respiratory">Respiratory</option><option value="routine check">Routine check</option></select></div>
+            <div class="filter-section"><label>Date Range</label><input type="date" id="filterStartDate"> to <input type="date" id="filterEndDate"></div>
         </div>
+        <div class="filter-footer"><button class="btn" id="applyFilter">Apply</button><button class="btn btn-secondary" id="resetFilter">Reset</button></div>
+    </div>
 
-        <!-- Filter Dropdown -->
-        <div class="filter-dropdown" id="filterDropdown">
-            <div class="filter-header"><h4>Filter Options</h4><button class="close-filter" id="closeFilter"><i class="fas fa-times"></i></button></div>
-            <div class="filter-body">
-                <div class="filter-section"><label>Status</label><select id="filterStatus"><option value="all">All</option><option value="stable">Stable</option><option value="at risk">At risk</option><option value="critical">Critical</option><option value="follow-up">Follow-up</option></select></div>
-                <div class="filter-section"><label>Condition</label><select id="filterCondition"><option value="all">All</option><option value="post-surgery">Post-surgery</option><option value="arrhythmia">Arrhythmia</option><option value="respiratory">Respiratory</option><option value="routine check">Routine check</option></select></div>
-                <div class="filter-section"><label>Date Range</label><input type="date" id="filterStartDate"> to <input type="date" id="filterEndDate"></div>
-            </div>
-            <div class="filter-footer"><button class="btn" id="applyFilter">Apply</button><button class="btn btn-secondary" id="resetFilter">Reset</button></div>
-        </div>
+    <!-- Date Range Dropdown -->
+    <div class="date-dropdown" id="dateDropdown"><ul><li data-range="7">Last 7 days</li><li data-range="30" class="active">Last 30 days</li><li data-range="90">Last 3 months</li><li data-range="custom">Custom range</li></ul></div>
 
-        <!-- Date Range Dropdown -->
-        <div class="date-dropdown" id="dateDropdown"><ul><li data-range="7">Last 7 days</li><li data-range="30" class="active">Last 30 days</li><li data-range="90">Last 3 months</li><li data-range="custom">Custom range</li></ul></div>
-
-        <!-- PAGE: PATIENT VITALS -->
-        <div class="page-section" id="patientVitalsPage">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2><i class="fas fa-heartbeat"></i> Patient Live Vitals</h2>
-                <div class="patient-selector" style="margin: 0;">
-                    <label><i class="fas fa-user-md"></i> Select Patient: </label>
-                    <select id="vitalsPatientSelect" style="padding: 8px; border-radius: 8px;">
-                        <option value="">Loading patients...</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="stats-grid">
-                <div class="stat-card"><div class="stat-title">TOTAL PATIENTS</div><div class="stat-value" id="totalPatients">--</div><div class="stat-sub">Registered in system</div></div>
-                <div class="stat-card"><div class="stat-title">CRITICAL CASES</div><div class="stat-value" id="criticalCases">--</div><div class="stat-sub">Need immediate attention</div></div>
-                <div class="stat-card"><div class="stat-title">LAST UPDATE</div><div class="stat-value" style="font-size:1.2rem;" id="lastUpdate">--</div><div class="stat-sub">Firebase sync</div></div>
-                <div class="stat-card"><div class="stat-title">CARE SYNC</div><div class="stat-value" style="font-size:1rem;" id="careSyncStatus">Waiting...</div><div class="stat-sub">PIMA Model</div></div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                <div class="card"><div class="card-header"><i class="fas fa-heart" style="color:#ef4444;"></i><h3>Heart Rate</h3></div><div class="card-value" id="doctorHeartValue">-- <span>bpm</span></div><div class="card-indicator" id="doctorHeartIndicator">Normal</div></div>
-                <div class="card"><div class="card-header"><i class="fas fa-lungs" style="color:#10b981;"></i><h3>SpO₂</h3></div><div class="card-value" id="doctorSpo2Value">-- <span>%</span></div><div class="card-indicator" id="doctorSpo2Indicator">Normal</div></div>
-                <div class="card"><div class="card-header"><i class="fas fa-thermometer-half" style="color:#f59e0b;"></i><h3>Body Temp</h3></div><div class="card-value" id="doctorTempValue">-- <span>°C</span></div><div class="card-indicator" id="doctorTempIndicator">Normal</div></div>
-                <div class="card"><div class="card-header"><i class="fas fa-tachometer-alt" style="color:#8b5cf6;"></i><h3>Blood Pressure</h3></div><div class="card-value" id="doctorBpValue">--/-- <span>mmHg</span></div><div class="card-indicator" id="doctorBpIndicator">Normal</div></div>
-                <div class="card"><div class="card-header"><i class="fas fa-tint" style="color:#f97316;"></i><h3>Blood Glucose</h3></div><div class="card-value" id="doctorGlucoseValue">-- <span>mg/dL</span></div><div class="card-indicator" id="doctorGlucoseIndicator">Normal</div></div>
-                <div class="card"><div class="card-header"><i class="fas fa-temperature-low" style="color:#3b82f6;"></i><h3>Room Temp</h3></div><div class="card-value" id="doctorRoomTempValue">-- <span>°C</span></div></div>
-                <div class="card"><div class="card-header"><i class="fas fa-tint" style="color:#06b6d4;"></i><h3>Humidity</h3></div><div class="card-value" id="doctorHumidityValue">-- <span>%</span></div></div>
-                <div class="card"><div class="card-header"><i class="fas fa-shoe-prints" style="color:#a855f7;"></i><h3>Motion</h3></div><div class="card-value" id="doctorMotionValue">-- <span>m/s²</span></div></div>
-            </div>
-
-            <div class="alerts-section" style="margin-top: 1rem;">
-                <h3><i class="fas fa-flask"></i> Current Lab Results (from Firebase)</h3>
-                <div id="currentLabResultsDisplay" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
-                    <div style="background: rgba(239,68,68,0.1); padding: 0.8rem; border-radius: 12px;"><strong>🩸 Diabetes:</strong><br>FBG: <span id="display_fbg">--</span> | HbA1c: <span id="display_hba1c">--</span><br>PPG: <span id="display_ppg">--</span> | RBS: <span id="display_rbs">--</span></div>
-                    <div style="background: rgba(59,130,246,0.1); padding: 0.8rem; border-radius: 12px;"><strong>🫀 Kidney:</strong><br>Creatinine: <span id="display_creatinine">--</span> | BUN: <span id="display_bun">--</span><br>eGFR: <span id="display_egfr">--</span> | Uric Acid: <span id="display_uricAcid">--</span></div>
-                    <div style="background: rgba(16,185,129,0.1); padding: 0.8rem; border-radius: 12px;"><strong>🧪 Liver:</strong><br>ALT: <span id="display_alt">--</span> | AST: <span id="display_ast">--</span><br>ALP: <span id="display_alp">--</span> | Bilirubin: <span id="display_bilirubin">--</span></div>
-                    <div style="background: rgba(245,158,11,0.1); padding: 0.8rem; border-radius: 12px;"><strong>🦋 Thyroid:</strong><br>TSH: <span id="display_tsh">--</span> | T3: <span id="display_t3">--</span><br>T4: <span id="display_t4">--</span></div>
-                    <div style="background: rgba(236,72,153,0.1); padding: 0.8rem; border-radius: 12px;"><strong>❤️ Cardiac:</strong><br>Troponin: <span id="display_troponin">--</span> | CK-MB: <span id="display_ckmb">--</span><br>NT-proBNP: <span id="display_bnp">--</span></div>
-                    <div style="background: rgba(139,92,246,0.1); padding: 0.8rem; border-radius: 12px;"><strong>🔥 Inflammation:</strong><br>CRP: <span id="display_crp">--</span> | ESR: <span id="display_esr">--</span><br>PCT: <span id="display_pct">--</span></div>
-                </div>
-                <div id="currentDoctorNotesDisplay" style="margin-top: 1rem; background: rgba(139,92,246,0.1); padding: 1rem; border-radius: 12px;">
-                    <strong>👨‍⚕️ Doctor's Notes:</strong><br>
-                    <span id="display_doctorName">--</span><br>
-                    📋 Summary: <span id="display_summary">--</span><br>
-                    💊 Recommendations: <span id="display_recommendations">--</span><br>
-                    ✅ Next Appointment: <span id="display_nextAppointment">--</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- PAGE: LAB RESULTS ENTRY -->
-        <div class="page-section" id="labResultsPage">
-            <h2 style="margin-bottom: 1.5rem;">🔬 Laboratory Results Entry</h2>
-            
-            <div class="patient-selector" style="margin-bottom: 1.5rem;">
-                <label><i class="fas fa-user"></i> Select Patient: </label>
-                <select id="labPatientSelect" style="padding: 8px; border-radius: 8px; margin-left: 10px;">
+    <!-- ==================== PAGE: PATIENT VITALS ==================== -->
+    <div class="page-section" id="patientVitalsPage">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2><i class="fas fa-heartbeat"></i> Patient Live Vitals</h2>
+            <div class="patient-selector" style="margin: 0;">
+                <label><i class="fas fa-user-md"></i> Select Patient: </label>
+                <select id="vitalsPatientSelect" style="padding: 8px; border-radius: 8px;">
                     <option value="">Loading patients...</option>
                 </select>
             </div>
-            
-            <form id="labResultsForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
-                <!-- Diabetes -->
-                <div class="card" style="background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.02)); border: 1px solid rgba(239,68,68,0.2);">
-                    <div class="card-header" style="border-bottom: 2px solid #ef4444;"><i class="fas fa-droplet" style="color: #ef4444;"></i><h3 style="color: #ef4444;">🩸 Diabetes Profile</h3></div>
-                    <div style="padding: 1rem;">
-                        <div class="form-group"><label>FBG (mg/dL):</label><input type="number" id="fbg" class="form-control" step="1" value="118"></div>
-                        <div class="form-group"><label>HbA1c (%):</label><input type="number" id="hba1c" class="form-control" step="0.1" value="5.7"></div>
-                        <div class="form-group"><label>PPG (mg/dL):</label><input type="number" id="ppg" class="form-control" step="1" value="140"></div>
-                        <div class="form-group"><label>RBS (mg/dL):</label><input type="number" id="rbs" class="form-control" step="1" value="125"></div>
-                    </div>
-                </div>
-                
-                <!-- Kidney -->
-                <div class="card" style="background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(59,130,246,0.02)); border: 1px solid rgba(59,130,246,0.2);">
-                    <div class="card-header" style="border-bottom: 2px solid #3b82f6;"><i class="fas fa-kidneys" style="color: #3b82f6;"></i><h3 style="color: #3b82f6;">🫀 Kidney Function</h3></div>
-                    <div style="padding: 1rem;">
-                        <div class="form-group"><label>Creatinine (mg/dL):</label><input type="number" id="creatinine" class="form-control" step="0.1" value="0.9"></div>
-                        <div class="form-group"><label>BUN (mg/dL):</label><input type="number" id="bun" class="form-control" step="1" value="12"></div>
-                        <div class="form-group"><label>eGFR (mL/min):</label><input type="number" id="egfr" class="form-control" step="1" value="95"></div>
-                        <div class="form-group"><label>Uric Acid (mg/dL):</label><input type="number" id="uricAcid" class="form-control" step="0.1" value="5.2"></div>
-                    </div>
-                </div>
-                
-                <!-- Liver -->
-                <div class="card" style="background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.02)); border: 1px solid rgba(16,185,129,0.2);">
-                    <div class="card-header" style="border-bottom: 2px solid #10b981;"><i class="fas fa-liver" style="color: #10b981;"></i><h3 style="color: #10b981;">🧪 Liver Function</h3></div>
-                    <div style="padding: 1rem;">
-                        <div class="form-group"><label>ALT (U/L):</label><input type="number" id="alt" class="form-control" step="1" value="25"></div>
-                        <div class="form-group"><label>AST (U/L):</label><input type="number" id="ast" class="form-control" step="1" value="22"></div>
-                        <div class="form-group"><label>ALP (U/L):</label><input type="number" id="alp" class="form-control" step="1" value="70"></div>
-                        <div class="form-group"><label>Bilirubin (mg/dL):</label><input type="number" id="bilirubin" class="form-control" step="0.1" value="0.8"></div>
-                    </div>
-                </div>
-                
-                <!-- Thyroid -->
-                <div class="card" style="background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.02)); border: 1px solid rgba(245,158,11,0.2);">
-                    <div class="card-header" style="border-bottom: 2px solid #f59e0b;"><i class="fas fa-thyroid" style="color: #f59e0b;"></i><h3 style="color: #f59e0b;">🦋 Thyroid Function</h3></div>
-                    <div style="padding: 1rem;">
-                        <div class="form-group"><label>TSH (µIU/mL):</label><input type="number" id="tsh" class="form-control" step="0.1" value="2.5"></div>
-                        <div class="form-group"><label>T3 (ng/dL):</label><input type="number" id="t3" class="form-control" step="1" value="110"></div>
-                        <div class="form-group"><label>T4 (µg/dL):</label><input type="number" id="t4" class="form-control" step="0.1" value="7.5"></div>
-                    </div>
-                </div>
-                
-                <!-- Cardiac -->
-                <div class="card" style="background: linear-gradient(135deg, rgba(236,72,153,0.1), rgba(236,72,153,0.02)); border: 1px solid rgba(236,72,153,0.2);">
-                    <div class="card-header" style="border-bottom: 2px solid #ec4899;"><i class="fas fa-heartbeat" style="color: #ec4899;"></i><h3 style="color: #ec4899;">❤️ Cardiac Markers</h3></div>
-                    <div style="padding: 1rem;">
-                        <div class="form-group"><label>Troponin I (ng/mL):</label><input type="number" id="troponin" class="form-control" step="0.01" value="0.02"></div>
-                        <div class="form-group"><label>CK-MB (ng/mL):</label><input type="number" id="ckmb" class="form-control" step="0.1" value="1.2"></div>
-                        <div class="form-group"><label>NT-proBNP (pg/mL):</label><input type="number" id="bnp" class="form-control" step="1" value="85"></div>
-                    </div>
-                </div>
-                
-                <!-- Inflammation -->
-                <div class="card" style="background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(139,92,246,0.02)); border: 1px solid rgba(139,92,246,0.2);">
-                    <div class="card-header" style="border-bottom: 2px solid #8b5cf6;"><i class="fas fa-biohazard" style="color: #8b5cf6;"></i><h3 style="color: #8b5cf6;">🔥 Inflammation</h3></div>
-                    <div style="padding: 1rem;">
-                        <div class="form-group"><label>CRP (mg/L):</label><input type="number" id="crp" class="form-control" step="0.1" value="2.5"></div>
-                        <div class="form-group"><label>ESR (mm/hr):</label><input type="number" id="esr" class="form-control" step="1" value="12"></div>
-                        <div class="form-group"><label>Procalcitonin (ng/mL):</label><input type="number" id="pct" class="form-control" step="0.01" value="0.05"></div>
-                    </div>
-                </div>
-                
-                <!-- Doctor Notes -->
-                <div class="card" style="grid-column: span 2; background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(139,92,246,0.02));">
-                    <div class="card-header" style="border-bottom: 2px solid #8b5cf6;"><i class="fas fa-stethoscope" style="color: #8b5cf6;"></i><h3 style="color: #8b5cf6;">👨‍⚕️ Doctor's Notes</h3></div>
-                    <div style="padding: 1rem;">
-                        <div class="form-group"><label>Doctor Name:</label><input type="text" id="doctorName" class="form-control" value="Dr. Sarah Ahmed"></div>
-                        <div class="form-group" style="flex-direction: column; align-items: stretch;"><label>Clinical Summary:</label><textarea id="clinicalSummary" class="form-control" rows="2">Patient presents with well-controlled type 2 diabetes (HbA1c 5.7%). Blood pressure is within normal range.</textarea></div>
-                        <div class="form-group" style="flex-direction: column; align-items: stretch;"><label>Recommendations:</label><textarea id="recommendations" class="form-control" rows="2">Continue Metformin 500mg twice daily. Follow up in 3 months.</textarea></div>
-                        <div class="form-group"><label>Next Appointment:</label><input type="text" id="nextAppointment" class="form-control" value="January 15, 2025 - 10:00 AM"></div>
-                    </div>
-                </div>
-            </form>
-            
-            <button id="saveLabResultsBtn" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; border: none; padding: 14px 28px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 20px; width: 100%;">
-                <i class="fas fa-save"></i> 💾 Save All Lab Results & Notes to Firebase
-            </button>
-            
-            <div id="labSaveStatus" style="margin-top: 15px; padding: 10px; border-radius: 8px; text-align: center; display: none;"></div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-title">TOTAL PATIENTS</div><div class="stat-value" id="totalPatients">--</div><div class="stat-sub">Registered in system</div></div>
+            <div class="stat-card"><div class="stat-title">CRITICAL CASES</div><div class="stat-value" id="criticalCases">--</div><div class="stat-sub">Need immediate attention</div></div>
+            <div class="stat-card"><div class="stat-title">LAST UPDATE</div><div class="stat-value" style="font-size:1.2rem;" id="lastUpdate">--</div><div class="stat-sub">Firebase sync</div></div>
+            <div class="stat-card"><div class="stat-title">CARE SYNC</div><div class="stat-value" style="font-size:1rem;" id="careSyncStatus">Waiting...</div><div class="stat-sub">PIMA Model</div></div>
         </div>
 
-        <!-- OTHER PAGES -->
-        <div class="page-section" id="dashboardPage">
-            <div class="stats-grid">
-                <div class="stat-card"><div class="stat-title">Total Patients</div><div class="stat-value" id="dashboardTotalPatients">--</div><div class="stat-sub">Registered</div></div>
-                <div class="stat-card"><div class="stat-title">Critical Cases</div><div class="stat-value" id="dashboardCriticalCases">--</div><div class="stat-sub">Need attention</div></div>
-                <div class="stat-card"><div class="stat-title">Avg. HR (today)</div><div class="stat-value" id="avgHR">-- <span>bpm</span></div><div class="stat-sub">normal range</div></div>
-                <div class="stat-card"><div class="stat-title">Bed Occupancy</div><div class="stat-value" id="bedOccupancy">--<small>%</small></div><div class="stat-sub">--/-- beds</div></div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="card"><div class="card-header"><i class="fas fa-heart" style="color:#ef4444;"></i><h3>Heart Rate</h3></div><div class="card-value" id="doctorHeartValue">-- <span>bpm</span></div><div class="card-indicator" id="doctorHeartIndicator">Normal</div></div>
+            <div class="card"><div class="card-header"><i class="fas fa-lungs" style="color:#10b981;"></i><h3>SpO₂</h3></div><div class="card-value" id="doctorSpo2Value">-- <span>%</span></div><div class="card-indicator" id="doctorSpo2Indicator">Normal</div></div>
+            <div class="card"><div class="card-header"><i class="fas fa-thermometer-half" style="color:#f59e0b;"></i><h3>Body Temp</h3></div><div class="card-value" id="doctorTempValue">-- <span>°C</span></div><div class="card-indicator" id="doctorTempIndicator">Normal</div></div>
+            <div class="card"><div class="card-header"><i class="fas fa-tachometer-alt" style="color:#8b5cf6;"></i><h3>Blood Pressure</h3></div><div class="card-value" id="doctorBpValue">--/-- <span>mmHg</span></div><div class="card-indicator" id="doctorBpIndicator">Normal</div></div>
+            <div class="card"><div class="card-header"><i class="fas fa-tint" style="color:#f97316;"></i><h3>Blood Glucose</h3></div><div class="card-value" id="doctorGlucoseValue">-- <span>mg/dL</span></div><div class="card-indicator" id="doctorGlucoseIndicator">Normal</div></div>
+            <div class="card"><div class="card-header"><i class="fas fa-temperature-low" style="color:#3b82f6;"></i><h3>Room Temp</h3></div><div class="card-value" id="doctorRoomTempValue">-- <span>°C</span></div></div>
+            <div class="card"><div class="card-header"><i class="fas fa-tint" style="color:#06b6d4;"></i><h3>Humidity</h3></div><div class="card-value" id="doctorHumidityValue">-- <span>%</span></div></div>
+            <div class="card"><div class="card-header"><i class="fas fa-shoe-prints" style="color:#a855f7;"></i><h3>Motion</h3></div><div class="card-value" id="doctorMotionValue">-- <span>m/s²</span></div></div>
+        </div>
+
+        <div class="alerts-section" style="margin-top: 1rem;">
+            <h3><i class="fas fa-flask"></i> Current Lab Results (from Firebase)</h3>
+            <div id="currentLabResultsDisplay" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div style="background: rgba(239,68,68,0.1); padding: 0.8rem; border-radius: 12px;"><strong>🩸 Diabetes:</strong><br>FBG: <span id="display_fbg">--</span> | HbA1c: <span id="display_hba1c">--</span><br>PPG: <span id="display_ppg">--</span> | RBS: <span id="display_rbs">--</span></div>
+                <div style="background: rgba(59,130,246,0.1); padding: 0.8rem; border-radius: 12px;"><strong>🫀 Kidney:</strong><br>Creatinine: <span id="display_creatinine">--</span> | BUN: <span id="display_bun">--</span><br>eGFR: <span id="display_egfr">--</span> | Uric Acid: <span id="display_uricAcid">--</span></div>
+                <div style="background: rgba(16,185,129,0.1); padding: 0.8rem; border-radius: 12px;"><strong>🧪 Liver:</strong><br>ALT: <span id="display_alt">--</span> | AST: <span id="display_ast">--</span><br>ALP: <span id="display_alp">--</span> | Bilirubin: <span id="display_bilirubin">--</span></div>
+                <div style="background: rgba(245,158,11,0.1); padding: 0.8rem; border-radius: 12px;"><strong>🦋 Thyroid:</strong><br>TSH: <span id="display_tsh">--</span> | T3: <span id="display_t3">--</span><br>T4: <span id="display_t4">--</span></div>
+                <div style="background: rgba(236,72,153,0.1); padding: 0.8rem; border-radius: 12px;"><strong>❤️ Cardiac:</strong><br>Troponin: <span id="display_troponin">--</span> | CK-MB: <span id="display_ckmb">--</span><br>NT-proBNP: <span id="display_bnp">--</span></div>
+                <div style="background: rgba(139,92,246,0.1); padding: 0.8rem; border-radius: 12px;"><strong>🔥 Inflammation:</strong><br>CRP: <span id="display_crp">--</span> | ESR: <span id="display_esr">--</span><br>PCT: <span id="display_pct">--</span></div>
             </div>
-            <div class="alerts-section"><div class="alerts-header"><h3><i class="fas fa-bell"></i> Active Alerts</h3><button class="mute-button" id="muteAlerts"><i class="fas fa-volume-up"></i> Mute</button></div><div class="alerts-list" id="alertsList"></div></div>
+            <div id="currentDoctorNotesDisplay" style="margin-top: 1rem; background: rgba(139,92,246,0.1); padding: 1rem; border-radius: 12px;">
+                <strong>👨‍⚕️ Doctor's Notes:</strong><br>
+                <span id="display_doctorName">--</span><br>
+                📋 Summary: <span id="display_summary">--</span><br>
+                💊 Recommendations: <span id="display_recommendations">--</span><br>
+                ✅ Next Appointment: <span id="display_nextAppointment">--</span>
+            </div>
         </div>
-        <div class="page-section" id="appointmentsPage"><h2>📅 Appointments</h2><div class="table-container"><input type="text" id="appointmentSearch" class="form-control" placeholder="Search..."><table id="appointmentsTable"><thead><tr><th>Patient</th><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody><tr><td>John Doe</td><td>2025-03-27</td><td>10:30</td><td>Scheduled</td></tr></tbody></table></div></div>
-        <div class="page-section" id="patientsPage"><h2>👥 Patients List</h2><div class="table-container"><input type="text" id="patientSearch" class="form-control" placeholder="Search..."><table id="patientsFullTable"><thead><tr><th>Name</th><th>Age</th><th>Condition</th><th>Status</th></tr></thead><tbody><tr><td>Emily Davis</td><td>45</td><td>Post-surgery</td><td>Stable</td></tr></tbody></table></div></div>
-        <div class="page-section" id="timelogPage"><h2>⏱️ Time Log</h2><div class="table-container"><table><thead><tr><th>Date</th><th>Clock In</th><th>Clock Out</th><th>Hours</th></tr></thead><tbody><tr><td>2025-03-26</td><td>08:15</td><td>16:30</td><td>8.25</td></tr></tbody></table></div></div>
-        <div class="page-section" id="reportsPage"><h2>📝 Patient Report</h2><form id="patientReportForm"><div class="form-group"><label>Patient Name</label><input type="text" id="patientName" required></div><div class="form-group"><label>Age</label><input type="number" id="patientAge" required></div><div class="form-group"><label>Gender</label><select id="patientGender"><option>Male</option><option>Female</option></select></div><div class="form-group"><label>Health Condition</label><textarea id="healthCondition" rows="3" required></textarea></div><div class="form-group"><label>Medications</label><textarea id="medications" rows="2" required></textarea></div><button type="submit" class="btn-submit">Save Report</button></form></div>
-        <div class="page-section" id="settingsPage"><h2>⚙️ Settings</h2><div class="form-container"><div class="form-group"><label>Email</label><input type="email" id="settingsEmail"></div><div class="form-group"><label>Language</label><select id="settingsLanguage"><option>English</option><option>Arabic</option></select></div><button class="btn" id="saveSettings">Save</button></div></div>
-        <div class="page-section" id="supportPage"><h2>🆘 Support</h2><p>support@smarthealth.com</p></div>
-    </main>
-</div>
+    </div>
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-<script src="js/firebase.js"></script>
-<script src="js/doctor.js"></script>
-<script src="js/theme.js"></script>
-
-<script>
-// ==================== FIREBASE CONFIG ====================
-const firebaseConfig = {
-    apiKey: "AIzaSyDy29ivSun9rqvqTlYhgBI8PBGJhnLJSc0",
-    databaseURL: "https://smart-health-monitoring-f97fb-default-rtdb.firebaseio.com/",
-    projectId: "smart-health-monitoring-f97fb"
-};
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-
-let currentVitalsPatientId = null;
-let currentLabPatientId = null;
-
-// ==================== HELPER FUNCTIONS ====================
-function updateDoctorIndicator(id, value, normalMin, normalMax, warnMin, warnMax) {
-    const el = document.getElementById(id);
-    if(!el) return;
-    if(value < normalMin || value > normalMax) { el.className = 'indicator-danger'; el.innerHTML = 'Critical'; }
-    else if((warnMin && value < warnMin) || (warnMax && value > warnMax)) { el.className = 'indicator-warning'; el.innerHTML = 'Warning'; }
-    else { el.className = 'indicator-normal'; el.innerHTML = 'Normal'; }
-}
-
-function showSuccessMessage(message) {
-    const statusDiv = document.getElementById('labSaveStatus');
-    if(statusDiv) {
-        statusDiv.textContent = message;
-        statusDiv.style.display = 'block';
-        statusDiv.style.backgroundColor = '#10b981';
-        statusDiv.style.color = 'white';
-        statusDiv.style.padding = '12px';
-        statusDiv.style.borderRadius = '10px';
-        setTimeout(() => { statusDiv.style.display = 'none'; }, 3000);
-    } else {
-        alert(message);
-    }
-}
-
-function showErrorMessage(message) {
-    const statusDiv = document.getElementById('labSaveStatus');
-    if(statusDiv) {
-        statusDiv.textContent = message;
-        statusDiv.style.display = 'block';
-        statusDiv.style.backgroundColor = '#ef4444';
-        statusDiv.style.color = 'white';
-        statusDiv.style.padding = '12px';
-        statusDiv.style.borderRadius = '10px';
-        setTimeout(() => { statusDiv.style.display = 'none'; }, 5000);
-    } else {
-        alert(message);
-    }
-}
-
-// ==================== LOAD PATIENTS FROM USERS ====================
-async function loadPatientsFromUsers() {
-    try {
-        console.log("🔄 Loading patients from users...");
-        const snapshot = await database.ref('users').once('value');
-        const users = snapshot.val();
+    <!-- ==================== PAGE: LAB RESULTS ENTRY ==================== -->
+    <div class="page-section" id="labResultsPage">
+        <h2 style="margin-bottom: 1.5rem;">🔬 Laboratory Results Entry</h2>
         
-        if (!users) {
-            console.log("❌ No users found!");
-            return;
-        }
+        <div class="patient-selector" style="margin-bottom: 1.5rem;">
+            <label><i class="fas fa-user"></i> Select Patient: </label>
+            <select id="labPatientSelect" style="padding: 8px; border-radius: 8px; margin-left: 10px;">
+                <option value="">Loading patients...</option>
+            </select>
+        </div>
         
-        const patientsList = [];
-        for (const [uid, userData] of Object.entries(users)) {
-            if (userData.role === 'patient') {
-                patientsList.push({
-                    uid: uid,
-                    name: userData.name || "Unknown",
-                    email: userData.email || ""
-                });
-                console.log(`✅ Found patient: ${userData.name}`);
-            }
-        }
+        <form id="labResultsForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
+            <!-- Diabetes -->
+            <div class="card" style="background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.02)); border: 1px solid rgba(239,68,68,0.2);">
+                <div class="card-header" style="border-bottom: 2px solid #ef4444;"><i class="fas fa-droplet" style="color: #ef4444;"></i><h3 style="color: #ef4444;">🩸 Diabetes Profile</h3></div>
+                <div style="padding: 1rem;">
+                    <div class="form-group"><label>FBG (mg/dL):</label><input type="number" id="fbg" class="form-control" step="1" value="118"></div>
+                    <div class="form-group"><label>HbA1c (%):</label><input type="number" id="hba1c" class="form-control" step="0.1" value="5.7"></div>
+                    <div class="form-group"><label>PPG (mg/dL):</label><input type="number" id="ppg" class="form-control" step="1" value="140"></div>
+                    <div class="form-group"><label>RBS (mg/dL):</label><input type="number" id="rbs" class="form-control" step="1" value="125"></div>
+                </div>
+            </div>
+            
+            <!-- Kidney -->
+            <div class="card" style="background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(59,130,246,0.02)); border: 1px solid rgba(59,130,246,0.2);">
+                <div class="card-header" style="border-bottom: 2px solid #3b82f6;"><i class="fas fa-kidneys" style="color: #3b82f6;"></i><h3 style="color: #3b82f6;">🫀 Kidney Function</h3></div>
+                <div style="padding: 1rem;">
+                    <div class="form-group"><label>Creatinine (mg/dL):</label><input type="number" id="creatinine" class="form-control" step="0.1" value="0.9"></div>
+                    <div class="form-group"><label>BUN (mg/dL):</label><input type="number" id="bun" class="form-control" step="1" value="12"></div>
+                    <div class="form-group"><label>eGFR (mL/min):</label><input type="number" id="egfr" class="form-control" step="1" value="95"></div>
+                    <div class="form-group"><label>Uric Acid (mg/dL):</label><input type="number" id="uricAcid" class="form-control" step="0.1" value="5.2"></div>
+                </div>
+            </div>
+            
+            <!-- Liver -->
+            <div class="card" style="background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.02)); border: 1px solid rgba(16,185,129,0.2);">
+                <div class="card-header" style="border-bottom: 2px solid #10b981;"><i class="fas fa-liver" style="color: #10b981;"></i><h3 style="color: #10b981;">🧪 Liver Function</h3></div>
+                <div style="padding: 1rem;">
+                    <div class="form-group"><label>ALT (U/L):</label><input type="number" id="alt" class="form-control" step="1" value="25"></div>
+                    <div class="form-group"><label>AST (U/L):</label><input type="number" id="ast" class="form-control" step="1" value="22"></div>
+                    <div class="form-group"><label>ALP (U/L):</label><input type="number" id="alp" class="form-control" step="1" value="70"></div>
+                    <div class="form-group"><label>Bilirubin (mg/dL):</label><input type="number" id="bilirubin" class="form-control" step="0.1" value="0.8"></div>
+                </div>
+            </div>
+            
+            <!-- Thyroid -->
+            <div class="card" style="background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.02)); border: 1px solid rgba(245,158,11,0.2);">
+                <div class="card-header" style="border-bottom: 2px solid #f59e0b;"><i class="fas fa-thyroid" style="color: #f59e0b;"></i><h3 style="color: #f59e0b;">🦋 Thyroid Function</h3></div>
+                <div style="padding: 1rem;">
+                    <div class="form-group"><label>TSH (µIU/mL):</label><input type="number" id="tsh" class="form-control" step="0.1" value="2.5"></div>
+                    <div class="form-group"><label>T3 (ng/dL):</label><input type="number" id="t3" class="form-control" step="1" value="110"></div>
+                    <div class="form-group"><label>T4 (µg/dL):</label><input type="number" id="t4" class="form-control" step="0.1" value="7.5"></div>
+                </div>
+            </div>
+            
+            <!-- Cardiac -->
+            <div class="card" style="background: linear-gradient(135deg, rgba(236,72,153,0.1), rgba(236,72,153,0.02)); border: 1px solid rgba(236,72,153,0.2);">
+                <div class="card-header" style="border-bottom: 2px solid #ec4899;"><i class="fas fa-heartbeat" style="color: #ec4899;"></i><h3 style="color: #ec4899;">❤️ Cardiac Markers</h3></div>
+                <div style="padding: 1rem;">
+                    <div class="form-group"><label>Troponin I (ng/mL):</label><input type="number" id="troponin" class="form-control" step="0.01" value="0.02"></div>
+                    <div class="form-group"><label>CK-MB (ng/mL):</label><input type="number" id="ckmb" class="form-control" step="0.1" value="1.2"></div>
+                    <div class="form-group"><label>NT-proBNP (pg/mL):</label><input type="number" id="bnp" class="form-control" step="1" value="85"></div>
+                </div>
+            </div>
+            
+            <!-- Inflammation -->
+            <div class="card" style="background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(139,92,246,0.02)); border: 1px solid rgba(139,92,246,0.2);">
+                <div class="card-header" style="border-bottom: 2px solid #8b5cf6;"><i class="fas fa-biohazard" style="color: #8b5cf6;"></i><h3 style="color: #8b5cf6;">🔥 Inflammation</h3></div>
+                <div style="padding: 1rem;">
+                    <div class="form-group"><label>CRP (mg/L):</label><input type="number" id="crp" class="form-control" step="0.1" value="2.5"></div>
+                    <div class="form-group"><label>ESR (mm/hr):</label><input type="number" id="esr" class="form-control" step="1" value="12"></div>
+                    <div class="form-group"><label>Procalcitonin (ng/mL):</label><input type="number" id="pct" class="form-control" step="0.01" value="0.05"></div>
+                </div>
+            </div>
+            
+            <!-- Doctor Notes -->
+            <div class="card" style="grid-column: span 2; background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(139,92,246,0.02));">
+                <div class="card-header" style="border-bottom: 2px solid #8b5cf6;"><i class="fas fa-stethoscope" style="color: #8b5cf6;"></i><h3 style="color: #8b5cf6;">👨‍⚕️ Doctor's Notes</h3></div>
+                <div style="padding: 1rem;">
+                    <div class="form-group"><label>Doctor Name:</label><input type="text" id="doctorName" class="form-control" value="Dr. Sarah Ahmed"></div>
+                    <div class="form-group" style="flex-direction: column; align-items: stretch;"><label>Clinical Summary:</label><textarea id="clinicalSummary" class="form-control" rows="2">Patient presents with well-controlled type 2 diabetes (HbA1c 5.7%). Blood pressure is within normal range.</textarea></div>
+                    <div class="form-group" style="flex-direction: column; align-items: stretch;"><label>Recommendations:</label><textarea id="recommendations" class="form-control" rows="2">Continue Metformin 500mg twice daily. Follow up in 3 months.</textarea></div>
+                    <div class="form-group"><label>Next Appointment:</label><input type="text" id="nextAppointment" class="form-control" value="January 15, 2025 - 10:00 AM"></div>
+                </div>
+            </div>
+        </form>
         
-        console.log(`📊 Total patients found: ${patientsList.length}`);
+        <button id="saveLabResultsBtn" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; border: none; padding: 14px 28px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 20px; width: 100%;">
+            <i class="fas fa-save"></i> 💾 Save All Lab Results & Notes to Firebase
+        </button>
         
-        // Update patient count
-        const totalEl = document.getElementById('totalPatients');
-        const dashboardTotalEl = document.getElementById('dashboardTotalPatients');
-        if (totalEl) totalEl.innerHTML = patientsList.length;
-        if (dashboardTotalEl) dashboardTotalEl.innerHTML = patientsList.length;
-        
-        // Update Lab Results select
-        const labSelect = document.getElementById('labPatientSelect');
-        if (labSelect) {
-            labSelect.innerHTML = '<option value="">-- Select Patient --</option>';
-            for (const p of patientsList) {
-                const option = document.createElement('option');
-                option.value = p.uid;
-                option.textContent = p.name;
-                labSelect.appendChild(option);
-            }
-            console.log(`✅ Added ${patientsList.length} patients to Lab select`);
-        }
-        
-        // Update Vitals select
-        const vitalsSelect = document.getElementById('vitalsPatientSelect');
-        if (vitalsSelect) {
-            vitalsSelect.innerHTML = '<option value="">-- Select Patient --</option>';
-            for (const p of patientsList) {
-                const option = document.createElement('option');
-                option.value = p.uid;
-                option.textContent = p.name;
-                vitalsSelect.appendChild(option);
-            }
-            console.log(`✅ Added ${patientsList.length} patients to Vitals select`);
-        }
-        
-        if (patientsList.length === 0) {
-            console.log("⚠️ No patients found! Creating a test patient...");
-            const testUid = "patient_" + Date.now();
-            await database.ref(`users/${testUid}`).set({
-                name: "Demo Patient",
-                email: "demo@patient.com",
-                role: "patient",
-                createdAt: Date.now()
-            });
-            console.log("✅ Test patient created! Refreshing...");
-            setTimeout(() => location.reload(), 1500);
-        }
-        
-    } catch (error) {
-        console.error("❌ Error loading patients:", error);
-    }
-}
+        <div id="labSaveStatus" style="margin-top: 15px; padding: 10px; border-radius: 8px; text-align: center; display: none;"></div>
+    </div>
 
-// ==================== VITALS LISTENERS ====================
-function startVitalsListener(patientId) {
-    if(!patientId) return;
-    currentVitalsPatientId = patientId;
-    document.getElementById('careSyncStatus').innerHTML = '✅ Connected: ' + patientId.substring(0, 20) + '...';
-    
-    const esp32Ref = database.ref('/HELIOS_DATA_LIVE/Vitals');
-    esp32Ref.on('value', (snapshot) => {
-        const data = snapshot.val();
-        if(data) {
-            if(data.HeartRate) {
-                document.getElementById('doctorHeartValue').innerHTML = data.HeartRate + ' <span>bpm</span>';
-                updateDoctorIndicator('doctorHeartIndicator', data.HeartRate, 60, 100, 55, 110);
-            }
-            if(data.SpO2) {
-                document.getElementById('doctorSpo2Value').innerHTML = data.SpO2 + ' <span>%</span>';
-                updateDoctorIndicator('doctorSpo2Indicator', data.SpO2, 95, 100, 90, 100);
-            }
-            if(data.BodyTemp) {
-                document.getElementById('doctorTempValue').innerHTML = data.BodyTemp.toFixed(1) + ' <span>°C</span>';
-                updateDoctorIndicator('doctorTempIndicator', data.BodyTemp, 36.0, 37.5, 35.5, 38.0);
-            }
-            if(data.RoomTemp) document.getElementById('doctorRoomTempValue').innerHTML = data.RoomTemp.toFixed(1) + ' <span>°C</span>';
-            if(data.Humidity) document.getElementById('doctorHumidityValue').innerHTML = data.Humidity.toFixed(1) + ' <span>%</span>';
-            if(data.Motion) document.getElementById('doctorMotionValue').innerHTML = data.Motion.toFixed(1) + ' <span>m/s²</span>';
-            document.getElementById('lastUpdate').innerHTML = new Date().toLocaleTimeString();
-        }
-    });
-    
-    const readingsRef = database.ref(`patients/${patientId}/readings`);
-    readingsRef.on('child_added', (snapshot) => {
-        const reading = snapshot.val();
-        if(reading && reading.vitals) {
-            if(reading.vitals.systolic_bp && reading.vitals.diastolic_bp) {
-                document.getElementById('doctorBpValue').innerHTML = reading.vitals.systolic_bp + '/' + reading.vitals.diastolic_bp + ' <span>mmHg</span>';
-                updateDoctorIndicator('doctorBpIndicator', reading.vitals.systolic_bp, 90, 120, 130, 140);
-            }
-            if(reading.vitals.glucose) {
-                document.getElementById('doctorGlucoseValue').innerHTML = Math.round(reading.vitals.glucose) + ' <span>mg/dL</span>';
-                updateDoctorIndicator('doctorGlucoseIndicator', reading.vitals.glucose, 70, 100, 126, 200);
-            }
-        }
-    });
-    
-    const labRef = database.ref(`patients/${patientId}/labResults`);
-    labRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        if(data) {
-            if(data.diabetes) {
-                document.getElementById('display_fbg').innerText = data.diabetes.fbg || '--';
-                document.getElementById('display_hba1c').innerText = data.diabetes.hba1c || '--';
-                document.getElementById('display_ppg').innerText = data.diabetes.ppg || '--';
-                document.getElementById('display_rbs').innerText = data.diabetes.rbs || '--';
-            }
-            if(data.kidney) {
-                document.getElementById('display_creatinine').innerText = data.kidney.creatinine || '--';
-                document.getElementById('display_bun').innerText = data.kidney.bun || '--';
-                document.getElementById('display_egfr').innerText = data.kidney.egfr || '--';
-                document.getElementById('display_uricAcid').innerText = data.kidney.uricAcid || '--';
-            }
-            if(data.liver) {
-                document.getElementById('display_alt').innerText = data.liver.alt || '--';
-                document.getElementById('display_ast').innerText = data.liver.ast || '--';
-                document.getElementById('display_alp').innerText = data.liver.alp || '--';
-                document.getElementById('display_bilirubin').innerText = data.liver.bilirubin || '--';
-            }
-            if(data.thyroid) {
-                document.getElementById('display_tsh').innerText = data.thyroid.tsh || '--';
-                document.getElementById('display_t3').innerText = data.thyroid.t3 || '--';
-                document.getElementById('display_t4').innerText = data.thyroid.t4 || '--';
-            }
-            if(data.cardiac) {
-                document.getElementById('display_troponin').innerText = data.cardiac.troponin || '--';
-                document.getElementById('display_ckmb').innerText = data.cardiac.ckmb || '--';
-                document.getElementById('display_bnp').innerText = data.cardiac.bnp || '--';
-            }
-            if(data.inflammation) {
-                document.getElementById('display_crp').innerText = data.inflammation.crp || '--';
-                document.getElementById('display_esr').innerText = data.inflammation.esr || '--';
-                document.getElementById('display_pct').innerText = data.inflammation.pct || '--';
-            }
-        }
-    });
-    
-    const notesRef = database.ref(`patients/${patientId}/doctorNotes`);
-    notesRef.on('value', (snapshot) => {
-        const notes = snapshot.val();
-        if(notes) {
-            document.getElementById('display_doctorName').innerHTML = `<i class="fas fa-user-md"></i> ${notes.doctorName || '--'}`;
-            document.getElementById('display_summary').innerText = notes.summary || '--';
-            document.getElementById('display_recommendations').innerText = notes.recommendations || '--';
-            document.getElementById('display_nextAppointment').innerText = notes.nextAppointment || '--';
-        }
-    });
-}
-
-// ==================== LOAD EXISTING LAB DATA ====================
-async function loadExistingLabData(patientId) {
-    if(!patientId) return;
-    try {
-        const snapshot = await database.ref(`patients/${patientId}/labResults`).once('value');
-        const data = snapshot.val();
-        if(data) {
-            if(data.diabetes) {
-                if(data.diabetes.fbg) document.getElementById('fbg').value = data.diabetes.fbg;
-                if(data.diabetes.hba1c) document.getElementById('hba1c').value = data.diabetes.hba1c;
-                if(data.diabetes.ppg) document.getElementById('ppg').value = data.diabetes.ppg;
-                if(data.diabetes.rbs) document.getElementById('rbs').value = data.diabetes.rbs;
-            }
-            if(data.kidney) {
-                if(data.kidney.creatinine) document.getElementById('creatinine').value = data.kidney.creatinine;
-                if(data.kidney.bun) document.getElementById('bun').value = data.kidney.bun;
-                if(data.kidney.egfr) document.getElementById('egfr').value = data.kidney.egfr;
-                if(data.kidney.uricAcid) document.getElementById('uricAcid').value = data.kidney.uricAcid;
-            }
-            if(data.liver) {
-                if(data.liver.alt) document.getElementById('alt').value = data.liver.alt;
-                if(data.liver.ast) document.getElementById('ast').value = data.liver.ast;
-                if(data.liver.alp) document.getElementById('alp').value = data.liver.alp;
-                if(data.liver.bilirubin) document.getElementById('bilirubin').value = data.liver.bilirubin;
-            }
-            if(data.thyroid) {
-                if(data.thyroid.tsh) document.getElementById('tsh').value = data.thyroid.tsh;
-                if(data.thyroid.t3) document.getElementById('t3').value = data.thyroid.t3;
-                if(data.thyroid.t4) document.getElementById('t4').value = data.thyroid.t4;
-            }
-            if(data.cardiac) {
-                if(data.cardiac.troponin) document.getElementById('troponin').value = data.cardiac.troponin;
-                if(data.cardiac.ckmb) document.getElementById('ckmb').value = data.cardiac.ckmb;
-                if(data.cardiac.bnp) document.getElementById('bnp').value = data.cardiac.bnp;
-            }
-            if(data.inflammation) {
-                if(data.inflammation.crp) document.getElementById('crp').value = data.inflammation.crp;
-                if(data.inflammation.esr) document.getElementById('esr').value = data.inflammation.esr;
-                if(data.inflammation.pct) document.getElementById('pct').value = data.inflammation.pct;
-            }
-        }
-        const notesSnapshot = await database.ref(`patients/${patientId}/doctorNotes`).once('value');
-        const notes = notesSnapshot.val();
-        if(notes) {
-            if(notes.doctorName) document.getElementById('doctorName').value = notes.doctorName;
-            if(notes.summary) document.getElementById('clinicalSummary').value = notes.summary;
-            if(notes.recommendations) document.getElementById('recommendations').value = notes.recommendations;
-            if(notes.nextAppointment) document.getElementById('nextAppointment').value = notes.nextAppointment;
-        }
-    } catch(e) { console.error(e); }
-}
-
-// ==================== SAVE LAB RESULTS TO FIREBASE ====================
-async function saveLabResultsToFirebase() {
-    console.log("💾 Save button clicked!");
-    
-    const labSelect = document.getElementById('labPatientSelect');
-    if (!labSelect || !labSelect.value) {
-        showErrorMessage('❌ Please select a patient first!');
-        return;
-    }
-    
-    const patientId = labSelect.value;
-    console.log("📌 Saving for patient:", patientId);
-    
-    const labData = {
-        diabetes: {
-            fbg: parseFloat(document.getElementById('fbg')?.value || 118),
-            hba1c: parseFloat(document.getElementById('hba1c')?.value || 5.7),
-            ppg: parseFloat(document.getElementById('ppg')?.value || 140),
-            rbs: parseFloat(document.getElementById('rbs')?.value || 125)
-        },
-        kidney: {
-            creatinine: parseFloat(document.getElementById('creatinine')?.value || 0.9),
-            bun: parseFloat(document.getElementById('bun')?.value || 12),
-            egfr: parseFloat(document.getElementById('egfr')?.value || 95),
-            uricAcid: parseFloat(document.getElementById('uricAcid')?.value || 5.2)
-        },
-        liver: {
-            alt: parseFloat(document.getElementById('alt')?.value || 25),
-            ast: parseFloat(document.getElementById('ast')?.value || 22),
-            alp: parseFloat(document.getElementById('alp')?.value || 70),
-            bilirubin: parseFloat(document.getElementById('bilirubin')?.value || 0.8)
-        },
-        thyroid: {
-            tsh: parseFloat(document.getElementById('tsh')?.value || 2.5),
-            t3: parseFloat(document.getElementById('t3')?.value || 110),
-            t4: parseFloat(document.getElementById('t4')?.value || 7.5)
-        },
-        cardiac: {
-            troponin: parseFloat(document.getElementById('troponin')?.value || 0.02),
-            ckmb: parseFloat(document.getElementById('ckmb')?.value || 1.2),
-            bnp: parseFloat(document.getElementById('bnp')?.value || 85)
-        },
-        inflammation: {
-            crp: parseFloat(document.getElementById('crp')?.value || 2.5),
-            esr: parseFloat(document.getElementById('esr')?.value || 12),
-            pct: parseFloat(document.getElementById('pct')?.value || 0.05)
-        },
-        lastUpdated: new Date().toISOString()
-    };
-    
-    const doctorNotes = {
-        doctorName: document.getElementById('doctorName')?.value || 'Dr. Sarah Ahmed',
-        summary: document.getElementById('clinicalSummary')?.value || '',
-        recommendations: document.getElementById('recommendations')?.value || '',
-        nextAppointment: document.getElementById('nextAppointment')?.value || '',
-        lastUpdated: new Date().toISOString()
-    };
-    
-    try {
-        await database.ref(`patients/${patientId}/labResults`).set(labData);
-        await database.ref(`patients/${patientId}/doctorNotes`).set(doctorNotes);
-        console.log("✅ Data saved successfully!");
-        showSuccessMessage('✅ Lab results and notes saved successfully! Patient page will update automatically.');
-        
-        // Refresh the displayed lab results
-        startVitalsListener(patientId);
-        
-    } catch(error) {
-        console.error("❌ Save error:", error);
-        showErrorMessage('❌ Error saving data: ' + error.message);
-    }
-}
-
-// ==================== EVENT LISTENERS ====================
-document.querySelectorAll('.menu-item[data-page]').forEach(item => {
-    item.addEventListener('click', function() {
-        const page = this.dataset.page;
-        document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-        document.getElementById(page + 'Page').classList.add('active');
-        document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-        this.classList.add('active');
-    });
-});
-
-const themeToggle = document.getElementById('themeToggle');
-if(themeToggle) {
-    themeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark');
-        localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-    });
-    if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
-}
-
-document.getElementById('vitalsPatientSelect')?.addEventListener('change', (e) => { if(e.target.value) startVitalsListener(e.target.value); });
-document.getElementById('labPatientSelect')?.addEventListener('change', (e) => { if(e.target.value) { currentLabPatientId = e.target.value; loadExistingLabData(currentLabPatientId); } });
-
-const saveBtn = document.getElementById('saveLabResultsBtn');
-if (saveBtn) {
-    saveBtn.removeEventListener('click', saveLabResultsToFirebase);
-    saveBtn.addEventListener('click', saveLabResultsToFirebase);
-    console.log("✅ Save button connected!");
-}
-
-document.getElementById('collapseSidebar')?.addEventListener('click', () => {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.style.width = sidebar.style.width === '80px' ? '280px' : '80px';
-    document.querySelectorAll('.sidebar span').forEach(span => span.style.display = sidebar.style.width === '80px' ? 'none' : 'inline');
-});
-
-// ==================== INITIALIZATION ====================
-setTimeout(() => {
-    loadPatientsFromUsers();
-}, 1000);
-
-setTimeout(() => {
-    const firstPatient = document.getElementById('labPatientSelect')?.value;
-    if(firstPatient) {
-        startVitalsListener(firstPatient);
-    }
-}, 2000);
-
-// Style for indicators
-const style = document.createElement('style');
-style.textContent = `.indicator-normal { color: #10b981; font-weight: 600; } .indicator-warning { color: #f59e0b; font-weight: 600; } .indicator-danger { color: #ef4444; font-weight: 600; } .card-value { font-size: 1.8rem; font-weight: 800; margin: 0.5rem 0; } .form-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 8px; background: rgba(0,0,0,0.05); border-radius: 10px; } .form-group input, .form-group textarea, .form-group select { width: 160px; padding: 6px 10px; border-radius: 8px; border: 1px solid #ddd; } .card-header { padding: 12px 15px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(0,0,0,0.1); }`;
-document.head.appendChild(style);
-</script>
-
-</body>
-</html>
+    <!-- ==================== OTHER PAGES ==================== -->
+    <div class="page-section" id="dashboardPage">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-title">Total Patients</div><div class="stat-value" id="dashboardTotalPatients">--</div><div class="stat-sub">Registered</div></div>
+            <div class="stat-card"><div class="stat-title">Critical Cases</div><div class="stat-value" id="dashboardCriticalCases">--</div><div class="stat-sub">Need attention</div></div>
+            <div class="stat-card"><div class="stat-title">Avg. HR (today)</div><div class="stat-value" id="avgHR">-- <span style="font-size:1rem;">bpm</span></div><div class="stat-sub">normal range</div></div>
+            <div class="stat-card"><div class="stat-title">Bed Occupancy</div><div class="stat-value" id="bedOccupancy">--<small style="font-size:1rem;">%</small></div><div class="stat-sub">--/-- beds</div></div>
+        </div>
+        <div class="alerts-section"><div class="alerts-header"><h3><i class="fas fa-bell"></i> Active Alerts</h3><button class="mute-button" id="muteAlerts"><i class="fas fa-volume-up"></i> Mute</button></div><div class="alerts-list" id="alertsList"></div></div>
+    </div>
+    <div class="page-section" id="appointmentsPage"><h2>📅 Appointments</h2><div class="table-container"><input type="text" id="appointmentSearch" class="form-control" placeholder="Search..."><table id="appointmentsTable"><thead><tr><th>Patient</th><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody><tr><td>John Doe</td><td>2025-03-27</td><td>10:30</td><td>Scheduled</td></tr></tbody></table></div></div>
+    <div class="page-section" id="patientsPage"><h2>👥 Patients List</h2><div class="table-container"><input type="text" id="patientSearch" class="form-control" placeholder="Search..."><table id="patientsFullTable"><thead><tr><th>Name</th><th>Age</th><th>Condition</th><th>Status</th></tr></thead><tbody><tr><td>Emily Davis</td><td>45</td><td>Post-surgery<\/td><td><span class=\"status-badge status-completed\">Stable</span></td></tr>\n                </tbody>\n            </table>\n        </div>\n    </div>\n    <div class=\"page-section\" id=\"timelogPage\"><h2>⏱️ Time Log</h2><div class=\"table-container\"><table class=\"data-table\"><thead><tr><th>Date</th><th>Clock In</th><th>Clock Out</th><th>Hours</th></tr></thead><tbody><tr><td>2025-03-26</td><td>08:15</td><td>16:30</td><td>8.25</td></tr></tbody></table></div></div>\n    <div class=\"page-section\" id=\"reportsPage\"><h2>📝 Patient Report</h2><form id=\"patientReportForm\"><div class=\"form-group\"><label>Patient Name</label><input type=\"text\" id=\"patientName\" required></div><div class=\"form-group\"><label>Age</label><input type=\"number\" id=\"patientAge\" required></div><div class=\"form-group\"><label>Gender</label><select id=\"patientGender\"><option>Male</option><option>Female</option></select></div><div class=\"form-group\"><label>Health Condition</label><textarea id=\"healthCondition\" rows=\"3\" required></textarea></div><div class=\"form-group\"><label>Medications</label><textarea id=\"medications\" rows=\"2\" required></textarea></div><button type=\"submit\" class=\"btn-submit\">Save Report</button></form></div>\n    <div class=\"page-section\" id=\"settingsPage\"><h2>⚙️ Settings</h2><div class=\"form-container\"><div class=\"form-group\"><label>Email</label><input type=\"email\" id=\"settingsEmail\"></div><div class=\"form-group\"><label>Language</label><select id=\"settingsLanguage\"><option>English</option><option>Arabic</option></select></div><button class=\"btn\" id=\"saveSettings\">Save</button></div></div>\n    <div class=\"page-section\" id=\"supportPage\"><h2>🆘 Support</h2><p>support@smarthealth.com</p></div>\n</main>\n</div>\n\n<!-- Firebase SDKs -->\n<script src=\"https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js\"></script>\n<script src=\"https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js\"></script>\n<script src=\"https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js\"></script>\n<script src=\"https://unpkg.com/mqtt/dist/mqtt.min.js\"></script>\n<script src=\"js/firebase.js\"></script>\n<script src=\"js/doctor.js\"></script>\n<script src=\"js/theme.js\"></script>\n\n<script>\n// ==================== PERMANENT FIX: LOAD PATIENTS FROM USERS ====================\nconsole.log(\"🔧 PERMANENT FIX: Loading patients from users...\");\n\nasync function loadPatientsPermanent() {\n    try {\n        const db = firebase.database();\n        const snapshot = await db.ref('users').once('value');\n        const users = snapshot.val();\n        \n        console.log(\"📊 Users from Firebase:\", users);\n        \n        if (!users) {\n            console.log(\"❌ No users found!\");\n            return;\n        }\n        \n        const patientsList = [];\n        for (const [uid, userData] of Object.entries(users)) {\n            if (userData.role === 'patient') {\n                patientsList.push({\n                    uid: uid,\n                    name: userData.name || \"Unknown\",\n                    email: userData.email || \"\"\n                });\n                console.log(`✅ Found patient: ${userData.name}`);\n            }\n        }\n        \n        console.log(`📊 Total patients found: ${patientsList.length}`);\n        \n        // تحديث عدد المرضى\n        const totalEl = document.getElementById('totalPatients');\n        const dashboardTotalEl = document.getElementById('dashboardTotalPatients');\n        if (totalEl) totalEl.innerHTML = patientsList.length;\n        if (dashboardTotalEl) dashboardTotalEl.innerHTML = patientsList.length;\n        \n        // تحديث قائمة Lab Results\n        const labSelect = document.getElementById('labPatientSelect');\n        if (labSelect) {\n            labSelect.innerHTML = '<option value=\"\">-- Select Patient --</option>';\n            for (const p of patientsList) {\n                const option = document.createElement('option');\n                option.value = p.uid;\n                option.textContent = p.name;\n                labSelect.appendChild(option);\n            }\n            console.log(`✅ Added ${patientsList.length} patients to Lab select`);\n        }\n        \n        // تحديث قائمة Vitals\n        const vitalsSelect = document.getElementById('vitalsPatientSelect');\n        if (vitalsSelect) {\n            vitalsSelect.innerHTML = '<option value=\"\">-- Select Patient --</option>';\n            for (const p of patientsList) {\n                const option = document.createElement('option');\n                option.value = p.uid;\n                option.textContent = p.name;\n                vitalsSelect.appendChild(option);\n            }\n            console.log(`✅ Added ${patientsList.length} patients to Vitals select`);\n        }\n        \n        if (patientsList.length === 0) {\n            console.log(\"⚠️ No patients found! Creating a test patient...\");\n            const testUid = \"patient_\" + Date.now();\n            await db.ref(`users/${testUid}`).set({\n                name: \"Demo Patient\",\n                email: \"demo@patient.com\",\n                role: \"patient\",\n                createdAt: Date.now()\n            });\n            console.log(\"✅ Test patient created! Refreshing...\");\n            setTimeout(() => location.reload(), 1500);\n        }\n        \n    } catch (error) {\n        console.error(\"❌ Error loading patients:\", error);\n    }\n}\n\n// تشغيل الدالة بعد تحميل الصفحة\nsetTimeout(() => {\n    loadPatientsPermanent();\n}, 1500);\n</script>\n\n</body>\n</html>
