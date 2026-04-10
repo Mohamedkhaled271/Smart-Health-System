@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
@@ -28,6 +28,7 @@
             <a href="javascript:void(0)" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
             <a href="javascript:void(0)" class="menu-item" data-page="patientVitals"><i class="fas fa-heartbeat"></i><span>Patient Vitals</span></a>
             <a href="javascript:void(0)" class="menu-item" data-page="labResults"><i class="fas fa-microscope"></i><span>Lab Results</span></a>
+            <a href="javascript:void(0)" class="menu-item" data-page="patientData"><i class="fas fa-chart-line"></i><span>Patient Data</span></a>
             <a href="javascript:void(0)" class="menu-item" data-page="appointments"><i class="fas fa-calendar-check"></i><span>Appointments</span></a>
             <a href="javascript:void(0)" class="menu-item" data-page="patients"><i class="fas fa-users"></i><span>Patients</span></a>
             <a href="javascript:void(0)" class="menu-item" data-page="timelog"><i class="fas fa-clock"></i><span>Time log</span></a>
@@ -67,7 +68,7 @@
         <!-- Date Range Dropdown -->
         <div class="date-dropdown" id="dateDropdown"><ul><li data-range="7">Last 7 days</li><li data-range="30" class="active">Last 30 days</li><li data-range="90">Last 3 months</li><li data-range="custom">Custom range</li></ul></div>
 
-        <!-- PAGE: PATIENT VITALS -->
+        <!-- PAGE: PATIENT VITALS (ESP32 + Care Sync AI Data) -->
         <div class="page-section" id="patientVitalsPage">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <h2><i class="fas fa-heartbeat"></i> Patient Live Vitals</h2>
@@ -86,17 +87,19 @@
                 <div class="stat-card"><div class="stat-title">CARE SYNC</div><div class="stat-value" style="font-size:1rem;" id="careSyncStatus">Waiting...</div><div class="stat-sub">PIMA Model</div></div>
             </div>
 
+            <!-- ESP32 & Care Sync AI Vitals Display -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                <div class="card"><div class="card-header"><i class="fas fa-heart" style="color:#ef4444;"></i><h3>Heart Rate</h3></div><div class="card-value" id="doctorHeartValue">-- <span>bpm</span></div><div class="card-indicator" id="doctorHeartIndicator">Normal</div></div>
-                <div class="card"><div class="card-header"><i class="fas fa-lungs" style="color:#10b981;"></i><h3>SpO₂</h3></div><div class="card-value" id="doctorSpo2Value">-- <span>%</span></div><div class="card-indicator" id="doctorSpo2Indicator">Normal</div></div>
-                <div class="card"><div class="card-header"><i class="fas fa-thermometer-half" style="color:#f59e0b;"></i><h3>Body Temp</h3></div><div class="card-value" id="doctorTempValue">-- <span>°C</span></div><div class="card-indicator" id="doctorTempIndicator">Normal</div></div>
-                <div class="card"><div class="card-header"><i class="fas fa-tachometer-alt" style="color:#8b5cf6;"></i><h3>Blood Pressure</h3></div><div class="card-value" id="doctorBpValue">--/-- <span>mmHg</span></div><div class="card-indicator" id="doctorBpIndicator">Normal</div></div>
-                <div class="card"><div class="card-header"><i class="fas fa-tint" style="color:#f97316;"></i><h3>Blood Glucose</h3></div><div class="card-value" id="doctorGlucoseValue">-- <span>mg/dL</span></div><div class="card-indicator" id="doctorGlucoseIndicator">Normal</div></div>
+                <div class="card"><div class="card-header"><i class="fas fa-heart" style="color:#ef4444;"></i><h3>Heart Rate (ESP32)</h3></div><div class="card-value" id="doctorHeartValue">-- <span>bpm</span></div><div class="card-indicator" id="doctorHeartIndicator">Normal</div></div>
+                <div class="card"><div class="card-header"><i class="fas fa-lungs" style="color:#10b981;"></i><h3>SpO₂ (ESP32)</h3></div><div class="card-value" id="doctorSpo2Value">-- <span>%</span></div><div class="card-indicator" id="doctorSpo2Indicator">Normal</div></div>
+                <div class="card"><div class="card-header"><i class="fas fa-thermometer-half" style="color:#f59e0b;"></i><h3>Body Temp (ESP32)</h3></div><div class="card-value" id="doctorTempValue">-- <span>°C</span></div><div class="card-indicator" id="doctorTempIndicator">Normal</div></div>
+                <div class="card"><div class="card-header"><i class="fas fa-tachometer-alt" style="color:#8b5cf6;"></i><h3>Blood Pressure (AI)</h3></div><div class="card-value" id="doctorBpValue">--/-- <span>mmHg</span></div><div class="card-indicator" id="doctorBpIndicator">Normal</div></div>
+                <div class="card"><div class="card-header"><i class="fas fa-tint" style="color:#f97316;"></i><h3>Blood Glucose (AI)</h3></div><div class="card-value" id="doctorGlucoseValue">-- <span>mg/dL</span></div><div class="card-indicator" id="doctorGlucoseIndicator">Normal</div></div>
                 <div class="card"><div class="card-header"><i class="fas fa-temperature-low" style="color:#3b82f6;"></i><h3>Room Temp</h3></div><div class="card-value" id="doctorRoomTempValue">-- <span>°C</span></div></div>
                 <div class="card"><div class="card-header"><i class="fas fa-tint" style="color:#06b6d4;"></i><h3>Humidity</h3></div><div class="card-value" id="doctorHumidityValue">-- <span>%</span></div></div>
                 <div class="card"><div class="card-header"><i class="fas fa-shoe-prints" style="color:#a855f7;"></i><h3>Motion</h3></div><div class="card-value" id="doctorMotionValue">-- <span>m/s²</span></div></div>
             </div>
 
+            <!-- Current Lab Results Display -->
             <div class="alerts-section" style="margin-top: 1rem;">
                 <h3><i class="fas fa-flask"></i> Current Lab Results (from Firebase)</h3>
                 <div id="currentLabResultsDisplay" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
@@ -113,6 +116,110 @@
                     📋 Summary: <span id="display_summary">--</span><br>
                     💊 Recommendations: <span id="display_recommendations">--</span><br>
                     ✅ Next Appointment: <span id="display_nextAppointment">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: PATIENT DATA (ESP32 + AI Model Data) -->
+        <div class="page-section" id="patientDataPage">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2><i class="fas fa-chart-line"></i> Patient Health Data (ESP32 + AI Model)</h2>
+                <div class="patient-selector" style="margin: 0;">
+                    <label><i class="fas fa-user-md"></i> Select Patient: </label>
+                    <select id="patientDataSelect" style="padding: 8px; border-radius: 8px;">
+                        <option value="">Loading patients...</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- ESP32 Data Section -->
+            <div class="stats-grid" style="margin-bottom: 1.5rem;">
+                <div class="stat-card"><div class="stat-title">ESP32 DEVICE</div><div class="stat-value" style="font-size:1rem;" id="esp32Status">Checking...</div><div class="stat-sub">Real-time sensor data</div></div>
+                <div class="stat-card"><div class="stat-title">AI MODEL</div><div class="stat-value" style="font-size:1rem;" id="aiModelStatus">PIMA Diabetes Model</div><div class="stat-sub">Care Sync AI Predictions</div></div>
+                <div class="stat-card"><div class="stat-title">DATA SYNC</div><div class="stat-value" style="font-size:1rem;" id="dataSyncTime">--</div><div class="stat-sub">Last update</div></div>
+            </div>
+
+            <!-- ESP32 Vitals Display -->
+            <h3 style="margin-bottom: 1rem; color: var(--primary);"><i class="fas fa-microchip"></i> ESP32 Sensor Data</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-heart" style="color:#ef4444;"></i><h3>Heart Rate</h3></div>
+                    <div class="card-value" id="esp32HeartRate">-- <span>bpm</span></div>
+                    <div class="card-indicator" id="esp32HeartIndicator">Normal</div>
+                    <small>Measured by ESP32 sensor</small>
+                </div>
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-lungs" style="color:#10b981;"></i><h3>Oxygen Saturation</h3></div>
+                    <div class="card-value" id="esp32Spo2">-- <span>%</span></div>
+                    <div class="card-indicator" id="esp32Spo2Indicator">Normal</div>
+                    <small>Measured by ESP32 sensor</small>
+                </div>
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-thermometer-half" style="color:#f59e0b;"></i><h3>Body Temperature</h3></div>
+                    <div class="card-value" id="esp32Temp">-- <span>°C</span></div>
+                    <div class="card-indicator" id="esp32TempIndicator">Normal</div>
+                    <small>Measured by ESP32 sensor</small>
+                </div>
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-temperature-low" style="color:#3b82f6;"></i><h3>Room Temperature</h3></div>
+                    <div class="card-value" id="esp32RoomTemp">-- <span>°C</span></div>
+                    <small>Environmental sensor</small>
+                </div>
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-tint" style="color:#06b6d4;"></i><h3>Humidity</h3></div>
+                    <div class="card-value" id="esp32Humidity">-- <span>%</span></div>
+                    <small>Environmental sensor</small>
+                </div>
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-shoe-prints" style="color:#a855f7;"></i><h3>Motion</h3></div>
+                    <div class="card-value" id="esp32Motion">-- <span>m/s²</span></div>
+                    <small>Movement detection</small>
+                </div>
+            </div>
+
+            <!-- AI Model (Care Sync) Data Display -->
+            <h3 style="margin-bottom: 1rem; color: var(--primary);"><i class="fas fa-brain"></i> AI Model Predictions (Care Sync PIMA)</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-tachometer-alt" style="color:#8b5cf6;"></i><h3>Systolic BP</h3></div>
+                    <div class="card-value" id="aiSbp">-- <span>mmHg</span></div>
+                    <div class="card-indicator" id="aiSbpIndicator">Normal</div>
+                    <small>AI predicted from facial analysis</small>
+                </div>
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-tachometer-alt" style="color:#8b5cf6;"></i><h3>Diastolic BP</h3></div>
+                    <div class="card-value" id="aiDbp">-- <span>mmHg</span></div>
+                    <small>AI predicted from facial analysis</small>
+                </div>
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-tint" style="color:#f97316;"></i><h3>Blood Glucose</h3></div>
+                    <div class="card-value" id="aiGlucose">-- <span>mg/dL</span></div>
+                    <div class="card-indicator" id="aiGlucoseIndicator">Normal</div>
+                    <small>AI predicted from PIMA model</small>
+                </div>
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-heartbeat" style="color:#ec4899;"></i><h3>Heart Rate (AI)</h3></div>
+                    <div class="card-value" id="aiHeartRate">-- <span>bpm</span></div>
+                    <small>AI predicted from facial PPG</small>
+                </div>
+            </div>
+
+            <!-- Clinical Classification -->
+            <div class="alerts-section">
+                <h3><i class="fas fa-clinic-medical"></i> Clinical Classification</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div style="background: rgba(239,68,68,0.1); padding: 1rem; border-radius: 12px;">
+                        <strong>🩸 Diabetes Status:</strong><br>
+                        <span id="clinicalGlucoseClass">--</span>
+                    </div>
+                    <div style="background: rgba(59,130,246,0.1); padding: 1rem; border-radius: 12px;">
+                        <strong>❤️ BP Status:</strong><br>
+                        <span id="clinicalBpClass">--</span>
+                    </div>
+                    <div style="background: rgba(16,185,129,0.1); padding: 1rem; border-radius: 12px;">
+                        <strong>📊 Health Trend:</strong><br>
+                        <span id="clinicalTrend">--</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -225,7 +332,12 @@
         <div class="page-section" id="patientsPage"><h2>👥 Patients List</h2><div class="table-container"><input type="text" id="patientSearch" class="form-control" placeholder="Search..."><table id="patientsFullTable"><thead><tr><th>Name</th><th>Age</th><th>Condition</th><th>Status</th></tr></thead><tbody><tr><td>Emily Davis</td><td>45</td><td>Post-surgery</td><td>Stable</td></tr></tbody></table></div></div>
         <div class="page-section" id="timelogPage"><h2>⏱️ Time Log</h2><div class="table-container"><table><thead><tr><th>Date</th><th>Clock In</th><th>Clock Out</th><th>Hours</th></tr></thead><tbody><tr><td>2025-03-26</td><td>08:15</td><td>16:30</td><td>8.25</td></tr></tbody></table></div></div>
         <div class="page-section" id="reportsPage"><h2>📝 Patient Report</h2><form id="patientReportForm"><div class="form-group"><label>Patient Name</label><input type="text" id="patientName" required></div><div class="form-group"><label>Age</label><input type="number" id="patientAge" required></div><div class="form-group"><label>Gender</label><select id="patientGender"><option>Male</option><option>Female</option></select></div><div class="form-group"><label>Health Condition</label><textarea id="healthCondition" rows="3" required></textarea></div><div class="form-group"><label>Medications</label><textarea id="medications" rows="2" required></textarea></div><button type="submit" class="btn-submit">Save Report</button></form></div>
-        <div class="page-section" id="settingsPage"><h2>⚙️ Settings</h2><div class="form-container"><div class="form-group"><label>Email</label><input type="email" id="settingsEmail"></div><div class="form-group"><label>Language</label><select id="settingsLanguage"><option>English</option><option>Arabic</option></select></div><button class="btn" id="saveSettings">Save</button></div></div>
+        <div class="page-section" id="settingsPage"><h2>⚙️ Settings</h2><div class="form-container">
+            <div class="form-group"><label>Doctor Name:</label><input type="text" id="doctorNameSetting" class="form-control" placeholder="Enter your name"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="settingsEmail"></div>
+            <div class="form-group"><label>Language</label><select id="settingsLanguage"><option>English</option><option>Arabic</option></select></div>
+            <button class="btn" id="saveSettings">Save</button>
+        </div></div>
         <div class="page-section" id="supportPage"><h2>🆘 Support</h2><p>support@smarthealth.com</p></div>
     </main>
 </div>
@@ -251,6 +363,21 @@ const database = firebase.database();
 
 let currentVitalsPatientId = null;
 let currentLabPatientId = null;
+let currentDataPatientId = null;
+let currentDoctorName = localStorage.getItem('doctorName') || "Dr. Sarah Ahmed";
+
+// Load saved doctor name
+const doctorNameInput = document.getElementById('doctorNameSetting');
+if (doctorNameInput) {
+    doctorNameInput.value = currentDoctorName;
+    doctorNameInput.addEventListener('change', function() {
+        currentDoctorName = this.value;
+        localStorage.setItem('doctorName', currentDoctorName);
+        document.getElementById('doctorName').value = currentDoctorName;
+        showSuccessMessage('Doctor name updated!');
+    });
+}
+document.getElementById('doctorName').value = currentDoctorName;
 
 // ==================== HELPER FUNCTIONS ====================
 function updateDoctorIndicator(id, value, normalMin, normalMax, warnMin, warnMax) {
@@ -323,30 +450,20 @@ async function loadPatientsFromUsers() {
         if (totalEl) totalEl.innerHTML = patientsList.length;
         if (dashboardTotalEl) dashboardTotalEl.innerHTML = patientsList.length;
         
-        // Update Lab Results select
-        const labSelect = document.getElementById('labPatientSelect');
-        if (labSelect) {
-            labSelect.innerHTML = '<option value="">-- Select Patient --</option>';
-            for (const p of patientsList) {
-                const option = document.createElement('option');
-                option.value = p.uid;
-                option.textContent = p.name;
-                labSelect.appendChild(option);
+        // Update all patient selects
+        const selects = ['vitalsPatientSelect', 'labPatientSelect', 'patientDataSelect'];
+        for (const selectId of selects) {
+            const select = document.getElementById(selectId);
+            if (select) {
+                select.innerHTML = '<option value="">-- Select Patient --</option>';
+                for (const p of patientsList) {
+                    const option = document.createElement('option');
+                    option.value = p.uid;
+                    option.textContent = p.name;
+                    select.appendChild(option);
+                }
+                console.log(`✅ Added ${patientsList.length} patients to ${selectId}`);
             }
-            console.log(`✅ Added ${patientsList.length} patients to Lab select`);
-        }
-        
-        // Update Vitals select
-        const vitalsSelect = document.getElementById('vitalsPatientSelect');
-        if (vitalsSelect) {
-            vitalsSelect.innerHTML = '<option value="">-- Select Patient --</option>';
-            for (const p of patientsList) {
-                const option = document.createElement('option');
-                option.value = p.uid;
-                option.textContent = p.name;
-                vitalsSelect.appendChild(option);
-            }
-            console.log(`✅ Added ${patientsList.length} patients to Vitals select`);
         }
         
         if (patientsList.length === 0) {
@@ -367,7 +484,90 @@ async function loadPatientsFromUsers() {
     }
 }
 
-// ==================== VITALS LISTENERS ====================
+// ==================== ESP32 + AI DATA LISTENER ====================
+function startDataListener(patientId) {
+    if(!patientId) return;
+    currentDataPatientId = patientId;
+    console.log("📊 Starting data listener for patient:", patientId);
+    
+    // ESP32 Listener
+    const esp32Ref = database.ref('/HELIOS_DATA_LIVE/Vitals');
+    esp32Ref.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if(data) {
+            // Update ESP32 display
+            if(data.HeartRate) {
+                document.getElementById('esp32HeartRate').innerHTML = data.HeartRate + ' <span>bpm</span>';
+                updateDoctorIndicator('esp32HeartIndicator', data.HeartRate, 60, 100, 55, 110);
+            }
+            if(data.SpO2) {
+                document.getElementById('esp32Spo2').innerHTML = data.SpO2 + ' <span>%</span>';
+                updateDoctorIndicator('esp32Spo2Indicator', data.SpO2, 95, 100, 90, 100);
+            }
+            if(data.BodyTemp) {
+                document.getElementById('esp32Temp').innerHTML = data.BodyTemp.toFixed(1) + ' <span>°C</span>';
+                updateDoctorIndicator('esp32TempIndicator', data.BodyTemp, 36.0, 37.5, 35.5, 38.0);
+            }
+            if(data.RoomTemp) document.getElementById('esp32RoomTemp').innerHTML = data.RoomTemp.toFixed(1) + ' <span>°C</span>';
+            if(data.Humidity) document.getElementById('esp32Humidity').innerHTML = data.Humidity.toFixed(1) + ' <span>%</span>';
+            if(data.Motion) document.getElementById('esp32Motion').innerHTML = data.Motion.toFixed(1) + ' <span>m/s²</span>';
+            
+            document.getElementById('esp32Status').innerHTML = '✅ Connected';
+            document.getElementById('dataSyncTime').innerHTML = new Date().toLocaleTimeString();
+        }
+    });
+    
+    // Care Sync AI Listener (BP & Glucose)
+    const readingsRef = database.ref(`patients/${patientId}/readings`);
+    readingsRef.on('child_added', (snapshot) => {
+        const reading = snapshot.val();
+        if(reading && reading.vitals) {
+            if(reading.vitals.systolic_bp) {
+                document.getElementById('aiSbp').innerHTML = reading.vitals.systolic_bp + ' <span>mmHg</span>';
+                updateDoctorIndicator('aiSbpIndicator', reading.vitals.systolic_bp, 90, 120, 130, 140);
+            }
+            if(reading.vitals.diastolic_bp) {
+                document.getElementById('aiDbp').innerHTML = reading.vitals.diastolic_bp + ' <span>mmHg</span>';
+            }
+            if(reading.vitals.glucose) {
+                document.getElementById('aiGlucose').innerHTML = Math.round(reading.vitals.glucose) + ' <span>mg/dL</span>';
+                updateDoctorIndicator('aiGlucoseIndicator', reading.vitals.glucose, 70, 100, 126, 200);
+            }
+            if(reading.vitals.heart_rate) {
+                document.getElementById('aiHeartRate').innerHTML = reading.vitals.heart_rate + ' <span>bpm</span>';
+            }
+            
+            // Update clinical classification
+            if(reading.clinical) {
+                document.getElementById('clinicalGlucoseClass').innerHTML = reading.clinical.glucose_class || '--';
+                document.getElementById('clinicalBpClass').innerHTML = reading.clinical.bp_class || '--';
+                document.getElementById('clinicalTrend').innerHTML = reading.clinical.trend || 'STABLE';
+            }
+            
+            document.getElementById('aiModelStatus').innerHTML = '✅ PIMA Model Active';
+        }
+    });
+    
+    // Get latest reading
+    readingsRef.orderByKey().limitToLast(1).once('value', (snapshot) => {
+        const readings = snapshot.val();
+        if(readings) {
+            const lastKey = Object.keys(readings)[0];
+            const lastReading = readings[lastKey];
+            if(lastReading && lastReading.vitals) {
+                if(lastReading.vitals.systolic_bp) document.getElementById('aiSbp').innerHTML = lastReading.vitals.systolic_bp + ' <span>mmHg</span>';
+                if(lastReading.vitals.diastolic_bp) document.getElementById('aiDbp').innerHTML = lastReading.vitals.diastolic_bp + ' <span>mmHg</span>';
+                if(lastReading.vitals.glucose) document.getElementById('aiGlucose').innerHTML = Math.round(lastReading.vitals.glucose) + ' <span>mg/dL</span>';
+                if(lastReading.clinical) {
+                    document.getElementById('clinicalGlucoseClass').innerHTML = lastReading.clinical.glucose_class || '--';
+                    document.getElementById('clinicalBpClass').innerHTML = lastReading.clinical.bp_class || '--';
+                }
+            }
+        }
+    });
+}
+
+// ==================== VITALS LISTENER (for Patient Vitals Page) ====================
 function startVitalsListener(patientId) {
     if(!patientId) return;
     currentVitalsPatientId = patientId;
@@ -566,7 +766,7 @@ async function saveLabResultsToFirebase() {
     };
     
     const doctorNotes = {
-        doctorName: document.getElementById('doctorName')?.value || 'Dr. Sarah Ahmed',
+        doctorName: currentDoctorName,
         summary: document.getElementById('clinicalSummary')?.value || '',
         recommendations: document.getElementById('recommendations')?.value || '',
         nextAppointment: document.getElementById('nextAppointment')?.value || '',
@@ -579,7 +779,6 @@ async function saveLabResultsToFirebase() {
         console.log("✅ Data saved successfully!");
         showSuccessMessage('✅ Lab results and notes saved successfully! Patient page will update automatically.');
         
-        // Refresh the displayed lab results
         startVitalsListener(patientId);
         
     } catch(error) {
@@ -608,8 +807,10 @@ if(themeToggle) {
     if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
 }
 
+// Select change listeners
 document.getElementById('vitalsPatientSelect')?.addEventListener('change', (e) => { if(e.target.value) startVitalsListener(e.target.value); });
 document.getElementById('labPatientSelect')?.addEventListener('change', (e) => { if(e.target.value) { currentLabPatientId = e.target.value; loadExistingLabData(currentLabPatientId); } });
+document.getElementById('patientDataSelect')?.addEventListener('change', (e) => { if(e.target.value) startDataListener(e.target.value); });
 
 const saveBtn = document.getElementById('saveLabResultsBtn');
 if (saveBtn) {
@@ -624,6 +825,28 @@ document.getElementById('collapseSidebar')?.addEventListener('click', () => {
     document.querySelectorAll('.sidebar span').forEach(span => span.style.display = sidebar.style.width === '80px' ? 'none' : 'inline');
 });
 
+// Save settings
+document.getElementById('saveSettings')?.addEventListener('click', () => {
+    const email = document.getElementById('settingsEmail')?.value;
+    const lang = document.getElementById('settingsLanguage')?.value;
+    showSuccessMessage(`Settings saved: Email ${email}, Language ${lang}`);
+});
+
+// Export PDF for patient data
+document.getElementById('exportBtn')?.addEventListener('click', () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Patient Health Report", 14, 22);
+    doc.setFontSize(12);
+    doc.text(`Heart Rate: ${document.getElementById('doctorHeartValue')?.innerText || '--'}`, 14, 45);
+    doc.text(`Blood Pressure: ${document.getElementById('doctorBpValue')?.innerText || '--'}`, 14, 55);
+    doc.text(`Blood Glucose: ${document.getElementById('doctorGlucoseValue')?.innerText || '--'}`, 14, 65);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 120);
+    doc.save("patient_health_report.pdf");
+    showSuccessMessage('Report exported successfully!');
+});
+
 // ==================== INITIALIZATION ====================
 setTimeout(() => {
     loadPatientsFromUsers();
@@ -633,6 +856,7 @@ setTimeout(() => {
     const firstPatient = document.getElementById('labPatientSelect')?.value;
     if(firstPatient) {
         startVitalsListener(firstPatient);
+        startDataListener(firstPatient);
     }
 }, 2000);
 
