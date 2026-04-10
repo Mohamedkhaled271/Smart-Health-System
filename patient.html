@@ -1371,6 +1371,150 @@ function startCareSyncListener() {
 setTimeout(() => {
     startCareSyncListener();
 }, 3000);
+        // ==================== LAB RESULTS & DOCTOR NOTES LISTENER ====================
+// هذا الكود يجلب بيانات المعامل وملاحظات الدكتور التي يدخلها الدكتور يدوياً
+// ولا يؤثر على بيانات ESP32 أو AI/Care Sync
+
+function updateLabElement(elementId, value, suffix = '') {
+    const element = document.getElementById(elementId);
+    if (element && value !== undefined && value !== null) {
+        element.innerHTML = `${value} <span style="font-size: 0.8rem;">${suffix}</span>`;
+        element.classList.add('data-update-pulse');
+        setTimeout(() => element.classList.remove('data-update-pulse'), 400);
+    }
+}
+
+function updateAllLabResults(data) {
+    if (!data) return;
+    
+    // 🩸 Diabetes Profile
+    if (data.diabetes) {
+        updateLabElement('lab_fbg', data.diabetes.fbg, 'mg/dL');
+        updateLabElement('lab_hba1c', data.diabetes.hba1c, '%');
+        updateLabElement('lab_ppg', data.diabetes.ppg, 'mg/dL');
+        updateLabElement('lab_rbs', data.diabetes.rbs, 'mg/dL');
+    }
+    
+    // 🫀 Kidney Function
+    if (data.kidney) {
+        updateLabElement('lab_creatinine', data.kidney.creatinine, 'mg/dL');
+        updateLabElement('lab_bun', data.kidney.bun, 'mg/dL');
+        updateLabElement('lab_egfr', data.kidney.egfr, 'mL/min');
+        updateLabElement('lab_uric_acid', data.kidney.uricAcid, 'mg/dL');
+    }
+    
+    // 🧪 Liver Function
+    if (data.liver) {
+        updateLabElement('lab_alt', data.liver.alt, 'U/L');
+        updateLabElement('lab_ast', data.liver.ast, 'U/L');
+        updateLabElement('lab_alp', data.liver.alp, 'U/L');
+        updateLabElement('lab_bilirubin', data.liver.bilirubin, 'mg/dL');
+    }
+    
+    // 🦋 Thyroid Function
+    if (data.thyroid) {
+        updateLabElement('lab_tsh', data.thyroid.tsh, 'µIU/mL');
+        updateLabElement('lab_t3', data.thyroid.t3, 'ng/dL');
+        updateLabElement('lab_t4', data.thyroid.t4, 'µg/dL');
+    }
+    
+    // ❤️ Cardiac Markers
+    if (data.cardiac) {
+        updateLabElement('lab_troponin', data.cardiac.troponin, 'ng/mL');
+        updateLabElement('lab_ckmb', data.cardiac.ckmb, 'ng/mL');
+        updateLabElement('lab_bnp', data.cardiac.bnp, 'pg/mL');
+    }
+    
+    // 🔥 Inflammation
+    if (data.inflammation) {
+        updateLabElement('lab_crp', data.inflammation.crp, 'mg/L');
+        updateLabElement('lab_esr', data.inflammation.esr, 'mm/hr');
+        updateLabElement('lab_pct', data.inflammation.pct, 'ng/mL');
+    }
+    
+    // تحديث وقت آخر تحديث
+    const lastUpdateSpan = document.getElementById('labLastUpdate');
+    if (lastUpdateSpan && data.lastUpdated) {
+        const date = new Date(data.lastUpdated);
+        lastUpdateSpan.innerHTML = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    }
+}
+
+function updateDoctorNotesUI(notes) {
+    if (!notes) return;
+    
+    const doctorNotesDiv = document.getElementById('doctorNotes');
+    const doctorNotesDate = document.getElementById('doctorNotesDate');
+    
+    if (doctorNotesDiv && notes.summary) {
+        doctorNotesDiv.innerHTML = `
+            <i class="fas fa-quote-right" style="color: #8b5cf6; float: right; opacity: 0.5;"></i>
+            <p>📋 <strong>Clinical Summary:</strong> ${notes.summary || 'No summary available'}</p>
+            <p style="margin-top: 10px;">💊 <strong>Recommendations:</strong> ${notes.recommendations || 'No recommendations'}</p>
+            <p style="margin-top: 10px;">✅ <strong>Next Appointment:</strong> ${notes.nextAppointment || 'Not scheduled'}</p>
+        `;
+    }
+    
+    if (doctorNotesDate && notes.doctorName) {
+        doctorNotesDate.innerHTML = `${notes.lastUpdated ? new Date(notes.lastUpdated).toLocaleDateString() : 'Today'} | <i class="fas fa-user-md"></i> ${notes.doctorName}`;
+    }
+}
+
+function startLabResultsSync() {
+    console.log('🔬 Starting lab results sync from Firebase (Doctor input only)...');
+    
+    // انتظار قليلاً لتحميل patientId من Care Sync
+    setTimeout(async () => {
+        let patientId = careSyncPatientId;
+        
+        if (!patientId) {
+            try {
+                const snapshot = await database.ref('patients').once('value');
+                const patients = snapshot.val();
+                if (patients) {
+                    patientId = Object.keys(patients)[0];
+                }
+            } catch(e) { 
+                console.log('Waiting for patient ID...'); 
+            }
+        }
+        
+        if (!patientId) {
+            console.log('No patient found, retrying in 5 seconds...');
+            setTimeout(startLabResultsSync, 5000);
+            return;
+        }
+        
+        console.log(`✅ Listening to lab results for patient: ${patientId}`);
+        console.log('📌 Note: Only Lab Results and Doctor Notes will be updated from Firebase');
+        console.log('📌 ESP32 and AI/Care Sync data remain unchanged');
+        
+        // الاستماع لبيانات المعامل
+        const labResultsRef = database.ref(`patients/${patientId}/labResults`);
+        labResultsRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                updateAllLabResults(data);
+                console.log('📊 Lab results updated from Firebase (Doctor input)');
+            }
+        });
+        
+        // الاستماع لملاحظات الدكتور
+        const doctorNotesRef = database.ref(`patients/${patientId}/doctorNotes`);
+        doctorNotesRef.on('value', (snapshot) => {
+            const notes = snapshot.val();
+            if (notes) {
+                updateDoctorNotesUI(notes);
+                console.log('📝 Doctor notes updated from Firebase');
+            }
+        });
+    }, 3000);
+}
+
+// تشغيل المزامنة بعد تحميل الصفحة
+setTimeout(() => {
+    startLabResultsSync();
+}, 5000);
     </script>
 </body>
 </html>
