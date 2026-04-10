@@ -244,7 +244,87 @@
 <script src="js/theme.js"></script>
 
 <script>
-// Firebase Config
+// ==================== FORCE FIX: LOAD PATIENTS DIRECTLY ====================
+console.log("🔧 FORCE FIX: Loading patients...");
+
+async function loadPatientsDirectly() {
+    try {
+        const snapshot = await firebase.database().ref('users').once('value');
+        const users = snapshot.val();
+        
+        console.log("📊 Users from Firebase:", users);
+        
+        if (!users) {
+            console.log("❌ No users found!");
+            return;
+        }
+        
+        const patientsList = [];
+        for (const [uid, userData] of Object.entries(users)) {
+            if (userData.role === 'patient') {
+                patientsList.push({
+                    uid: uid,
+                    name: userData.name || "Unknown",
+                    email: userData.email || ""
+                });
+                console.log(`✅ Found patient: ${userData.name} (${uid})`);
+            }
+        }
+        
+        console.log(`📊 Total patients found: ${patientsList.length}`);
+        
+        const totalPatientsEl = document.getElementById('totalPatients');
+        const dashboardTotalEl = document.getElementById('dashboardTotalPatients');
+        if (totalPatientsEl) totalPatientsEl.innerHTML = patientsList.length;
+        if (dashboardTotalEl) dashboardTotalEl.innerHTML = patientsList.length;
+        
+        const labSelect = document.getElementById('labPatientSelect');
+        if (labSelect) {
+            labSelect.innerHTML = '<option value="">-- Select Patient --</option>';
+            for (const patient of patientsList) {
+                const option = document.createElement('option');
+                option.value = patient.uid;
+                option.textContent = `${patient.name}`;
+                labSelect.appendChild(option);
+            }
+            console.log(`✅ Added ${patientsList.length} patients to Lab select`);
+        }
+        
+        const vitalsSelect = document.getElementById('vitalsPatientSelect');
+        if (vitalsSelect) {
+            vitalsSelect.innerHTML = '<option value="">-- Select Patient --</option>';
+            for (const patient of patientsList) {
+                const option = document.createElement('option');
+                option.value = patient.uid;
+                option.textContent = `${patient.name}`;
+                vitalsSelect.appendChild(option);
+            }
+            console.log(`✅ Added ${patientsList.length} patients to Vitals select`);
+        }
+        
+        if (patientsList.length === 0) {
+            console.log("⚠️ No patients found! Creating a test patient...");
+            const testUid = "test_patient_" + Date.now();
+            await firebase.database().ref(`users/${testUid}`).set({
+                name: "Test Patient",
+                email: "test@patient.com",
+                role: "patient",
+                createdAt: Date.now()
+            });
+            console.log("✅ Test patient created! Refreshing page...");
+            setTimeout(() => location.reload(), 1500);
+        }
+        
+    } catch (error) {
+        console.error("❌ Error loading patients:", error);
+    }
+}
+
+setTimeout(() => {
+    loadPatientsDirectly();
+}, 1000);
+
+// ==================== Firebase Config ====================
 const firebaseConfig = {
     apiKey: "AIzaSyDy29ivSun9rqvqTlYhgBI8PBGJhnLJSc0",
     databaseURL: "https://smart-health-monitoring-f97fb-default-rtdb.firebaseio.com/",
@@ -264,7 +344,6 @@ function updateDoctorIndicator(id, value, normalMin, normalMax, warnMin, warnMax
     else { el.className = 'indicator-normal'; el.innerHTML = 'Normal'; }
 }
 
-// ==================== عرض إحصائيات المرضى من users ====================
 async function updatePatientStats() {
     try {
         const usersSnapshot = await database.ref('users').once('value');
@@ -478,7 +557,6 @@ async function loadExistingLabData(patientId) {
     } catch(e) { console.error(e); }
 }
 
-// ==================== FIXED SAVE FUNCTION ====================
 async function saveLabResultsToFirebase() {
     console.log("💾 Save button clicked!");
     
@@ -541,14 +619,6 @@ async function saveLabResultsToFirebase() {
         await database.ref(`patients/${patientId}/doctorNotes`).set(doctorNotes);
         console.log("✅ Data saved successfully!");
         showLabStatus('✅ Saved successfully!', 'success');
-        
-        // تحديث العرض
-        if (typeof updateAllLabResults === 'function') {
-            updateAllLabResults(labData);
-        }
-        if (typeof updateDoctorNotesUI === 'function') {
-            updateDoctorNotesUI(doctorNotes);
-        }
     } catch(error) {
         console.error("❌ Save error:", error);
         showLabStatus('❌ Error: ' + error.message, 'error');
@@ -595,7 +665,6 @@ if(themeToggle) {
 document.getElementById('vitalsPatientSelect')?.addEventListener('change', (e) => { if(e.target.value) startVitalsListener(e.target.value); });
 document.getElementById('labPatientSelect')?.addEventListener('change', (e) => { if(e.target.value) { currentLabPatientId = e.target.value; loadExistingLabData(currentLabPatientId); } });
 
-// IMPORTANT: Remove old listener and add new one
 const saveBtn = document.getElementById('saveLabResultsBtn');
 if (saveBtn) {
     saveBtn.removeEventListener('click', saveLabResultsToFirebase);
@@ -609,7 +678,6 @@ document.getElementById('collapseSidebar')?.addEventListener('click', () => {
     document.querySelectorAll('.sidebar span').forEach(span => span.style.display = sidebar.style.width === '80px' ? 'none' : 'inline');
 });
 
-// Initialize
 setTimeout(() => {
     loadPatientsForVitals();
     loadLabPatients();
