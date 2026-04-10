@@ -615,6 +615,291 @@ document.getElementById('exportBtn').addEventListener('click', function() {
         if (filterDropdown) filterDropdown.classList.remove('active');
         if (dateDropdown) dateDropdown.classList.remove('active');
     };
+    // ==================== FIREBASE REAL-TIME DATA (PATIENT VITALS FROM CARE SYNC & ESP32) ====================
+// هذا الكود يجلب البيانات الحقيقية من Firebase ويعرضها للدكتور
+
+let firebaseDoctorPatientId = null;
+let firebaseDoctorReadingsRef = null;
+let firebaseDoctorEsp32Ref = null;
+let firebaseDoctorLabRef = null;
+
+// جلب آخر مريض من Care Sync
+async function getDoctorLatestPatientId() {
+    if (typeof firebase === 'undefined') {
+        console.warn('Firebase not loaded');
+        return null;
+    }
+    
+    try {
+        const snapshot = await database.ref('patients').once('value');
+        const patients = snapshot.val();
+        if (!patients) return null;
+        
+        let latestPatient = null;
+        let latestTime = 0;
+        
+        for (const pid of Object.keys(patients)) {
+            const readings = patients[pid]?.readings;
+            if (readings) {
+                const times = Object.keys(readings);
+                if (times.length > 0) {
+                    const lastTime = parseInt(times[times.length - 1]);
+                    if (lastTime > latestTime) {
+                        latestTime = lastTime;
+                        latestPatient = pid;
+                    }
+                }
+            }
+        }
+        return latestPatient;
+    } catch (error) {
+        console.error('Error getting patient ID:', error);
+        return null;
+    }
+}
+
+// تحديث واجهة الدكتور ببيانات Care Sync (BP, Glucose)
+function updateDoctorUICareSync(vitals) {
+    if (!vitals) return;
+    
+    // تحديث ضغط الدم
+    if (vitals.sbp > 0 && vitals.dbp > 0) {
+        const bpElement = document.getElementById('bpValue');
+        if (bpElement) {
+            bpElement.innerHTML = `${vitals.sbp}/${vitals.dbp} <span>mmHg</span>`;
+        }
+        
+        const bpInd = document.getElementById('bpIndicator');
+        if (bpInd) {
+            if (vitals.sbp >= 180 || vitals.dbp >= 120) {
+                bpInd.className = 'card-indicator indicator-danger';
+                bpInd.innerText = 'Crisis';
+            } else if (vitals.sbp >= 140 || vitals.dbp >= 90) {
+                bpInd.className = 'card-indicator indicator-warning';
+                bpInd.innerText = 'Hypertension';
+            } else if (vitals.sbp >= 120) {
+                bpInd.className = 'card-indicator indicator-warning';
+                bpInd.innerText = 'Elevated';
+            } else {
+                bpInd.className = 'card-indicator indicator-normal';
+                bpInd.innerText = 'Normal';
+            }
+        }
+    }
+    
+    // تحديث السكر
+    if (vitals.glucose > 0) {
+        const glucoseElement = document.getElementById('glucoseValue');
+        if (glucoseElement) {
+            glucoseElement.innerHTML = `${Math.round(vitals.glucose)} <span>mg/dL</span>`;
+        }
+        
+        const glucoseInd = document.getElementById('glucoseIndicator');
+        if (glucoseInd) {
+            if (vitals.glucose >= 300) {
+                glucoseInd.className = 'card-indicator indicator-danger';
+                glucoseInd.innerText = 'Critical';
+            } else if (vitals.glucose >= 200) {
+                glucoseInd.className = 'card-indicator indicator-danger';
+                glucoseInd.innerText = 'Very High';
+            } else if (vitals.glucose >= 126) {
+                glucoseInd.className = 'card-indicator indicator-warning';
+                glucoseInd.innerText = 'High (Diabetes)';
+            } else if (vitals.glucose >= 100) {
+                glucoseInd.className = 'card-indicator indicator-warning';
+                glucoseInd.innerText = 'Prediabetes';
+            } else if (vitals.glucose < 70) {
+                glucoseInd.className = 'card-indicator indicator-danger';
+                glucoseInd.innerText = 'Low';
+            } else {
+                glucoseInd.className = 'card-indicator indicator-normal';
+                glucoseInd.innerText = 'Normal';
+            }
+        }
+    }
+}
+
+// تحديث واجهة الدكتور ببيانات ESP32
+function updateDoctorUIESP32(data) {
+    if (!data) return;
+    
+    if (data.HeartRate) {
+        const heartElement = document.getElementById('heartValue');
+        if (heartElement) heartElement.innerHTML = data.HeartRate + ' <span>bpm</span>';
+        
+        const heartInd = document.getElementById('heartIndicator');
+        if (heartInd) {
+            if (data.HeartRate > 100 || data.HeartRate < 50) {
+                heartInd.className = 'card-indicator indicator-danger';
+                heartInd.innerText = 'Critical';
+            } else if (data.HeartRate > 90 || data.HeartRate < 60) {
+                heartInd.className = 'card-indicator indicator-warning';
+                heartInd.innerText = 'Warning';
+            } else {
+                heartInd.className = 'card-indicator indicator-normal';
+                heartInd.innerText = 'Normal';
+            }
+        }
+        
+        // تحديث الرسم البياني
+        updateCharts(data.HeartRate, null, null);
+    }
+    
+    if (data.SpO2) {
+        const spo2Element = document.getElementById('spo2Value');
+        if (spo2Element) spo2Element.innerHTML = data.SpO2 + ' <span>%</span>';
+        
+        const spo2Ind = document.getElementById('spo2Indicator');
+        if (spo2Ind) {
+            if (data.SpO2 < 90) {
+                spo2Ind.className = 'card-indicator indicator-danger';
+                spo2Ind.innerText = 'Critical';
+            } else if (data.SpO2 < 95) {
+                spo2Ind.className = 'card-indicator indicator-warning';
+                spo2Ind.innerText = 'Warning';
+            } else {
+                spo2Ind.className = 'card-indicator indicator-normal';
+                spo2Ind.innerText = 'Normal';
+            }
+        }
+    }
+    
+    if (data.BodyTemp) {
+        const tempElement = document.getElementById('tempValue');
+        if (tempElement) tempElement.innerHTML = data.BodyTemp.toFixed(1) + ' <span>°C</span>';
+        
+        const tempInd = document.getElementById('tempIndicator');
+        if (tempInd) {
+            if (data.BodyTemp > 38.5 || data.BodyTemp < 35) {
+                tempInd.className = 'card-indicator indicator-danger';
+                tempInd.innerText = 'Critical';
+            } else if (data.BodyTemp > 37.5 || data.BodyTemp < 36) {
+                tempInd.className = 'card-indicator indicator-warning';
+                tempInd.innerText = 'Warning';
+            } else {
+                tempInd.className = 'card-indicator indicator-normal';
+                tempInd.innerText = 'Normal';
+            }
+        }
+    }
+    
+    if (data.RoomTemp) {
+        const roomTempElement = document.getElementById('roomTempValue');
+        if (roomTempElement) roomTempElement.innerHTML = data.RoomTemp.toFixed(1) + ' <span>°C</span>';
+    }
+    
+    if (data.Humidity) {
+        const humidityElement = document.getElementById('humidityValue');
+        if (humidityElement) humidityElement.innerHTML = data.Humidity.toFixed(1) + ' <span>%</span>';
+    }
+    
+    if (data.Motion) {
+        const positionElement = document.getElementById('positionValue');
+        if (positionElement) positionElement.innerText = data.Motion > 0.5 ? 'walking' : 'resting';
+    }
+}
+
+// إضافة عناصر BP و Glucose في واجهة الدكتور
+function addDoctorCareSyncElements() {
+    const vitalsGrid = document.querySelector('.cards-grid');
+    if (!vitalsGrid) return;
+    
+    if (document.getElementById('bpValue')) return;
+    
+    // إضافة كارد ضغط الدم
+    const bpCard = document.createElement('div');
+    bpCard.className = 'card';
+    bpCard.innerHTML = `
+        <div class="card-header"><i class="fas fa-tachometer-alt" style="color:#8b5cf6;"></i><h3>Blood Pressure</h3></div>
+        <div class="card-value" id="bpValue">--/-- <span>mmHg</span></div>
+        <div class="card-indicator" id="bpIndicator">Normal</div>
+    `;
+    vitalsGrid.appendChild(bpCard);
+    
+    // إضافة كارد السكر
+    const glucoseCard = document.createElement('div');
+    glucoseCard.className = 'card';
+    glucoseCard.innerHTML = `
+        <div class="card-header"><i class="fas fa-tint" style="color:#f97316;"></i><h3>Blood Glucose</h3></div>
+        <div class="card-value" id="glucoseValue">-- <span>mg/dL</span></div>
+        <div class="card-indicator" id="glucoseIndicator">Normal</div>
+    `;
+    vitalsGrid.appendChild(glucoseCard);
+}
+
+// بدء الاستماع لبيانات Firebase في صفحة الدكتور
+function startDoctorFirebaseSync() {
+    if (typeof firebase === 'undefined' || !database) {
+        console.log('Waiting for Firebase...');
+        setTimeout(startDoctorFirebaseSync, 2000);
+        return;
+    }
+    
+    console.log('🔥 Starting Doctor Firebase sync...');
+    addDoctorCareSyncElements();
+    
+    // الاستماع لبيانات ESP32
+    const esp32Ref = database.ref('/HELIOS_DATA_LIVE/Vitals');
+    esp32Ref.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            updateDoctorUIESP32(data);
+            console.log('📊 ESP32 data updated in Doctor dashboard');
+        }
+    });
+    
+    // جلب بيانات Care Sync
+    getDoctorLatestPatientId().then(patientId => {
+        if (!patientId) {
+            console.log('No Care Sync patient data found yet...');
+            setTimeout(startDoctorFirebaseSync, 10000);
+            return;
+        }
+        
+        firebaseDoctorPatientId = patientId;
+        console.log(`✅ Doctor connected to Care Sync patient: ${patientId}`);
+        
+        // الاستماع لقراءات Care Sync
+        const readingsRef = database.ref(`patients/${patientId}/readings`);
+        readingsRef.on('child_added', (snapshot) => {
+            const reading = snapshot.val();
+            if (reading && reading.vitals) {
+                const vitals = {
+                    sbp: reading.vitals.systolic_bp,
+                    dbp: reading.vitals.diastolic_bp,
+                    glucose: reading.vitals.glucose,
+                    hr: reading.vitals.heart_rate
+                };
+                updateDoctorUICareSync(vitals);
+                console.log('🤖 Care Sync data updated in Doctor dashboard');
+            }
+        });
+        
+        // جلب آخر قراءة حالية
+        readingsRef.orderByKey().limitToLast(1).once('value', (snapshot) => {
+            const readings = snapshot.val();
+            if (readings) {
+                const lastKey = Object.keys(readings)[0];
+                const lastReading = readings[lastKey];
+                if (lastReading && lastReading.vitals) {
+                    updateDoctorUICareSync({
+                        sbp: lastReading.vitals.systolic_bp,
+                        dbp: lastReading.vitals.diastolic_bp,
+                        glucose: lastReading.vitals.glucose,
+                        hr: lastReading.vitals.heart_rate
+                    });
+                }
+            }
+        });
+    }).catch(error => {
+        console.error('Doctor Firebase error:', error);
+    });
+}
+
+// بدء المزامنة بعد تحميل الصفحة
+setTimeout(() => {
+    startDoctorFirebaseSync();
+}, 3000);
 
     // ==================== INITIAL PAGE ====================
     showPage('dashboard');
