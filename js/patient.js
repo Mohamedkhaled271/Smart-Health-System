@@ -29,6 +29,8 @@
     // ==================== GLOBAL VARIABLES ====================
     let mqttSimInterval;                // Interval for simulated MQTT updates
     let alertSoundEnabled = true;        // Sound toggle state
+      // تعريف قاعدة البيانات
+    const database = firebase.database();
     // ==================== FIREBASE REAL-TIME DATA (PATIENT VITALS FROM CARE SYNC) ====================
 // هذا القسم يجلب البيانات الحقيقية من تطبيق Care Sync PIMA Edition
 
