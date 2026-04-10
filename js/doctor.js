@@ -27,26 +27,25 @@
     }
 
     // ==================== GLOBAL VARIABLES ====================
-    let mqttSimInterval;                // Interval for simulated MQTT updates
-    let alertSoundEnabled = true;        // Sound toggle state
+    let mqttSimInterval;
+    let alertSoundEnabled = true;
 
-    // -------------------- Alert Sound using Web Audio API --------------------
+    // -------------------- Alert Sound --------------------
     const alertSound = (() => {
         try {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             return (type = 'warning') => {
-                if (!alertSoundEnabled) return;                     // Do nothing if muted
+                if (!alertSoundEnabled) return;
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-                osc.frequency.value = type === 'danger' ? 800 : 400; // Higher pitch for danger
-                gain.gain.value = 0.2;                               // Volume
+                osc.frequency.value = type === 'danger' ? 800 : 400;
+                gain.gain.value = 0.2;
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.2);
             };
         } catch (e) {
-            // Fallback if Web Audio API is not supported
             return () => {};
         }
     })();
@@ -54,17 +53,19 @@
     // ==================== SIDEBAR COLLAPSE ====================
     const sidebar = document.getElementById('sidebar');
     const collapseBtn = document.getElementById('collapseSidebar');
-    collapseBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-        const icon = collapseBtn.querySelector('i');
-        if (sidebar.classList.contains('collapsed')) {
-            icon.classList.remove('fa-chevron-left');
-            icon.classList.add('fa-chevron-right');
-        } else {
-            icon.classList.remove('fa-chevron-right');
-            icon.classList.add('fa-chevron-left');
-        }
-    });
+    if (collapseBtn) {
+        collapseBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            const icon = collapseBtn.querySelector('i');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.classList.remove('fa-chevron-left');
+                icon.classList.add('fa-chevron-right');
+            } else {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-left');
+            }
+        });
+    }
 
     // ==================== SIDEBAR ACTIVE STATE & PAGE NAVIGATION ====================
     const menuItems = document.querySelectorAll('.menu-item');
@@ -97,39 +98,14 @@
 
     // ==================== MUTE ALERTS BUTTON ====================
     const muteBtn = document.getElementById('muteAlerts');
-    muteBtn.addEventListener('click', () => {
-        alertSoundEnabled = !alertSoundEnabled;
-        muteBtn.innerHTML = alertSoundEnabled ? '<i class="fas fa-volume-up"></i> Mute' : '<i class="fas fa-volume-mute"></i> Unmute';
-        muteBtn.classList.toggle('muted', !alertSoundEnabled);
-        showNotification(alertSoundEnabled ? 'Alerts unmuted' : 'Alerts muted');
-    });
-
-    // ==================== STATS UPDATE (simulated + animated) ====================
-    function animateValue(element, start, end, duration) {
-        let startTimestamp = null;
-        const step = (timestamp) => {
-            if (!startTimestamp) startTimestamp = timestamp;
-            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            element.innerText = Math.floor(progress * (end - start) + start);
-            if (progress < 1) {
-                window.requestAnimationFrame(step);
-            }
-        };
-        window.requestAnimationFrame(step);
+    if (muteBtn) {
+        muteBtn.addEventListener('click', () => {
+            alertSoundEnabled = !alertSoundEnabled;
+            muteBtn.innerHTML = alertSoundEnabled ? '<i class="fas fa-volume-up"></i> Mute' : '<i class="fas fa-volume-mute"></i> Unmute';
+            muteBtn.classList.toggle('muted', !alertSoundEnabled);
+            showNotification(alertSoundEnabled ? 'Alerts unmuted' : 'Alerts muted');
+        });
     }
-
-    function updateStats() {
-        const newPatients = Math.floor(Math.random() * 50 + 200);
-        const newCritical = Math.floor(Math.random() * 10 + 5);
-        const newAvgHR = Math.floor(Math.random() * 20 + 65);
-        const newOccupancy = Math.floor(Math.random() * 15 + 75) + '%';
-
-        animateValue(document.getElementById('totalPatients'), parseInt(document.getElementById('totalPatients').innerText), newPatients, 1000);
-        animateValue(document.getElementById('criticalCases'), parseInt(document.getElementById('criticalCases').innerText), newCritical, 1000);
-        document.getElementById('avgHR').innerHTML = newAvgHR + ' <span style="font-size:1rem;">bpm</span>';
-        document.getElementById('bedOccupancy').innerHTML = newOccupancy + '<small style="font-size:1rem;">%</small>';
-    }
-    setInterval(updateStats, 10000);
 
     // ==================== REAL-TIME CHARTS (Chart.js) ====================
     const heartCtx = document.getElementById('heartChart')?.getContext('2d');
@@ -161,7 +137,6 @@
         });
     }
 
-    // Function to update real-time charts with new data
     function updateCharts(heart, spo2, temp) {
         const now = new Date().toLocaleTimeString();
         if (heart) { heartHistory.push(heart); if (heartHistory.length > 20) heartHistory.shift(); }
@@ -175,142 +150,216 @@
         if (tempChart) { tempChart.data.labels = timeLabels; tempChart.data.datasets[0].data = tempHistory; tempChart.update(); }
     }
 
-    // ==================== HISTORICAL CHARTS (ApexCharts) ====================
-    const heartHistoryChart = new ApexCharts(document.querySelector("#heartHistoryChart"), {
-        chart: { type: 'area', height: 250, animations: { enabled: true, speed: 500 } },
-        series: [{ name: 'Heart Rate', data: [72,75,71,73,74,72,70,73,75,74,73,72] }],
-        xaxis: { categories: ['00','02','04','06','08','10','12','14','16','18','20','22'] },
-        colors: ['#2563eb'],
-        fill: { type: 'gradient' }
-    });
-    heartHistoryChart.render();
+    // ==================== UPDATE DOCTOR VITALS DISPLAY (المتوافقة مع HTML الجديد) ====================
+    function updateDoctorHeartRate(value) {
+        const el = document.getElementById('doctorHeartValue');
+        if (el) el.innerHTML = value + ' <span>bpm</span>';
+        const indicator = document.getElementById('doctorHeartIndicator');
+        if (indicator) {
+            if (value > 100 || value < 50) { indicator.className = 'indicator-danger'; indicator.innerText = 'Critical'; }
+            else if (value > 90 || value < 60) { indicator.className = 'indicator-warning'; indicator.innerText = 'Warning'; }
+            else { indicator.className = 'indicator-normal'; indicator.innerText = 'Normal'; }
+        }
+        updateCharts(value, null, null);
+    }
 
-    const spo2HistoryChart = new ApexCharts(document.querySelector("#spo2HistoryChart"), {
-        chart: { type: 'area', height: 250, animations: { enabled: true, speed: 500 } },
-        series: [{ name: 'SpO₂', data: [98,97,98,99,98,97,98,98,97,98,99,98] }],
-        xaxis: { categories: ['00','02','04','06','08','10','12','14','16','18','20','22'] },
-        colors: ['#10b981'],
-        fill: { type: 'gradient' }
-    });
-    spo2HistoryChart.render();
+    function updateDoctorSpO2(value) {
+        const el = document.getElementById('doctorSpo2Value');
+        if (el) el.innerHTML = value + ' <span>%</span>';
+        const indicator = document.getElementById('doctorSpo2Indicator');
+        if (indicator) {
+            if (value < 90) { indicator.className = 'indicator-danger'; indicator.innerText = 'Critical'; }
+            else if (value < 95) { indicator.className = 'indicator-warning'; indicator.innerText = 'Warning'; }
+            else { indicator.className = 'indicator-normal'; indicator.innerText = 'Normal'; }
+        }
+    }
 
-    // Monthly report chart (for reports page)
-const reportForm = document.getElementById('patientReportForm');
+    function updateDoctorTemperature(value) {
+        const el = document.getElementById('doctorTempValue');
+        if (el) el.innerHTML = value.toFixed(1) + ' <span>°C</span>';
+        const indicator = document.getElementById('doctorTempIndicator');
+        if (indicator) {
+            if (value > 38.5 || value < 35) { indicator.className = 'indicator-danger'; indicator.innerText = 'Critical'; }
+            else if (value > 37.5 || value < 36) { indicator.className = 'indicator-warning'; indicator.innerText = 'Warning'; }
+            else { indicator.className = 'indicator-normal'; indicator.innerText = 'Normal'; }
+        }
+    }
 
-reportForm.addEventListener('submit', function(e) {
-    e.preventDefault();
+    function updateDoctorBloodPressure(sbp, dbp) {
+        const el = document.getElementById('doctorBpValue');
+        if (el) el.innerHTML = sbp + '/' + dbp + ' <span>mmHg</span>';
+        const indicator = document.getElementById('doctorBpIndicator');
+        if (indicator) {
+            if (sbp >= 180 || dbp >= 120) { indicator.className = 'indicator-danger'; indicator.innerText = 'Crisis'; }
+            else if (sbp >= 140 || dbp >= 90) { indicator.className = 'indicator-warning'; indicator.innerText = 'Hypertension'; }
+            else if (sbp >= 120) { indicator.className = 'indicator-warning'; indicator.innerText = 'Elevated'; }
+            else { indicator.className = 'indicator-normal'; indicator.innerText = 'Normal'; }
+        }
+    }
 
-    // Gather form data
-    const reportData = {
-        name: document.getElementById('patientName').value,
-        age: document.getElementById('patientAge').value,
-        gender: document.getElementById('patientGender').value,
-        condition: document.getElementById('healthCondition').value,
-        medications: document.getElementById('medications').value,
-        notes: document.getElementById('additionalNotes').value
-    };
+    function updateDoctorGlucose(value) {
+        const el = document.getElementById('doctorGlucoseValue');
+        if (el) el.innerHTML = Math.round(value) + ' <span>mg/dL</span>';
+        const indicator = document.getElementById('doctorGlucoseIndicator');
+        if (indicator) {
+            if (value >= 300) { indicator.className = 'indicator-danger'; indicator.innerText = 'Critical'; }
+            else if (value >= 200) { indicator.className = 'indicator-danger'; indicator.innerText = 'Very High'; }
+            else if (value >= 126) { indicator.className = 'indicator-warning'; indicator.innerText = 'High (Diabetes)'; }
+            else if (value >= 100) { indicator.className = 'indicator-warning'; indicator.innerText = 'Prediabetes'; }
+            else if (value < 70) { indicator.className = 'indicator-danger'; indicator.innerText = 'Low'; }
+            else { indicator.className = 'indicator-normal'; indicator.innerText = 'Normal'; }
+        }
+    }
 
-    //Create PDF using jsPDF
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    function updateDoctorRoomTemp(value) {
+        const el = document.getElementById('doctorRoomTempValue');
+        if (el) el.innerHTML = value.toFixed(1) + ' <span>°C</span>';
+    }
 
-    doc.setFontSize(16);
-    doc.text("Patient Report", 105, 20, { align: "center" });
+    function updateDoctorHumidity(value) {
+        const el = document.getElementById('doctorHumidityValue');
+        if (el) el.innerHTML = value.toFixed(1) + ' <span>%</span>';
+    }
 
-    doc.setFontSize(12);
-    doc.text(`Name: ${reportData.name}`, 20, 40);
-    doc.text(`Age: ${reportData.age}`, 20, 50);
-    doc.text(`Gender: ${reportData.gender}`, 20, 60);
-    
-    doc.text("Health Condition:", 20, 70);
-    doc.text(reportData.condition, 25, 80, { maxWidth: 160 });
+    function updateDoctorMotion(value) {
+        const el = document.getElementById('doctorMotionValue');
+        if (el) el.innerHTML = value.toFixed(1) + ' <span>m/s²</span>';
+    }
 
-    doc.text("Medications:", 20, 100);
-    doc.text(reportData.medications, 25, 110, { maxWidth: 160 });
+    // ==================== FIREBASE REAL-TIME DATA ====================
+    let firebaseDoctorPatientId = null;
 
-    doc.text("Additional Notes:", 20, 130);
-    doc.text(reportData.notes, 25, 140, { maxWidth: 160 });
+    async function getDoctorLatestPatientId() {
+        if (typeof firebase === 'undefined') {
+            console.warn('Firebase not loaded');
+            return null;
+        }
+        try {
+            const snapshot = await database.ref('patients').once('value');
+            const patients = snapshot.val();
+            if (!patients) return null;
+            let latestPatient = null;
+            let latestTime = 0;
+            for (const pid of Object.keys(patients)) {
+                const readings = patients[pid]?.readings;
+                if (readings) {
+                    const times = Object.keys(readings);
+                    if (times.length > 0) {
+                        const lastTime = parseInt(times[times.length - 1]);
+                        if (lastTime > latestTime) {
+                            latestTime = lastTime;
+                            latestPatient = pid;
+                        }
+                    }
+                }
+            }
+            return latestPatient;
+        } catch (error) {
+            console.error('Error getting patient ID:', error);
+            return null;
+        }
+    }
 
-    // Save the PDF with patient's name
-    doc.save(`${reportData.name}_report.pdf`);
+    function startDoctorFirebaseSync() {
+        if (typeof firebase === 'undefined' || !database) {
+            console.log('Waiting for Firebase...');
+            setTimeout(startDoctorFirebaseSync, 2000);
+            return;
+        }
+        
+        console.log('🔥 Starting Doctor Firebase sync...');
+        
+        // الاستماع لبيانات ESP32
+        const esp32Ref = database.ref('/HELIOS_DATA_LIVE/Vitals');
+        esp32Ref.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                if (data.HeartRate) updateDoctorHeartRate(data.HeartRate);
+                if (data.SpO2) updateDoctorSpO2(data.SpO2);
+                if (data.BodyTemp) updateDoctorTemperature(data.BodyTemp);
+                if (data.RoomTemp) updateDoctorRoomTemp(data.RoomTemp);
+                if (data.Humidity) updateDoctorHumidity(data.Humidity);
+                if (data.Motion) updateDoctorMotion(data.Motion);
+                document.getElementById('lastUpdate').innerHTML = new Date().toLocaleTimeString();
+                console.log('📊 ESP32 data updated');
+            }
+        });
+        
+        // جلب بيانات Care Sync
+        getDoctorLatestPatientId().then(patientId => {
+            if (!patientId) {
+                console.log('No Care Sync patient data found yet...');
+                setTimeout(startDoctorFirebaseSync, 10000);
+                return;
+            }
+            
+            firebaseDoctorPatientId = patientId;
+            document.getElementById('careSyncStatus').innerHTML = '✅ Connected: ' + patientId.substring(0, 20) + '...';
+            console.log(`✅ Doctor connected to Care Sync patient: ${patientId}`);
+            
+            const readingsRef = database.ref(`patients/${patientId}/readings`);
+            readingsRef.on('child_added', (snapshot) => {
+                const reading = snapshot.val();
+                if (reading && reading.vitals) {
+                    if (reading.vitals.systolic_bp && reading.vitals.diastolic_bp) {
+                        updateDoctorBloodPressure(reading.vitals.systolic_bp, reading.vitals.diastolic_bp);
+                    }
+                    if (reading.vitals.glucose) {
+                        updateDoctorGlucose(reading.vitals.glucose);
+                    }
+                }
+            });
+            
+            readingsRef.orderByKey().limitToLast(1).once('value', (snapshot) => {
+                const readings = snapshot.val();
+                if (readings) {
+                    const lastKey = Object.keys(readings)[0];
+                    const lastReading = readings[lastKey];
+                    if (lastReading && lastReading.vitals) {
+                        if (lastReading.vitals.systolic_bp && lastReading.vitals.diastolic_bp) {
+                            updateDoctorBloodPressure(lastReading.vitals.systolic_bp, lastReading.vitals.diastolic_bp);
+                        }
+                        if (lastReading.vitals.glucose) {
+                            updateDoctorGlucose(lastReading.vitals.glucose);
+                        }
+                    }
+                }
+            });
+        }).catch(error => {
+            console.error('Doctor Firebase error:', error);
+        });
+    }
 
-    // Reset form and show success message
-    reportForm.reset();
-    alert("Report saved as PDF successfully!");
-});
-    // ==================== SIMULATED MQTT UPDATES ====================
-    // Generates random realistic vital signs
+    // ==================== SIMULATED MQTT UPDATES (FALLBACK) ====================
     function generateRandomVitals() {
         return {
             heart: Math.floor(Math.random() * (85-65+1)) + 65,
             spo2: Math.floor(Math.random() * (99-94+1)) + 94,
-            temp: (Math.random() * (37.5-36.0) + 36.0).toFixed(1),
+            temp: (Math.random() * (37.5-36.0) + 36.0),
             roomTemp: Math.floor(Math.random() * (25-22+1)) + 22,
-            humidity: Math.floor(Math.random() * (60-40+1)) + 40,
-            position: ['sitting', 'standing', 'lying', 'walking'][Math.floor(Math.random() * 4)]
+            humidity: Math.floor(Math.random() * (60-40+1)) + 40
         };
     }
 
-    // Update UI elements with new vitals and trigger alerts
-    function updateUI(vitals) {
-        document.getElementById('heartValue').innerHTML = vitals.heart + ' <span>bpm</span>';
-        document.getElementById('spo2Value').innerHTML = vitals.spo2 + ' <span>%</span>';
-        document.getElementById('tempValue').innerHTML = vitals.temp + ' <span>°C</span>';
-        document.getElementById('roomTempValue').innerHTML = vitals.roomTemp + ' <span>°C</span>';
-        document.getElementById('humidityValue').innerHTML = vitals.humidity + ' <span>%</span>';
-        document.getElementById('positionValue').innerText = vitals.position;
-
-        // Update color-coded indicators based on thresholds
-        const heartInd = document.getElementById('heartIndicator');
-        if (vitals.heart > 100 || vitals.heart < 50) { heartInd.className = 'card-indicator indicator-danger'; heartInd.innerText = 'Critical'; }
-        else if (vitals.heart > 90 || vitals.heart < 60) { heartInd.className = 'card-indicator indicator-warning'; heartInd.innerText = 'Warning'; }
-        else { heartInd.className = 'card-indicator indicator-normal'; heartInd.innerText = 'Normal'; }
-
-        const spo2Ind = document.getElementById('spo2Indicator');
-        if (vitals.spo2 < 90) { spo2Ind.className = 'card-indicator indicator-danger'; spo2Ind.innerText = 'Critical'; }
-        else if (vitals.spo2 < 95) { spo2Ind.className = 'card-indicator indicator-warning'; spo2Ind.innerText = 'Warning'; }
-        else { spo2Ind.className = 'card-indicator indicator-normal'; spo2Ind.innerText = 'Normal'; }
-
-        const tempInd = document.getElementById('tempIndicator');
-        if (vitals.temp > 38.5 || vitals.temp < 35) { tempInd.className = 'card-indicator indicator-danger'; tempInd.innerText = 'Critical'; }
-        else if (vitals.temp > 37.5 || vitals.temp < 36) { tempInd.className = 'card-indicator indicator-warning'; tempInd.innerText = 'Warning'; }
-        else { tempInd.className = 'card-indicator indicator-normal'; tempInd.innerText = 'Normal'; }
-
-        const posInd = document.getElementById('positionIndicator');
-        if (vitals.position === 'fall') { posInd.className = 'card-indicator indicator-danger'; posInd.innerText = 'FALL'; }
-        else { posInd.className = 'card-indicator indicator-normal'; posInd.innerText = 'Normal'; }
-
-        updateCharts(vitals.heart, vitals.spo2, parseFloat(vitals.temp));
-
-        // Check for critical conditions and add alert
-        const alertsList = document.getElementById('alertsList');
-        if (vitals.heart > 100 || vitals.heart < 50 || vitals.spo2 < 90 || vitals.temp > 38.5 || vitals.temp < 35 || vitals.position === 'fall') {
-            let msg = '';
-            if (vitals.heart > 100) msg = 'Heart rate too high: ' + vitals.heart;
-            else if (vitals.heart < 50) msg = 'Heart rate too low: ' + vitals.heart;
-            else if (vitals.spo2 < 90) msg = 'Low SpO2: ' + vitals.spo2;
-            else if (vitals.temp > 38.5) msg = 'High fever: ' + vitals.temp;
-            else if (vitals.temp < 35) msg = 'Low temperature: ' + vitals.temp;
-            else if (vitals.position === 'fall') msg = 'FALL DETECTED!';
-
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'alert-item';
-            alertDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i><div class="alert-content"><div class="alert-title">${msg}</div><div class="alert-time">${new Date().toLocaleTimeString()}</div></div>`;
-            alertsList.prepend(alertDiv);
-            if (alertsList.children.length > 10) alertsList.removeChild(alertsList.lastChild);
-            alertSound('danger');
-        }
+    function startSimulation() {
+        const vitals = generateRandomVitals();
+        updateDoctorHeartRate(vitals.heart);
+        updateDoctorSpO2(vitals.spo2);
+        updateDoctorTemperature(vitals.temp);
+        updateDoctorRoomTemp(vitals.roomTemp);
+        updateDoctorHumidity(vitals.humidity);
+        
+        mqttSimInterval = setInterval(() => {
+            const newVitals = generateRandomVitals();
+            updateDoctorHeartRate(newVitals.heart);
+            updateDoctorSpO2(newVitals.spo2);
+            updateDoctorTemperature(newVitals.temp);
+            updateDoctorRoomTemp(newVitals.roomTemp);
+            updateDoctorHumidity(newVitals.humidity);
+        }, 5000);
     }
 
-    // Start simulation with initial data
-    const vitals = generateRandomVitals();
-    updateUI(vitals);
-    mqttSimInterval = setInterval(() => {
-        const newVitals = generateRandomVitals();
-        updateUI(newVitals);
-    }, 5000);
-
-    // ==================== SEARCH FUNCTIONALITY ====================
+    // ==================== SEARCH & FILTER ====================
     document.getElementById('globalSearch')?.addEventListener('input', function() {
         const value = this.value.toLowerCase();
         document.querySelectorAll('#recentPatientsTable tbody tr').forEach(row => {
@@ -325,266 +374,36 @@ reportForm.addEventListener('submit', function(e) {
         });
     });
 
-    document.getElementById('appointmentSearch')?.addEventListener('input', function() {
-        const value = this.value.toLowerCase();
-        document.querySelectorAll('#appointmentsTable tbody tr').forEach(row => {
-            row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+    // ==================== EXPORT PDF ====================
+    document.getElementById('exportBtn')?.addEventListener('click', function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(18);
+        doc.text("Recent Patients Report", 14, 22);
+        const table = document.getElementById('recentPatientsTable');
+        const headers = [];
+        const rows = [];
+        const headerCells = table.querySelectorAll('thead th');
+        headerCells.forEach(cell => headers.push(cell.innerText));
+        const bodyRows = table.querySelectorAll('tbody tr');
+        bodyRows.forEach(row => {
+            const rowData = [];
+            row.querySelectorAll('td').forEach(cell => rowData.push(cell.innerText.trim()));
+            rows.push(rowData);
         });
-    });
-
-    // ==================== FILTER & DATE RANGE FUNCTIONALITY ====================
-    const filterBtn = document.getElementById('filterBtn');
-    const filterDropdown = document.getElementById('filterDropdown');
-    const closeFilter = document.getElementById('closeFilter');
-    const dateBadge = document.querySelector('.date-badge');
-    const dateDropdown = document.getElementById('dateDropdown');
-    const dateSpan = dateBadge.querySelector('span');
-    const filterStatus = document.getElementById('filterStatus');
-    const filterCondition = document.getElementById('filterCondition');
-    const filterStartDate = document.getElementById('filterStartDate');
-    const filterEndDate = document.getElementById('filterEndDate');
-    const applyFilter = document.getElementById('applyFilter');
-    const resetFilter = document.getElementById('resetFilter');
-
-    // Toggle filter dropdown
-    filterBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        filterDropdown.classList.toggle('active');
-        dateDropdown.classList.remove('active'); // Hide date dropdown if open
-    });
-
-    // Close filter dropdown
-    closeFilter.addEventListener('click', () => {
-        filterDropdown.classList.remove('active');
-    });
-
-    // Toggle date dropdown
-    dateBadge.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dateDropdown.classList.toggle('active');
-        filterDropdown.classList.remove('active'); // Hide filter dropdown if open
-    });
-
-    // Click outside to close dropdowns
-    document.addEventListener('click', (e) => {
-        if (!filterDropdown.contains(e.target) && !filterBtn.contains(e.target)) {
-            filterDropdown.classList.remove('active');
-        }
-        if (!dateDropdown.contains(e.target) && !dateBadge.contains(e.target)) {
-            dateDropdown.classList.remove('active');
-        }
-    });
-
-    // Date range selection
-    document.querySelectorAll('.date-dropdown li').forEach(item => {
-        item.addEventListener('click', function() {
-            document.querySelectorAll('.date-dropdown li').forEach(li => li.classList.remove('active'));
-            this.classList.add('active');
-            const range = this.dataset.range;
-            if (range === 'custom') {
-                dateSpan.innerText = 'Custom range';
-            } else {
-                dateSpan.innerText = `Last ${range} days`;
-            }
-            applyDateFilter(range);
-            dateDropdown.classList.remove('active');
-        });
-    });
-
-    // Apply filter button
-    applyFilter.addEventListener('click', () => {
-        const status = filterStatus.value;
-        const condition = filterCondition.value;
-        const startDate = filterStartDate.value;
-        const endDate = filterEndDate.value;
-
-        filterTables(status, condition, startDate, endDate);
-        filterDropdown.classList.remove('active');
-    });
-
-    // Reset filter button
-    resetFilter.addEventListener('click', () => {
-        filterStatus.value = 'all';
-        filterCondition.value = 'all';
-        filterStartDate.value = '';
-        filterEndDate.value = '';
-        resetTableFilters();
-        filterDropdown.classList.remove('active');
-    });
-    // function applyDateFilter(range) {
-    //     showNotification(`Date range changed to ${dateSpan.innerText}`);
-    // }
-    function filterTables(status, condition, startDate, endDate) {
-        const recentRows = document.querySelectorAll('#recentPatientsTable tbody tr');
-        const patientRows = document.querySelectorAll('#patientsFullTable tbody tr');
-        const appointmentRows = document.querySelectorAll('#appointmentsTable tbody tr');
-
-        recentRows.forEach(row => {
-            let show = true;
-            const rowStatus = row.querySelector('td:last-child span').innerText.toLowerCase();
-            const rowCondition = row.querySelector('td:nth-child(3)').innerText.toLowerCase();
-            if (status !== 'all' && !rowStatus.includes(status)) show = false;
-            if (condition !== 'all' && !rowCondition.includes(condition)) show = false;
-            row.style.display = show ? '' : 'none';
-        });
-
-        patientRows.forEach(row => {
-            let show = true;
-            const rowStatus = row.querySelector('td:last-child span').innerText.toLowerCase();
-            const rowCondition = row.querySelector('td:nth-child(3)').innerText.toLowerCase();
-            if (status !== 'all' && !rowStatus.includes(status)) show = false;
-            if (condition !== 'all' && !rowCondition.includes(condition)) show = false;
-            row.style.display = show ? '' : 'none';
-        });
-
-        appointmentRows.forEach(row => {
-            let show = true;
-            const rowStatus = row.querySelector('td:last-child span').innerText.toLowerCase();
-            if (status !== 'all' && !rowStatus.includes(status)) show = false;
-            row.style.display = show ? '' : 'none';
-        });
-
-        showNotification('Filters applied');
-    }
-
-    function resetTableFilters() {
-        const allRows = document.querySelectorAll('#recentPatientsTable tbody tr, #patientsFullTable tbody tr, #appointmentsTable tbody tr');
-        allRows.forEach(row => row.style.display = '');
-        showNotification('Filters reset');
-    }
-// ==================== EXPORT BUTTON - GENERATE PDF FROM RECENT PATIENTS TABLE ====================
-document.getElementById('exportBtn').addEventListener('click', function() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    // Add title to PDF
-    doc.setFontSize(18);
-    doc.text("Recent Patients Report", 14, 22);
-
-    // Extract table data
-    const table = document.getElementById('recentPatientsTable');
-    const headers = [];
-    const rows = [];
-
-    //
-    const headerCells = table.querySelectorAll('thead th');
-    headerCells.forEach(cell => headers.push(cell.innerText));
-
-    // 
-    const bodyRows = table.querySelectorAll('tbody tr');
-    bodyRows.forEach(row => {
-        const rowData = [];
-        row.querySelectorAll('td').forEach(cell => {
-            // Trim text and handle multi-line content if necessary
-            rowData.push(cell.innerText.trim());
-        });
-        rows.push(rowData);
-    });
-
-    // Use jsPDF-AutoTable plugin to add table to PDF
-    doc.autoTable({
-        head: [headers],
-        body: rows,
-        startY: 30,
-        theme: 'striped',
-        headStyles: { fillColor: [37, 99, 235] }, // لون أزرق
-        styles: { fontSize: 10 }
-    });
-
-    // Save the PDF
-    doc.save('recent_patients_report.pdf');
-
-    // Show success notification 
-    showNotification('PDF exported successfully!');
-});
-
-    // ==================== EXPORT PATIENT HEALTH BUTTON (All Vitals & Charts) ====================
-    //
-    document.getElementById('export-btn-Patient-Health')?.addEventListener('click', function() {
-        showNotification('Generating patient health report...');
-        
-        // Delay to ensure charts are fully rendered before capturing them
-        setTimeout(() => {
-            try {
-                // verify jsPDF is loaded
-                if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
-                    showNotification('PDF library not loaded!', 'error');
-                    return;
-                }
-                
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                // add title
-                doc.setFontSize(20);
-                doc.text("Patient Health Report", 105, 15, { align: "center" });
-                
-                // date and time
-                doc.setFontSize(10);
-                doc.text(`Generated: ${new Date().toLocaleString()}`, 105, 22, { align: "center" });
-                
-                let yOffset = 30;
-                
-                // function to add chart image to PDF
-                function addChartImage(canvasId, title, yPos) {
-                    const canvas = document.getElementById(canvasId);
-                    if (!canvas) {
-                        console.warn(`Canvas with id "${canvasId}" not found`);
-                        return yPos;
-                    }
-                    try {
-                        const imgData = canvas.toDataURL('image/png');
-                        doc.setFontSize(12);
-                        doc.text(title, 14, yPos);
-                        doc.addImage(imgData, 'PNG', 14, yPos + 5, 180, 60);
-                        return yPos + 70;
-                    } catch (e) {
-                        console.error('Could not add chart:', canvasId, e);
-                        doc.text(`[${title} chart unavailable]`, 14, yPos + 10);
-                        return yPos + 15;
-                    }
-                }
-                
-                // add charts to PDF
-                yOffset = addChartImage('heartChart', 'Heart Rate (bpm)', yOffset);
-                yOffset = addChartImage('spo2Chart', 'SpO₂ (%)', yOffset);
-                yOffset = addChartImage('tempChart', 'Body Temperature (°C)', yOffset);
-                
-                // add current vitals section
-                doc.setFontSize(14);
-                doc.text("Current Vitals:", 14, yOffset);
-                yOffset += 8;
-                
-                const roomTemp = document.getElementById('roomTempValue')?.innerText || '--';
-                const humidity = document.getElementById('humidityValue')?.innerText || '--';
-                const position = document.getElementById('positionValue')?.innerText || '--';
-                const positionIndicator = document.getElementById('positionIndicator')?.innerText || '';
-                
-                doc.setFontSize(11);
-                doc.text(`• Room Temperature: ${roomTemp}`, 20, yOffset);
-                yOffset += 6;
-                doc.text(`• Humidity: ${humidity}`, 20, yOffset);
-                yOffset += 6;
-                doc.text(`• Position: ${position} (${positionIndicator})`, 20, yOffset);
-                
-                // Save the PDF
-                doc.save("patient_health_report.pdf");
-                showNotification('Health report ready!');
-            } catch (error) {
-                console.error('PDF generation error:', error);
-                showNotification('Failed to generate PDF', 'error');
-            }
-        }, 100);
+        doc.autoTable({ head: [headers], body: rows, startY: 30, theme: 'striped' });
+        doc.save('recent_patients_report.pdf');
+        showNotification('PDF exported successfully!');
     });
 
     // ==================== SETTINGS SAVE ====================
     document.getElementById('saveSettings')?.addEventListener('click', () => {
-        const email = document.getElementById('settingsEmail').value;
-        const lang = document.getElementById('settingsLanguage').value;
+        const email = document.getElementById('settingsEmail')?.value;
+        const lang = document.getElementById('settingsLanguage')?.value;
         showNotification(`Settings saved: Email ${email}, Language ${lang}`);
     });
 
-    // ==================== LOGOUT BUTTON ====================
+    // ==================== LOGOUT ====================
     const footer = document.querySelector('.sidebar-footer');
     const logoutBtn = document.createElement('a');
     logoutBtn.href = 'javascript:void(0)';
@@ -601,306 +420,33 @@ document.getElementById('exportBtn').addEventListener('click', function() {
             }
         }
     });
-    footer.appendChild(logoutBtn);
+    if (footer) footer.appendChild(logoutBtn);
 
-    // ==================== CLEANUP ON PAGE UNLOAD ====================
+    // ==================== CLEANUP ====================
     window.addEventListener('beforeunload', () => {
         if (mqttSimInterval) clearInterval(mqttSimInterval);
     });
 
-    // Override showPage to close dropdowns when changing page
+    // Override showPage
     const originalShowPage = showPage;
     showPage = function(pageId) {
         originalShowPage(pageId);
+        const filterDropdown = document.getElementById('filterDropdown');
+        const dateDropdown = document.getElementById('dateDropdown');
         if (filterDropdown) filterDropdown.classList.remove('active');
         if (dateDropdown) dateDropdown.classList.remove('active');
     };
-    // ==================== FIREBASE REAL-TIME DATA (PATIENT VITALS FROM CARE SYNC & ESP32) ====================
-// هذا الكود يجلب البيانات الحقيقية من Firebase ويعرضها للدكتور
-
-let firebaseDoctorPatientId = null;
-let firebaseDoctorReadingsRef = null;
-let firebaseDoctorEsp32Ref = null;
-let firebaseDoctorLabRef = null;
-
-// جلب آخر مريض من Care Sync
-async function getDoctorLatestPatientId() {
-    if (typeof firebase === 'undefined') {
-        console.warn('Firebase not loaded');
-        return null;
-    }
-    
-    try {
-        const snapshot = await database.ref('patients').once('value');
-        const patients = snapshot.val();
-        if (!patients) return null;
-        
-        let latestPatient = null;
-        let latestTime = 0;
-        
-        for (const pid of Object.keys(patients)) {
-            const readings = patients[pid]?.readings;
-            if (readings) {
-                const times = Object.keys(readings);
-                if (times.length > 0) {
-                    const lastTime = parseInt(times[times.length - 1]);
-                    if (lastTime > latestTime) {
-                        latestTime = lastTime;
-                        latestPatient = pid;
-                    }
-                }
-            }
-        }
-        return latestPatient;
-    } catch (error) {
-        console.error('Error getting patient ID:', error);
-        return null;
-    }
-}
-
-// تحديث واجهة الدكتور ببيانات Care Sync (BP, Glucose)
-function updateDoctorUICareSync(vitals) {
-    if (!vitals) return;
-    
-    // تحديث ضغط الدم
-    if (vitals.sbp > 0 && vitals.dbp > 0) {
-        const bpElement = document.getElementById('bpValue');
-        if (bpElement) {
-            bpElement.innerHTML = `${vitals.sbp}/${vitals.dbp} <span>mmHg</span>`;
-        }
-        
-        const bpInd = document.getElementById('bpIndicator');
-        if (bpInd) {
-            if (vitals.sbp >= 180 || vitals.dbp >= 120) {
-                bpInd.className = 'card-indicator indicator-danger';
-                bpInd.innerText = 'Crisis';
-            } else if (vitals.sbp >= 140 || vitals.dbp >= 90) {
-                bpInd.className = 'card-indicator indicator-warning';
-                bpInd.innerText = 'Hypertension';
-            } else if (vitals.sbp >= 120) {
-                bpInd.className = 'card-indicator indicator-warning';
-                bpInd.innerText = 'Elevated';
-            } else {
-                bpInd.className = 'card-indicator indicator-normal';
-                bpInd.innerText = 'Normal';
-            }
-        }
-    }
-    
-    // تحديث السكر
-    if (vitals.glucose > 0) {
-        const glucoseElement = document.getElementById('glucoseValue');
-        if (glucoseElement) {
-            glucoseElement.innerHTML = `${Math.round(vitals.glucose)} <span>mg/dL</span>`;
-        }
-        
-        const glucoseInd = document.getElementById('glucoseIndicator');
-        if (glucoseInd) {
-            if (vitals.glucose >= 300) {
-                glucoseInd.className = 'card-indicator indicator-danger';
-                glucoseInd.innerText = 'Critical';
-            } else if (vitals.glucose >= 200) {
-                glucoseInd.className = 'card-indicator indicator-danger';
-                glucoseInd.innerText = 'Very High';
-            } else if (vitals.glucose >= 126) {
-                glucoseInd.className = 'card-indicator indicator-warning';
-                glucoseInd.innerText = 'High (Diabetes)';
-            } else if (vitals.glucose >= 100) {
-                glucoseInd.className = 'card-indicator indicator-warning';
-                glucoseInd.innerText = 'Prediabetes';
-            } else if (vitals.glucose < 70) {
-                glucoseInd.className = 'card-indicator indicator-danger';
-                glucoseInd.innerText = 'Low';
-            } else {
-                glucoseInd.className = 'card-indicator indicator-normal';
-                glucoseInd.innerText = 'Normal';
-            }
-        }
-    }
-}
-
-// تحديث واجهة الدكتور ببيانات ESP32
-function updateDoctorUIESP32(data) {
-    if (!data) return;
-    
-    if (data.HeartRate) {
-        const heartElement = document.getElementById('heartValue');
-        if (heartElement) heartElement.innerHTML = data.HeartRate + ' <span>bpm</span>';
-        
-        const heartInd = document.getElementById('heartIndicator');
-        if (heartInd) {
-            if (data.HeartRate > 100 || data.HeartRate < 50) {
-                heartInd.className = 'card-indicator indicator-danger';
-                heartInd.innerText = 'Critical';
-            } else if (data.HeartRate > 90 || data.HeartRate < 60) {
-                heartInd.className = 'card-indicator indicator-warning';
-                heartInd.innerText = 'Warning';
-            } else {
-                heartInd.className = 'card-indicator indicator-normal';
-                heartInd.innerText = 'Normal';
-            }
-        }
-        
-        // تحديث الرسم البياني
-        updateCharts(data.HeartRate, null, null);
-    }
-    
-    if (data.SpO2) {
-        const spo2Element = document.getElementById('spo2Value');
-        if (spo2Element) spo2Element.innerHTML = data.SpO2 + ' <span>%</span>';
-        
-        const spo2Ind = document.getElementById('spo2Indicator');
-        if (spo2Ind) {
-            if (data.SpO2 < 90) {
-                spo2Ind.className = 'card-indicator indicator-danger';
-                spo2Ind.innerText = 'Critical';
-            } else if (data.SpO2 < 95) {
-                spo2Ind.className = 'card-indicator indicator-warning';
-                spo2Ind.innerText = 'Warning';
-            } else {
-                spo2Ind.className = 'card-indicator indicator-normal';
-                spo2Ind.innerText = 'Normal';
-            }
-        }
-    }
-    
-    if (data.BodyTemp) {
-        const tempElement = document.getElementById('tempValue');
-        if (tempElement) tempElement.innerHTML = data.BodyTemp.toFixed(1) + ' <span>°C</span>';
-        
-        const tempInd = document.getElementById('tempIndicator');
-        if (tempInd) {
-            if (data.BodyTemp > 38.5 || data.BodyTemp < 35) {
-                tempInd.className = 'card-indicator indicator-danger';
-                tempInd.innerText = 'Critical';
-            } else if (data.BodyTemp > 37.5 || data.BodyTemp < 36) {
-                tempInd.className = 'card-indicator indicator-warning';
-                tempInd.innerText = 'Warning';
-            } else {
-                tempInd.className = 'card-indicator indicator-normal';
-                tempInd.innerText = 'Normal';
-            }
-        }
-    }
-    
-    if (data.RoomTemp) {
-        const roomTempElement = document.getElementById('roomTempValue');
-        if (roomTempElement) roomTempElement.innerHTML = data.RoomTemp.toFixed(1) + ' <span>°C</span>';
-    }
-    
-    if (data.Humidity) {
-        const humidityElement = document.getElementById('humidityValue');
-        if (humidityElement) humidityElement.innerHTML = data.Humidity.toFixed(1) + ' <span>%</span>';
-    }
-    
-    if (data.Motion) {
-        const positionElement = document.getElementById('positionValue');
-        if (positionElement) positionElement.innerText = data.Motion > 0.5 ? 'walking' : 'resting';
-    }
-}
-
-// إضافة عناصر BP و Glucose في واجهة الدكتور
-function addDoctorCareSyncElements() {
-    const vitalsGrid = document.querySelector('.cards-grid');
-    if (!vitalsGrid) return;
-    
-    if (document.getElementById('bpValue')) return;
-    
-    // إضافة كارد ضغط الدم
-    const bpCard = document.createElement('div');
-    bpCard.className = 'card';
-    bpCard.innerHTML = `
-        <div class="card-header"><i class="fas fa-tachometer-alt" style="color:#8b5cf6;"></i><h3>Blood Pressure</h3></div>
-        <div class="card-value" id="bpValue">--/-- <span>mmHg</span></div>
-        <div class="card-indicator" id="bpIndicator">Normal</div>
-    `;
-    vitalsGrid.appendChild(bpCard);
-    
-    // إضافة كارد السكر
-    const glucoseCard = document.createElement('div');
-    glucoseCard.className = 'card';
-    glucoseCard.innerHTML = `
-        <div class="card-header"><i class="fas fa-tint" style="color:#f97316;"></i><h3>Blood Glucose</h3></div>
-        <div class="card-value" id="glucoseValue">-- <span>mg/dL</span></div>
-        <div class="card-indicator" id="glucoseIndicator">Normal</div>
-    `;
-    vitalsGrid.appendChild(glucoseCard);
-}
-
-// بدء الاستماع لبيانات Firebase في صفحة الدكتور
-function startDoctorFirebaseSync() {
-    if (typeof firebase === 'undefined' || !database) {
-        console.log('Waiting for Firebase...');
-        setTimeout(startDoctorFirebaseSync, 2000);
-        return;
-    }
-    
-    console.log('🔥 Starting Doctor Firebase sync...');
-    addDoctorCareSyncElements();
-    
-    // الاستماع لبيانات ESP32
-    const esp32Ref = database.ref('/HELIOS_DATA_LIVE/Vitals');
-    esp32Ref.on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            updateDoctorUIESP32(data);
-            console.log('📊 ESP32 data updated in Doctor dashboard');
-        }
-    });
-    
-    // جلب بيانات Care Sync
-    getDoctorLatestPatientId().then(patientId => {
-        if (!patientId) {
-            console.log('No Care Sync patient data found yet...');
-            setTimeout(startDoctorFirebaseSync, 10000);
-            return;
-        }
-        
-        firebaseDoctorPatientId = patientId;
-        console.log(`✅ Doctor connected to Care Sync patient: ${patientId}`);
-        
-        // الاستماع لقراءات Care Sync
-        const readingsRef = database.ref(`patients/${patientId}/readings`);
-        readingsRef.on('child_added', (snapshot) => {
-            const reading = snapshot.val();
-            if (reading && reading.vitals) {
-                const vitals = {
-                    sbp: reading.vitals.systolic_bp,
-                    dbp: reading.vitals.diastolic_bp,
-                    glucose: reading.vitals.glucose,
-                    hr: reading.vitals.heart_rate
-                };
-                updateDoctorUICareSync(vitals);
-                console.log('🤖 Care Sync data updated in Doctor dashboard');
-            }
-        });
-        
-        // جلب آخر قراءة حالية
-        readingsRef.orderByKey().limitToLast(1).once('value', (snapshot) => {
-            const readings = snapshot.val();
-            if (readings) {
-                const lastKey = Object.keys(readings)[0];
-                const lastReading = readings[lastKey];
-                if (lastReading && lastReading.vitals) {
-                    updateDoctorUICareSync({
-                        sbp: lastReading.vitals.systolic_bp,
-                        dbp: lastReading.vitals.diastolic_bp,
-                        glucose: lastReading.vitals.glucose,
-                        hr: lastReading.vitals.heart_rate
-                    });
-                }
-            }
-        });
-    }).catch(error => {
-        console.error('Doctor Firebase error:', error);
-    });
-}
-
-// بدء المزامنة بعد تحميل الصفحة
-setTimeout(() => {
-    startDoctorFirebaseSync();
-}, 3000);
 
     // ==================== INITIAL PAGE ====================
     showPage('dashboard');
+    
+    // بدء Firebase sync بعد 2 ثانية
+    setTimeout(() => {
+        startDoctorFirebaseSync();
+    }, 2000);
+    
+    // بدء المحاكاة كنسخة احتياطية
+    setTimeout(() => {
+        startSimulation();
+    }, 3000);
 })();
