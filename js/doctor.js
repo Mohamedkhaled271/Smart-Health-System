@@ -29,6 +29,22 @@
     // ==================== GLOBAL VARIABLES ====================
     let mqttSimInterval;
     let alertSoundEnabled = true;
+    
+    // تعريف database
+    let database = null;
+    
+    // انتظار تحميل Firebase
+    function waitForFirebase() {
+        if (typeof firebase !== 'undefined' && firebase.database) {
+            database = firebase.database();
+            console.log("✅ Firebase database initialized");
+            startDoctorFirebaseSync();
+            startSimulation();
+        } else {
+            console.log("⏳ Waiting for Firebase...");
+            setTimeout(waitForFirebase, 500);
+        }
+    }
 
     // -------------------- Alert Sound --------------------
     const alertSound = (() => {
@@ -150,7 +166,7 @@
         if (tempChart) { tempChart.data.labels = timeLabels; tempChart.data.datasets[0].data = tempHistory; tempChart.update(); }
     }
 
-    // ==================== UPDATE DOCTOR VITALS DISPLAY (المتوافقة مع HTML الجديد) ====================
+    // ==================== UPDATE DOCTOR VITALS DISPLAY ====================
     function updateDoctorHeartRate(value) {
         const el = document.getElementById('doctorHeartValue');
         if (el) el.innerHTML = value + ' <span>bpm</span>';
@@ -226,14 +242,76 @@
         if (el) el.innerHTML = value.toFixed(1) + ' <span>m/s²</span>';
     }
 
+    // ==================== جلب المرضى من users ====================
+    async function loadPatientsFromUsers() {
+        if (!database) return;
+        
+        try {
+            console.log("🔄 Loading patients from users...");
+            const snapshot = await database.ref('users').once('value');
+            const users = snapshot.val();
+            
+            if (!users) {
+                console.log("❌ No users found!");
+                return;
+            }
+            
+            const patientsList = [];
+            for (const [uid, userData] of Object.entries(users)) {
+                if (userData.role === 'patient') {
+                    patientsList.push({
+                        uid: uid,
+                        name: userData.name || "Unknown",
+                        email: userData.email || ""
+                    });
+                    console.log(`✅ Found patient: ${userData.name} (${uid})`);
+                }
+            }
+            
+            console.log(`📊 Total patients found: ${patientsList.length}`);
+            
+            // تحديث عدد المرضى
+            const totalPatientsEl = document.getElementById('totalPatients');
+            const dashboardTotalEl = document.getElementById('dashboardTotalPatients');
+            if (totalPatientsEl) totalPatientsEl.innerHTML = patientsList.length;
+            if (dashboardTotalEl) dashboardTotalEl.innerHTML = patientsList.length;
+            
+            // تحديث قائمة المرضى في Lab Results Page
+            const labSelect = document.getElementById('labPatientSelect');
+            if (labSelect) {
+                labSelect.innerHTML = '<option value="">-- Select Patient --</option>';
+                for (const patient of patientsList) {
+                    const option = document.createElement('option');
+                    option.value = patient.uid;
+                    option.textContent = patient.name;
+                    labSelect.appendChild(option);
+                }
+                console.log(`✅ Added ${patientsList.length} patients to Lab select`);
+            }
+            
+            // تحديث قائمة المرضى في Patient Vitals Page
+            const vitalsSelect = document.getElementById('vitalsPatientSelect');
+            if (vitalsSelect) {
+                vitalsSelect.innerHTML = '<option value="">-- Select Patient --</option>';
+                for (const patient of patientsList) {
+                    const option = document.createElement('option');
+                    option.value = patient.uid;
+                    option.textContent = patient.name;
+                    vitalsSelect.appendChild(option);
+                }
+                console.log(`✅ Added ${patientsList.length} patients to Vitals select`);
+            }
+            
+        } catch (error) {
+            console.error("❌ Error loading patients:", error);
+        }
+    }
+
     // ==================== FIREBASE REAL-TIME DATA ====================
     let firebaseDoctorPatientId = null;
 
     async function getDoctorLatestPatientId() {
-        if (typeof firebase === 'undefined') {
-            console.warn('Firebase not loaded');
-            return null;
-        }
+        if (!database) return null;
         try {
             const snapshot = await database.ref('patients').once('value');
             const patients = snapshot.val();
@@ -261,9 +339,8 @@
     }
 
     function startDoctorFirebaseSync() {
-        if (typeof firebase === 'undefined' || !database) {
-            console.log('Waiting for Firebase...');
-            setTimeout(startDoctorFirebaseSync, 2000);
+        if (!database) {
+            console.log('Waiting for database...');
             return;
         }
         
@@ -289,7 +366,6 @@
         getDoctorLatestPatientId().then(patientId => {
             if (!patientId) {
                 console.log('No Care Sync patient data found yet...');
-                setTimeout(startDoctorFirebaseSync, 10000);
                 return;
             }
             
@@ -440,13 +516,13 @@
     // ==================== INITIAL PAGE ====================
     showPage('dashboard');
     
-    // بدء Firebase sync بعد 2 ثانية
+    // بدء تحميل المرضى و Firebase sync
     setTimeout(() => {
-        startDoctorFirebaseSync();
-    }, 2000);
+        loadPatientsFromUsers();
+    }, 500);
     
-    // بدء المحاكاة كنسخة احتياطية
+    // بدء Firebase sync
     setTimeout(() => {
-        startSimulation();
-    }, 3000);
+        waitForFirebase();
+    }, 1000);
 })();
