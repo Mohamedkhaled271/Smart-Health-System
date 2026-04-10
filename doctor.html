@@ -85,7 +85,8 @@
         
         <!-- Stats Grid -->
         <div class="stats-grid">
-            <div class="stat-card"><div class="stat-title">HEALTH SCORE</div><div class="stat-value" id="healthScore">--</div><div class="stat-sub">Based on vitals</div></div>
+            <div class="stat-card"><div class="stat-title">TOTAL PATIENTS</div><div class="stat-value" id="totalPatients">--</div><div class="stat-sub">Registered in system</div></div>
+            <div class="stat-card"><div class="stat-title">CRITICAL CASES</div><div class="stat-value" id="criticalCases">--</div><div class="stat-sub">Need immediate attention</div></div>
             <div class="stat-card"><div class="stat-title">LAST UPDATE</div><div class="stat-value" style="font-size:1.2rem;" id="lastUpdate">--</div><div class="stat-sub">Firebase sync</div></div>
             <div class="stat-card"><div class="stat-title">CARE SYNC</div><div class="stat-value" style="font-size:1rem;" id="careSyncStatus">Waiting...</div><div class="stat-sub">PIMA Model</div></div>
         </div>
@@ -217,13 +218,13 @@
         <div id="labSaveStatus" style="margin-top: 15px; padding: 10px; border-radius: 8px; text-align: center; display: none;"></div>
     </div>
 
-    <!-- ==================== OTHER PAGES (keep existing) ==================== -->
+    <!-- ==================== OTHER PAGES ==================== -->
     <div class="page-section" id="dashboardPage">
         <div class="stats-grid">
-            <div class="stat-card"><div class="stat-title">Total Patients</div><div class="stat-value" id="totalPatients">248</div><div class="stat-sub"><i class="fas fa-arrow-up"></i> +12%</div></div>
-            <div class="stat-card"><div class="stat-title">Critical Cases</div><div class="stat-value" id="criticalCases">12</div><div class="stat-sub"><i class="fas fa-exclamation-triangle" style="color:#e11d48;"></i> high</div></div>
-            <div class="stat-card"><div class="stat-title">Avg. HR (today)</div><div class="stat-value" id="avgHR">74 <span style="font-size:1rem;">bpm</span></div><div class="stat-sub">normal range</div></div>
-            <div class="stat-card"><div class="stat-title">Bed Occupancy</div><div class="stat-value" id="bedOccupancy">86<small style="font-size:1rem;">%</small></div><div class="stat-sub">32/37 beds</div></div>
+            <div class="stat-card"><div class="stat-title">Total Patients</div><div class="stat-value" id="dashboardTotalPatients">--</div><div class="stat-sub">Registered</div></div>
+            <div class="stat-card"><div class="stat-title">Critical Cases</div><div class="stat-value" id="dashboardCriticalCases">--</div><div class="stat-sub">Need attention</div></div>
+            <div class="stat-card"><div class="stat-title">Avg. HR (today)</div><div class="stat-value" id="avgHR">-- <span style="font-size:1rem;">bpm</span></div><div class="stat-sub">normal range</div></div>
+            <div class="stat-card"><div class="stat-title">Bed Occupancy</div><div class="stat-value" id="bedOccupancy">--<small style="font-size:1rem;">%</small></div><div class="stat-sub">--/-- beds</div></div>
         </div>
         <div class="alerts-section"><div class="alerts-header"><h3><i class="fas fa-bell"></i> Active Alerts</h3><button class="mute-button" id="muteAlerts"><i class="fas fa-volume-up"></i> Mute</button></div><div class="alerts-list" id="alertsList"></div></div>
     </div>
@@ -236,7 +237,7 @@
 </main>
 </div>
 
-<!-- Firebase -->
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -267,6 +268,52 @@ function updateDoctorIndicator(id, value, normalMin, normalMax, warnMin, warnMax
     else { el.className = 'indicator-normal'; el.innerHTML = 'Normal'; }
 }
 
+// ==================== عرض إحصائيات المرضى من Firebase ====================
+async function updatePatientStats() {
+    try {
+        const snapshot = await database.ref('patients').once('value');
+        const patients = snapshot.val();
+        
+        if (patients) {
+            const patientCount = Object.keys(patients).length;
+            
+            // تحديث عدد المرضى في جميع الأماكن
+            const totalPatientsEl = document.getElementById('totalPatients');
+            const dashboardTotalEl = document.getElementById('dashboardTotalPatients');
+            if (totalPatientsEl) totalPatientsEl.innerHTML = patientCount;
+            if (dashboardTotalEl) dashboardTotalEl.innerHTML = patientCount;
+            
+            // حساب عدد الحالات الحرجة
+            let criticalCount = 0;
+            for (const pid of Object.keys(patients)) {
+                const readings = patients[pid]?.readings;
+                if (readings) {
+                    const lastReading = Object.values(readings).pop();
+                    if (lastReading?.vitals) {
+                        const glucose = lastReading.vitals.glucose;
+                        const sbp = lastReading.vitals.systolic_bp;
+                        if ((glucose && glucose > 200) || (sbp && sbp > 160)) {
+                            criticalCount++;
+                        }
+                    }
+                }
+            }
+            
+            const criticalCasesEl = document.getElementById('criticalCases');
+            const dashboardCriticalEl = document.getElementById('dashboardCriticalCases');
+            if (criticalCasesEl) criticalCasesEl.innerHTML = criticalCount;
+            if (dashboardCriticalEl) dashboardCriticalEl.innerHTML = criticalCount;
+            
+            console.log(`📊 Patient Stats: ${patientCount} total, ${criticalCount} critical`);
+        }
+    } catch (error) {
+        console.error('Error updating patient stats:', error);
+    }
+}
+
+// تحديث إحصائيات المرضى كل 30 ثانية
+setInterval(updatePatientStats, 30000);
+
 // ==================== PATIENT VITALS DISPLAY ====================
 async function loadPatientsForVitals() {
     const snapshot = await database.ref('patients').once('value');
@@ -286,6 +333,8 @@ async function loadPatientsForVitals() {
             startVitalsListener(Object.keys(patients)[0]);
         }
     }
+    // تحديث الإحصائيات عند التحميل
+    updatePatientStats();
 }
 
 function startVitalsListener(patientId) {
@@ -482,16 +531,20 @@ async function saveLabResultsToFirebase() {
         await database.ref(`patients/${currentLabPatientId}/labResults`).set(labData);
         await database.ref(`patients/${currentLabPatientId}/doctorNotes`).set(doctorNotes);
         showLabStatus('✅ Saved successfully! Patient page will update automatically.', 'success');
+        // تحديث الإحصائيات بعد الحفظ
+        updatePatientStats();
     } catch(error) { showLabStatus('❌ Error: ' + error.message, 'error'); }
 }
 
 function showLabStatus(msg, type) {
     const div = document.getElementById('labSaveStatus');
-    div.textContent = msg;
-    div.style.display = 'block';
-    div.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
-    div.style.color = 'white';
-    setTimeout(() => div.style.display = 'none', 5000);
+    if(div) {
+        div.textContent = msg;
+        div.style.display = 'block';
+        div.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
+        div.style.color = 'white';
+        setTimeout(() => div.style.display = 'none', 5000);
+    }
 }
 
 // Navigation
@@ -529,6 +582,7 @@ document.getElementById('collapseSidebar')?.addEventListener('click', () => {
 setTimeout(() => {
     loadPatientsForVitals();
     loadLabPatients();
+    updatePatientStats();
 }, 2000);
 
 // Style for indicators
