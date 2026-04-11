@@ -844,7 +844,156 @@
             
 
             <!-- Other Pages -->
-            <div class="page-section" id="profilePage"><h2>My Profile</h2><div class="stat-card"><p>Patient profile information</p></div></div>
+            <div class="page-section" id="profilePage">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #0284c7, #0ea5e9); -webkit-background-clip: text; background-clip: text; color: transparent;">
+                <i class="fas fa-user-circle"></i> My Profile
+            </h2>
+            <p style="color: var(--text-secondary);">Manage your personal information and medical details</p>
+        </div>
+        <button class="export-btn" id="editProfileBtn" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); padding: 0.7rem 1.8rem;">
+            <i class="fas fa-edit"></i> Edit Profile
+        </button>
+    </div>
+
+    <!-- Profile Main Card -->
+    <div class="vital-card" style="padding: 2rem;">
+        <div style="display: flex; flex-wrap: wrap; gap: 2rem; align-items: flex-start;">
+            <!-- Profile Image & Basic Info -->
+            <div style="text-align: center; min-width: 200px;">
+                <div style="width: 150px; height: 150px; background: linear-gradient(135deg, #0284c7, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; box-shadow: 0 10px 30px rgba(2,132,199,0.3);">
+                    <i class="fas fa-user-md" style="font-size: 4rem; color: white;"></i>
+                </div>
+                <h3 id="profileName" style="font-size: 1.5rem; font-weight: 700;">Ahmed Mohamed</h3>
+                <p style="color: var(--text-secondary);"><i class="fas fa-id-card"></i> Patient ID: <span id="profileId">P-10042</span></p>
+                <div style="margin-top: 1rem;">
+                    <span style="background: rgba(16,185,129,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">
+                        <i class="fas fa-check-circle" style="color: #10b981;"></i> Verified
+                    </span>
+                </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div style="flex: 1;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <div>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Full Name</label>
+                            <p style="font-size: 1rem; font-weight: 600; margin-top: 5px;" id="profileFullName">Ahmed Mohamed Ali</p>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Email Address</label>
+                            <p style="font-size: 1rem; font-weight: 600; margin-top: 5px;" id="profileEmail">ahmed.mohamed@example.com</p>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Phone Number</label>
+                            <p style="font-size: 1rem; font-weight: 600; margin-top: 5px;" id="profilePhone">+20 123 456 7890</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Date of Birth</label>
+                            <p style="font-size: 1rem; font-weight: 600; margin-top: 5px;" id="profileDob">15 March 1985</p>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Gender</label>
+                            <p style="font-size: 1rem; font-weight: 600; margin-top: 5px;" id="profileGender">Male</p>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Blood Type</label>
+                            <p style="font-size: 1rem; font-weight: 600; margin-top: 5px;" id="profileBloodType">O+</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vital Stats Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
+        <div class="stat-card" style="text-align: center;">
+            <i class="fas fa-weight-scale" style="font-size: 2rem; color: #10b981;"></i>
+            <div class="stat-title" style="margin-top: 0.5rem;">Weight</div>
+            <div class="stat-value" style="font-size: 1.3rem;" id="profileWeight">78 kg</div>
+        </div>
+        <div class="stat-card" style="text-align: center;">
+            <i class="fas fa-ruler" style="font-size: 2rem; color: #3b82f6;"></i>
+            <div class="stat-title" style="margin-top: 0.5rem;">Height</div>
+            <div class="stat-value" style="font-size: 1.3rem;" id="profileHeight">175 cm</div>
+        </div>
+        <div class="stat-card" style="text-align: center;">
+            <i class="fas fa-calculator" style="font-size: 2rem; color: #f59e0b;"></i>
+            <div class="stat-title" style="margin-top: 0.5rem;">BMI</div>
+            <div class="stat-value" style="font-size: 1.3rem;" id="profileBMI">25.5</div>
+            <div class="stat-sub" id="bmiStatus">Overweight</div>
+        </div>
+        <div class="stat-card" style="text-align: center;">
+            <i class="fas fa-tint" style="font-size: 2rem; color: #ef4444;"></i>
+            <div class="stat-title" style="margin-top: 0.5rem;">Blood Glucose</div>
+            <div class="stat-value" style="font-size: 1.3rem;" id="profileGlucose">-- mg/dL</div>
+        </div>
+        <div class="stat-card" style="text-align: center;">
+            <i class="fas fa-heartbeat" style="font-size: 2rem; color: #ec4899;"></i>
+            <div class="stat-title" style="margin-top: 0.5rem;">Blood Pressure</div>
+            <div class="stat-value" style="font-size: 1.3rem;" id="profileBP">--/--</div>
+        </div>
+    </div>
+
+    <!-- Medical Information -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+        <div class="vital-card">
+            <h3 style="margin-bottom: 1rem;"><i class="fas fa-stethoscope"></i> Medical History</h3>
+            <div style="margin-bottom: 0.8rem;">
+                <span style="color: var(--text-secondary);">Chronic Diseases:</span>
+                <p id="profileChronic" style="font-weight: 500;">Type 2 Diabetes, Hypertension</p>
+            </div>
+            <div style="margin-bottom: 0.8rem;">
+                <span style="color: var(--text-secondary);">Allergies:</span>
+                <p id="profileAllergies" style="font-weight: 500;">Penicillin, Dust</p>
+            </div>
+            <div>
+                <span style="color: var(--text-secondary);">Current Medications:</span>
+                <p id="profileMedications" style="font-weight: 500;">Metformin 500mg, Lisinopril 10mg</p>
+            </div>
+        </div>
+
+        <div class="vital-card">
+            <h3 style="margin-bottom: 1rem;"><i class="fas fa-map-marker-alt"></i> Contact & Emergency</h3>
+            <div style="margin-bottom: 0.8rem;">
+                <span style="color: var(--text-secondary);">Address:</span>
+                <p id="profileAddress" style="font-weight: 500;">42 Nile Street, Cairo, Egypt</p>
+            </div>
+            <div style="margin-bottom: 0.8rem;">
+                <span style="color: var(--text-secondary);">Emergency Contact:</span>
+                <p id="profileEmergency" style="font-weight: 500;">Sara Ahmed - +20 122 345 6789</p>
+            </div>
+            <div>
+                <span style="color: var(--text-secondary);">Primary Physician:</span>
+                <p id="profilePhysician" style="font-weight: 500;">Dr. Sarah Ahmed (Cardiology)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid" style="margin-top: 0;">
+        <div class="stat-card">
+            <div class="stat-title"><i class="fas fa-calendar-check"></i> Total Visits</div>
+            <div class="stat-value" id="totalVisits">24</div>
+            <div class="stat-sub">Last 12 months</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title"><i class="fas fa-pills"></i> Active Prescriptions</div>
+            <div class="stat-value" id="activePrescriptions">3</div>
+            <div class="stat-sub">Current medications</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title"><i class="fas fa-flask"></i> Lab Tests (2024)</div>
+            <div class="stat-value" id="labTestsCount">8</div>
+            <div class="stat-sub">Completed</div>
+        </div>
+    </div>
+</div>
             <div class="page-section" id="historyPage"><h2>Medical History</h2><div class="stat-card"><p>Historical records will appear here</p></div></div>
             <div class="page-section" id="appointmentsPage"><h2>Appointments</h2><div class="stat-card"><p>Upcoming appointments</p></div></div>
             <div class="page-section" id="reportsPage"><h2>Health Reports</h2><div class="stat-card"><p>Submit or view reports</p></div></div>
