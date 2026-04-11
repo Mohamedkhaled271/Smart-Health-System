@@ -54,7 +54,7 @@
                 const firstPatient = document.getElementById('labPatientSelect')?.value;
                 if(firstPatient) {
                     startVitalsListener(firstPatient);
-                    startDataListener(firstPatient);
+                    // startDataListener(firstPatient);  // Commented out - elements not in HTML
                 }
             }, 1500);
         } else {
@@ -427,7 +427,8 @@
             if (totalEl) totalEl.innerHTML = patientsList.length;
             if (dashboardTotalEl) dashboardTotalEl.innerHTML = patientsList.length;
             
-            const selects = ['vitalsPatientSelect', 'labPatientSelect', 'patientDataSelect'];
+            // Removed 'patientDataSelect' as it doesn't exist in HTML
+            const selects = ['vitalsPatientSelect', 'labPatientSelect'];
             for (const selectId of selects) {
                 const select = document.getElementById(selectId);
                 if (select) {
@@ -877,7 +878,8 @@
     // ==================== EVENT LISTENERS ====================
     document.getElementById('vitalsPatientSelect')?.addEventListener('change', (e) => { if(e.target.value) startVitalsListener(e.target.value); });
     document.getElementById('labPatientSelect')?.addEventListener('change', (e) => { if(e.target.value) { currentLabPatientId = e.target.value; loadExistingLabData(currentLabPatientId); } });
-    document.getElementById('patientDataSelect')?.addEventListener('change', (e) => { if(e.target.value) startDataListener(e.target.value); });
+    // Removed patientDataSelect listener as it's not used
+    // document.getElementById('patientDataSelect')?.addEventListener('change', (e) => { if(e.target.value) startDataListener(e.target.value); });
 
     const saveBtn = document.getElementById('saveLabResultsBtn');
     if (saveBtn) {
