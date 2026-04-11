@@ -519,7 +519,329 @@
                     <div class="alerts-header"><h3><i class="fas fa-bell"></i> Critical Alerts</h3><button class="mute-button" id="muteAlerts" style="background:transparent;border:1px solid var(--border);padding:0.3rem 1rem;border-radius:20px;">Mute</button></div>
                     <div class="alerts-list" id="alertsList"><div class="alert-item">✅ All vitals within normal range</div></div>
                 </div>
+                   <!-- ==================== LABORATORY RESULTS SECTION (ENTERED BY DOCTOR) ==================== -->
+                <div class="lab-results-section" style="margin: 2rem 0;">
+                    <div class="section-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); width: 50px; height: 50px; border-radius: 25px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(139,92,246,0.4);">
+                                <i class="fas fa-microscope" style="font-size: 1.8rem; color: white;"></i>
+                            </div>
+                            <div>
+                                <h2 style="font-size: 1.6rem; font-weight: 700; background: linear-gradient(135deg, #8b5cf6, #c084fc); -webkit-background-clip: text; background-clip: text; color: transparent;">🔬 Laboratory Results</h2>
+                                <p style="font-size: 0.8rem; color: var(--text-secondary);">Entered by Doctor · Last updated: <span id="labLastUpdate">Today</span></p>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <span style="background: rgba(139,92,246,0.2); padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; color: #8b5cf6;"><i class="fas fa-chart-line"></i> Reference ranges shown</span>
+                        </div>
+                    </div>
+                    
+                    <div class="vital-card" style="padding: 1.8rem; background: linear-gradient(135deg, var(--surface), rgba(139,92,246,0.03));">
+                        
+                        <!-- الصف الأول: Diabetes + Kidney -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                            
+                            <!-- 🩸 Diabetes Profile Card -->
+                            <div style="background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.02)); border-radius: 24px; padding: 1.3rem; border: 1px solid rgba(239,68,68,0.25); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(239,68,68,0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1.2rem; border-bottom: 2px solid rgba(239,68,68,0.3); padding-bottom: 0.8rem;">
+                                    <div style="background: linear-gradient(135deg, #ef4444, #dc2626); width: 45px; height: 45px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-droplet" style="font-size: 1.4rem; color: white;"></i>
+                                    </div>
+                                    <div>
+                                        <h3 style="color: #ef4444; font-weight: 700;">🩸 Diabetes Profile</h3>
+                                        <small style="color: var(--text-secondary);">Glucose & Metabolic Control</small>
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed rgba(239,68,68,0.15);">
+                                        <span><i class="fas fa-chart-line" style="color: #ef4444; width: 25px;"></i> Fasting Blood Glucose (FBG)</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_fbg">118</span>
+                                            <span style="font-size: 0.7rem;"> mg/dL</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: 70-100</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed rgba(239,68,68,0.15);">
+                                        <span><i class="fas fa-chart-line" style="color: #ef4444; width: 25px;"></i> HbA1c</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_hba1c">5.7</span>
+                                            <span style="font-size: 0.7rem;"> %</span>
+                                            <div style="font-size: 0.6rem; color: #f59e0b;">Prediabetes: 5.7-6.4</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed rgba(239,68,68,0.15);">
+                                        <span><i class="fas fa-utensils" style="color: #ef4444; width: 25px;"></i> Postprandial Glucose (PPG)</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_ppg">140</span>
+                                            <span style="font-size: 0.7rem;"> mg/dL</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: <140</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0;">
+                                        <span><i class="fas fa-random" style="color: #ef4444; width: 25px;"></i> Random Blood Sugar (RBS)</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_rbs">125</span>
+                                            <span style="font-size: 0.7rem;"> mg/dL</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: <140</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 🫀 Kidney Function Card -->
+                            <div style="background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(59,130,246,0.02)); border-radius: 24px; padding: 1.3rem; border: 1px solid rgba(59,130,246,0.25); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(59,130,246,0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1.2rem; border-bottom: 2px solid rgba(59,130,246,0.3); padding-bottom: 0.8rem;">
+                                    <div style="background: linear-gradient(135deg, #3b82f6, #2563eb); width: 45px; height: 45px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-kidneys" style="font-size: 1.4rem; color: white;"></i>
+                                    </div>
+                                    <div>
+                                        <h3 style="color: #3b82f6; font-weight: 700;">🫀 Kidney Function</h3>
+                                        <small style="color: var(--text-secondary);">Renal Profile</small>
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed rgba(59,130,246,0.15);">
+                                        <span><i class="fas fa-flask" style="color: #3b82f6; width: 25px;"></i> Creatinine</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_creatinine">0.9</span>
+                                            <span style="font-size: 0.7rem;"> mg/dL</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: 0.6-1.2</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed rgba(59,130,246,0.15);">
+                                        <span><i class="fas fa-chart-line" style="color: #3b82f6; width: 25px;"></i> Blood Urea Nitrogen (BUN)</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_bun">12</span>
+                                            <span style="font-size: 0.7rem;"> mg/dL</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: 7-20</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed rgba(59,130,246,0.15);">
+                                        <span><i class="fas fa-calculator" style="color: #3b82f6; width: 25px;"></i> eGFR</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_egfr">95</span>
+                                            <span style="font-size: 0.7rem;"> mL/min</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: >60</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0;">
+                                        <span><i class="fas fa-crystal" style="color: #3b82f6; width: 25px;"></i> Uric Acid</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_uric_acid">5.2</span>
+                                            <span style="font-size: 0.7rem;"> mg/dL</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: 3.5-7.2</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- الصف الثاني: Liver + Thyroid -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                            
+                            <!-- 🧪 Liver Function Card -->
+                            <div style="background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.02)); border-radius: 24px; padding: 1.3rem; border: 1px solid rgba(16,185,129,0.25); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(16,185,129,0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1.2rem; border-bottom: 2px solid rgba(16,185,129,0.3); padding-bottom: 0.8rem;">
+                                    <div style="background: linear-gradient(135deg, #10b981, #059669); width: 45px; height: 45px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-liver" style="font-size: 1.4rem; color: white;"></i>
+                                    </div>
+                                    <div>
+                                        <h3 style="color: #10b981; font-weight: 700;">🧪 Liver Function</h3>
+                                        <small style="color: var(--text-secondary);">Hepatic Panel</small>
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed rgba(16,185,129,0.15);">
+                                        <span><i class="fas fa-chart-line" style="color: #10b981; width: 25px;"></i> ALT (SGPT)</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_alt">25</span>
+                                            <span style="font-size: 0.7rem;"> U/L</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: 10-40</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed rgba(16,185,129,0.15);">
+                                        <span><i class="fas fa-chart-line" style="color: #10b981; width: 25px;"></i> AST (SGOT)</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_ast">22</span>
+                                            <span style="font-size: 0.7rem;"> U/L</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: 10-35</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed rgba(16,185,129,0.15);">
+                                        <span><i class="fas fa-chart-line" style="color: #10b981; width: 25px;"></i> ALP</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_alp">70</span>
+                                            <span style="font-size: 0.7rem;"> U/L</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: 30-120</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0;">
+                                        <span><i class="fas fa-chart-line" style="color: #10b981; width: 25px;"></i> Bilirubin (Total)</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_bilirubin">0.8</span>
+                                            <span style="font-size: 0.7rem;"> mg/dL</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: 0.3-1.2</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 🦋 Thyroid Function Card -->
+                            <div style="background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.02)); border-radius: 24px; padding: 1.3rem; border: 1px solid rgba(245,158,11,0.25); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(245,158,11,0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1.2rem; border-bottom: 2px solid rgba(245,158,11,0.3); padding-bottom: 0.8rem;">
+                                    <div style="background: linear-gradient(135deg, #f59e0b, #d97706); width: 45px; height: 45px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-thyroid" style="font-size: 1.4rem; color: white;"></i>
+                                    </div>
+                                    <div>
+                                        <h3 style="color: #f59e0b; font-weight: 700;">🦋 Thyroid Function</h3>
+                                        <small style="color: var(--text-secondary);">Thyroid Profile</small>
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed rgba(245,158,11,0.15);">
+                                        <span><i class="fas fa-chart-line" style="color: #f59e0b; width: 25px;"></i> TSH</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_tsh">2.5</span>
+                                            <span style="font-size: 0.7rem;"> µIU/mL</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: 0.4-4.0</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed rgba(245,158,11,0.15);">
+                                        <span><i class="fas fa-chart-line" style="color: #f59e0b; width: 25px;"></i> T3</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_t3">110</span>
+                                            <span style="font-size: 0.7rem;"> ng/dL</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: 80-200</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0;">
+                                        <span><i class="fas fa-chart-line" style="color: #f59e0b; width: 25px;"></i> T4</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_t4">7.5</span>
+                                            <span style="font-size: 0.7rem;"> µg/dL</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: 5-12</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- الصف الثالث: Cardiac + Inflammation -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                            
+                            <!-- ❤️ Cardiac Markers Card -->
+                            <div style="background: linear-gradient(135deg, rgba(236,72,153,0.1), rgba(236,72,153,0.02)); border-radius: 24px; padding: 1.3rem; border: 1px solid rgba(236,72,153,0.25); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(236,72,153,0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1.2rem; border-bottom: 2px solid rgba(236,72,153,0.3); padding-bottom: 0.8rem;">
+                                    <div style="background: linear-gradient(135deg, #ec4899, #db2777); width: 45px; height: 45px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-heartbeat" style="font-size: 1.4rem; color: white;"></i>
+                                    </div>
+                                    <div>
+                                        <h3 style="color: #ec4899; font-weight: 700;">❤️ Cardiac Markers</h3>
+                                        <small style="color: var(--text-secondary);">Cardiac Profile</small>
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed rgba(236,72,153,0.15);">
+                                        <span><i class="fas fa-chart-line" style="color: #ec4899; width: 25px;"></i> Troponin I</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_troponin">0.02</span>
+                                            <span style="font-size: 0.7rem;"> ng/mL</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: <0.04</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed rgba(236,72,153,0.15);">
+                                        <span><i class="fas fa-chart-line" style="color: #ec4899; width: 25px;"></i> CK-MB</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_ckmb">1.2</span>
+                                            <span style="font-size: 0.7rem;"> ng/mL</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: <5.0</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0;">
+                                        <span><i class="fas fa-chart-line" style="color: #ec4899; width: 25px;"></i> NT-proBNP</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_bnp">85</span>
+                                            <span style="font-size: 0.7rem;"> pg/mL</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: <125</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 🔥 Inflammation & Infection Card -->
+                            <div style="background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(139,92,246,0.02)); border-radius: 24px; padding: 1.3rem; border: 1px solid rgba(139,92,246,0.25); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(139,92,246,0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1.2rem; border-bottom: 2px solid rgba(139,92,246,0.3); padding-bottom: 0.8rem;">
+                                    <div style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); width: 45px; height: 45px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-biohazard" style="font-size: 1.4rem; color: white;"></i>
+                                    </div>
+                                    <div>
+                                        <h3 style="color: #8b5cf6; font-weight: 700;">🔥 Inflammation & Infection</h3>
+                                        <small style="color: var(--text-secondary);">Inflammatory Markers</small>
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed rgba(139,92,246,0.15);">
+                                        <span><i class="fas fa-chart-line" style="color: #8b5cf6; width: 25px;"></i> C-Reactive Protein (CRP)</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_crp">2.5</span>
+                                            <span style="font-size: 0.7rem;"> mg/L</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: <5.0</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed rgba(139,92,246,0.15);">
+                                        <span><i class="fas fa-chart-line" style="color: #8b5cf6; width: 25px;"></i> ESR</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_esr">12</span>
+                                            <span style="font-size: 0.7rem;"> mm/hr</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: <20</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0;">
+                                        <span><i class="fas fa-chart-line" style="color: #8b5cf6; width: 25px;"></i> Procalcitonin (PCT)</span>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 1.1rem;" id="lab_pct">0.05</span>
+                                            <span style="font-size: 0.7rem;"> ng/mL</span>
+                                            <div style="font-size: 0.6rem; color: #10b981;">Normal: <0.15</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 🩺 Doctor's Clinical Notes - Improved Section -->
+                        <div style="margin-top: 1.8rem; background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.05)); border-radius: 28px; padding: 1.5rem; border: 1px solid rgba(139,92,246,0.2); backdrop-filter: blur(5px);">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1rem;">
+                                <div style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); width: 45px; height: 45px; border-radius: 25px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-stethoscope" style="font-size: 1.4rem; color: white;"></i>
+                                </div>
+                                <div>
+                                    <h4 style="font-weight: 700; font-size: 1.2rem;">👨‍⚕️ Doctor's Clinical Assessment</h4>
+                                    <p style="font-size: 0.7rem; color: var(--text-secondary);"><i class="fas fa-calendar-alt"></i> Last reviewed: <span id="doctorNotesDate">October 15, 2024</span> | <i class="fas fa-user-md"></i> Dr. Sarah Ahmed (Cardiology)</p>
+                                </div>
+                            </div>
+                            <div id="doctorNotes" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-primary); background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 20px; border-right: 3px solid #8b5cf6;">
+                                <i class="fas fa-quote-right" style="color: #8b5cf6; float: right; opacity: 0.5;"></i>
+                                <p>📋 <strong>Clinical Summary:</strong> Patient presents with well-controlled type 2 diabetes (HbA1c 5.7%). Blood pressure is within normal range. Kidney and liver function tests are normal. Lipid profile shows slightly elevated LDL - advised dietary modifications and increased physical activity.</p>
+                                <p style="margin-top: 10px;">💊 <strong>Recommendations:</strong> Continue Metformin 500mg twice daily. Follow up in 3 months for repeat HbA1c and lipid profile. Start statin therapy if LDL remains >130 mg/dL.</p>
+                                <p style="margin-top: 10px;">✅ <strong>Next Appointment:</strong> January 15, 2025 - 10:00 AM</p>
+                            </div>
+                            <div style="margin-top: 1rem; display: flex; gap: 10px; justify-content: flex-end;">
+                                <span style="font-size: 0.7rem; background: rgba(139,92,246,0.2); padding: 4px 10px; border-radius: 15px;"><i class="fas fa-print"></i> Print Report</span>
+                                <span style="font-size: 0.7rem; background: rgba(16,185,129,0.2); padding: 4px 10px; border-radius: 15px;"><i class="fas fa-download"></i> Download PDF</span>
+                            </div>
+                        </div>
+
+                        <!-- Reference Range Legend -->
+                        <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; padding: 0.8rem; background: rgba(0,0,0,0.03); border-radius: 20px;">
+                            <span style="font-size: 0.65rem;"><span style="display: inline-block; width: 12px; height: 12px; background: #10b981; border-radius: 3px;"></span> Normal Range</span>
+                            <span style="font-size: 0.65rem;"><span style="display: inline-block; width: 12px; height: 12px; background: #f59e0b; border-radius: 3px;"></span> Borderline</span>
+                            <span style="font-size: 0.65rem;"><span style="display: inline-block; width: 12px; height: 12px; background: #ef4444; border-radius: 3px;"></span> Critical / Requires Attention</span>
+                            <span style="font-size: 0.65rem;"><i class="fas fa-sync-alt"></i> Values can be updated by doctor</span>
+                        </div>
+                    </div>
+                </div>
             </div>
+            
 
             <!-- Other Pages -->
             <div class="page-section" id="profilePage"><h2>My Profile</h2><div class="stat-card"><p>Patient profile information</p></div></div>
@@ -1049,6 +1371,150 @@ function startCareSyncListener() {
 setTimeout(() => {
     startCareSyncListener();
 }, 3000);
+        // ==================== LAB RESULTS & DOCTOR NOTES LISTENER ====================
+// هذا الكود يجلب بيانات المعامل وملاحظات الدكتور التي يدخلها الدكتور يدوياً
+// ولا يؤثر على بيانات ESP32 أو AI/Care Sync
+
+function updateLabElement(elementId, value, suffix = '') {
+    const element = document.getElementById(elementId);
+    if (element && value !== undefined && value !== null) {
+        element.innerHTML = `${value} <span style="font-size: 0.8rem;">${suffix}</span>`;
+        element.classList.add('data-update-pulse');
+        setTimeout(() => element.classList.remove('data-update-pulse'), 400);
+    }
+}
+
+function updateAllLabResults(data) {
+    if (!data) return;
+    
+    // 🩸 Diabetes Profile
+    if (data.diabetes) {
+        updateLabElement('lab_fbg', data.diabetes.fbg, 'mg/dL');
+        updateLabElement('lab_hba1c', data.diabetes.hba1c, '%');
+        updateLabElement('lab_ppg', data.diabetes.ppg, 'mg/dL');
+        updateLabElement('lab_rbs', data.diabetes.rbs, 'mg/dL');
+    }
+    
+    // 🫀 Kidney Function
+    if (data.kidney) {
+        updateLabElement('lab_creatinine', data.kidney.creatinine, 'mg/dL');
+        updateLabElement('lab_bun', data.kidney.bun, 'mg/dL');
+        updateLabElement('lab_egfr', data.kidney.egfr, 'mL/min');
+        updateLabElement('lab_uric_acid', data.kidney.uricAcid, 'mg/dL');
+    }
+    
+    // 🧪 Liver Function
+    if (data.liver) {
+        updateLabElement('lab_alt', data.liver.alt, 'U/L');
+        updateLabElement('lab_ast', data.liver.ast, 'U/L');
+        updateLabElement('lab_alp', data.liver.alp, 'U/L');
+        updateLabElement('lab_bilirubin', data.liver.bilirubin, 'mg/dL');
+    }
+    
+    // 🦋 Thyroid Function
+    if (data.thyroid) {
+        updateLabElement('lab_tsh', data.thyroid.tsh, 'µIU/mL');
+        updateLabElement('lab_t3', data.thyroid.t3, 'ng/dL');
+        updateLabElement('lab_t4', data.thyroid.t4, 'µg/dL');
+    }
+    
+    // ❤️ Cardiac Markers
+    if (data.cardiac) {
+        updateLabElement('lab_troponin', data.cardiac.troponin, 'ng/mL');
+        updateLabElement('lab_ckmb', data.cardiac.ckmb, 'ng/mL');
+        updateLabElement('lab_bnp', data.cardiac.bnp, 'pg/mL');
+    }
+    
+    // 🔥 Inflammation
+    if (data.inflammation) {
+        updateLabElement('lab_crp', data.inflammation.crp, 'mg/L');
+        updateLabElement('lab_esr', data.inflammation.esr, 'mm/hr');
+        updateLabElement('lab_pct', data.inflammation.pct, 'ng/mL');
+    }
+    
+    // تحديث وقت آخر تحديث
+    const lastUpdateSpan = document.getElementById('labLastUpdate');
+    if (lastUpdateSpan && data.lastUpdated) {
+        const date = new Date(data.lastUpdated);
+        lastUpdateSpan.innerHTML = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    }
+}
+
+function updateDoctorNotesUI(notes) {
+    if (!notes) return;
+    
+    const doctorNotesDiv = document.getElementById('doctorNotes');
+    const doctorNotesDate = document.getElementById('doctorNotesDate');
+    
+    if (doctorNotesDiv && notes.summary) {
+        doctorNotesDiv.innerHTML = `
+            <i class="fas fa-quote-right" style="color: #8b5cf6; float: right; opacity: 0.5;"></i>
+            <p>📋 <strong>Clinical Summary:</strong> ${notes.summary || 'No summary available'}</p>
+            <p style="margin-top: 10px;">💊 <strong>Recommendations:</strong> ${notes.recommendations || 'No recommendations'}</p>
+            <p style="margin-top: 10px;">✅ <strong>Next Appointment:</strong> ${notes.nextAppointment || 'Not scheduled'}</p>
+        `;
+    }
+    
+    if (doctorNotesDate && notes.doctorName) {
+        doctorNotesDate.innerHTML = `${notes.lastUpdated ? new Date(notes.lastUpdated).toLocaleDateString() : 'Today'} | <i class="fas fa-user-md"></i> ${notes.doctorName}`;
+    }
+}
+
+function startLabResultsSync() {
+    console.log('🔬 Starting lab results sync from Firebase (Doctor input only)...');
+    
+    // انتظار قليلاً لتحميل patientId من Care Sync
+    setTimeout(async () => {
+        let patientId = careSyncPatientId;
+        
+        if (!patientId) {
+            try {
+                const snapshot = await database.ref('patients').once('value');
+                const patients = snapshot.val();
+                if (patients) {
+                    patientId = Object.keys(patients)[0];
+                }
+            } catch(e) { 
+                console.log('Waiting for patient ID...'); 
+            }
+        }
+        
+        if (!patientId) {
+            console.log('No patient found, retrying in 5 seconds...');
+            setTimeout(startLabResultsSync, 5000);
+            return;
+        }
+        
+        console.log(`✅ Listening to lab results for patient: ${patientId}`);
+        console.log('📌 Note: Only Lab Results and Doctor Notes will be updated from Firebase');
+        console.log('📌 ESP32 and AI/Care Sync data remain unchanged');
+        
+        // الاستماع لبيانات المعامل
+        const labResultsRef = database.ref(`patients/${patientId}/labResults`);
+        labResultsRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                updateAllLabResults(data);
+                console.log('📊 Lab results updated from Firebase (Doctor input)');
+            }
+        });
+        
+        // الاستماع لملاحظات الدكتور
+        const doctorNotesRef = database.ref(`patients/${patientId}/doctorNotes`);
+        doctorNotesRef.on('value', (snapshot) => {
+            const notes = snapshot.val();
+            if (notes) {
+                updateDoctorNotesUI(notes);
+                console.log('📝 Doctor notes updated from Firebase');
+            }
+        });
+    }, 3000);
+}
+
+// تشغيل المزامنة بعد تحميل الصفحة
+setTimeout(() => {
+    startLabResultsSync();
+}, 5000);
     </script>
 </body>
 </html>
