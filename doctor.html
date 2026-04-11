@@ -230,6 +230,46 @@
     </main>
 </div>
 
+<!-- ==================== FIX: Hidden elements for missing DOM references ==================== -->
+<div style="display: none;">
+    <!-- For doctorNameSetting -->
+    <input type="text" id="doctorNameSetting" value="Dr. Sarah Ahmed">
+    
+    <!-- For patientDataSelect (used in loadPatientsFromUsers) -->
+    <select id="patientDataSelect"></select>
+    
+    <!-- For exportBtn -->
+    <button id="exportBtn"></button>
+    
+    <!-- For recentPatientsTable (used in globalSearch listener) -->
+    <table id="recentPatientsTable"><tbody></tbody></table>
+    
+    <!-- All elements required by startDataListener (esp32 + AI data) -->
+    <span id="esp32HeartRate"></span>
+    <span id="esp32Spo2"></span>
+    <span id="esp32Temp"></span>
+    <span id="esp32RoomTemp"></span>
+    <span id="esp32Humidity"></span>
+    <span id="esp32Motion"></span>
+    <span id="esp32Status"></span>
+    <span id="dataSyncTime"></span>
+    <span id="aiSbp"></span>
+    <span id="aiDbp"></span>
+    <span id="aiGlucose"></span>
+    <span id="aiHeartRate"></span>
+    <span id="clinicalGlucoseClass"></span>
+    <span id="clinicalBpClass"></span>
+    <span id="clinicalTrend"></span>
+    <span id="aiModelStatus"></span>
+    
+    <!-- Indicators used in updateDoctorIndicator -->
+    <span id="esp32HeartIndicator"></span>
+    <span id="esp32Spo2Indicator"></span>
+    <span id="esp32TempIndicator"></span>
+    <span id="aiSbpIndicator"></span>
+    <span id="aiGlucoseIndicator"></span>
+</div>
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
