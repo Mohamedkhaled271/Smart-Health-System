@@ -848,211 +848,269 @@ document.getElementById('exportBtn')?.addEventListener('click', function() {
         if (mqttSimInterval) clearInterval(mqttSimInterval);
     });
 
-    // ==================== PROFILE PAGE FUNCTIONALITY ====================
-    window.togglePasswordVisibility = function(fieldId) {
-        const field = document.getElementById(fieldId);
-        const icon = field.parentElement.querySelector('.password-toggle i');
-        if (field.type === 'password') {
-            field.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            field.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    };
-
+        // ==================== PROFILE PAGE FUNCTIONALITY ====================
+    
+    // دالة بسيطة للتوافق - لا تفعل شيئاً لأن النظام الجديد يتولى كل شيء
     function initProfilePage() {
-        const editBtn = document.getElementById('editProfileBtn');
-        const saveBtn = document.getElementById('saveProfileBtn');
-        const cancelBtn = document.getElementById('cancelProfileBtn');
-        const changePwdBtn = document.getElementById('changePasswordBtn');
-        const passwordSection = document.getElementById('passwordSection');
-        const savePasswordBtn = document.getElementById('savePasswordBtn');
-        const profileInputs = document.querySelectorAll('.profile-input');
-        const editIcons = document.querySelectorAll('.edit-icon');
-        const profilePicInput = document.getElementById('profilePicInput');
-        const profileImage = document.getElementById('profileImage');
-        const changePicOverlay = document.getElementById('changePicOverlay');
-
-        // Enable editing on field icon click
-        editIcons.forEach(icon => {
-            icon.addEventListener('click', function() {
-                const field = this.dataset.field;
-                const input = document.getElementById(`profile${field.charAt(0).toUpperCase() + field.slice(1)}`);
-                if (input) {
-                    input.readOnly = false;
-                    input.disabled = false;
-                    input.focus();
-                }
-            });
-        });
-
-        // Edit button: show save/cancel, hide edit button, enable all fields
-        editBtn.addEventListener('click', function() {
-            profileInputs.forEach(input => {
-                input.readOnly = false;
-                input.disabled = false;
-            });
-            editBtn.style.display = 'none';
-            saveBtn.style.display = 'inline-block';
-            cancelBtn.style.display = 'inline-block';
-            changePwdBtn.style.display = 'none'; // Hide change password button during edit
-            passwordSection.style.display = 'none'; // Also hide password section if open
-        });
-
-        // Cancel button: revert to original values
-        cancelBtn.addEventListener('click', function() {
-            profileInputs.forEach(input => {
-                const original = input.getAttribute('data-original');
-                if (original !== null) {
-                    input.value = original;
-                }
-                input.readOnly = true;
-                input.disabled = true;
-            });
-            editBtn.style.display = 'inline-block';
-            saveBtn.style.display = 'none';
-            cancelBtn.style.display = 'none';
-            changePwdBtn.style.display = 'inline-block';
-            passwordSection.style.display = 'none';
-            // Clear password fields
-            document.getElementById('newPassword').value = '';
-            document.getElementById('confirmPassword').value = '';
-            showNotification('Edit cancelled');
-        });
-
-        // Save button (main): validate and save all changes (including password if filled)
-        saveBtn.addEventListener('click', function() {
-            // Basic validation
-            const name = document.getElementById('profileName').value.trim();
-            const email = document.getElementById('profileEmail').value.trim();
-            const phone = document.getElementById('profilePhone').value.trim();
-
-            if (!name || !email || !phone) {
-                showNotification('Please fill all required fields', 'error');
-                return;
-            }
-
-            // Email format validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showNotification('Please enter a valid email', 'error');
-                return;
-            }
-
-            // If password section visible and non-empty, validate password
-            if (passwordSection.style.display === 'block') {
-                const newPass = document.getElementById('newPassword').value;
-                const confirmPass = document.getElementById('confirmPassword').value;
-                if (newPass || confirmPass) {
-                    if (!newPass || !confirmPass) {
-                        showNotification('Please fill both password fields', 'error');
-                        return;
-                    }
-                    if (newPass.length < 6) {
-                        showNotification('Password must be at least 6 characters', 'error');
-                        return;
-                    }
-                    if (newPass !== confirmPass) {
-                        showNotification('Passwords do not match', 'error');
-                        return;
-                    }
-                    // Here you would send password change request
-                    showNotification('Password updated successfully');
-                    // Clear password fields
-                    document.getElementById('newPassword').value = '';
-                    document.getElementById('confirmPassword').value = '';
-                }
-            }
-
-            // Save main profile data (simulate)
-            profileInputs.forEach(input => {
-                input.setAttribute('data-original', input.value);
-            });
-
-            // Disable fields
-            profileInputs.forEach(input => {
-                input.readOnly = true;
-                input.disabled = true;
-            });
-
-            editBtn.style.display = 'inline-block';
-            saveBtn.style.display = 'none';
-            cancelBtn.style.display = 'none';
-            changePwdBtn.style.display = 'inline-block';
-            passwordSection.style.display = 'none';
-
-            showNotification('Profile updated successfully!');
-        });
-
-        // Change Password button: toggle password section
-        changePwdBtn.addEventListener('click', function() {
-            if (passwordSection.style.display === 'none') {
-                passwordSection.style.display = 'block';
-            } else {
-                passwordSection.style.display = 'none';
-                // Clear fields when hiding
-                document.getElementById('newPassword').value = '';
-                document.getElementById('confirmPassword').value = '';
-            }
-        });
-
-        // Save Password button (separate): only change password
-        savePasswordBtn.addEventListener('click', function() {
-            const newPass = document.getElementById('newPassword').value;
-            const confirmPass = document.getElementById('confirmPassword').value;
-
-            if (!newPass || !confirmPass) {
-                showNotification('Please fill both password fields', 'error');
-                return;
-            }
-            if (newPass.length < 6) {
-                showNotification('Password must be at least 6 characters', 'error');
-                return;
-            }
-            if (newPass !== confirmPass) {
-                showNotification('Passwords do not match', 'error');
-                return;
-            }
-            // Here you would send password change request
-            showNotification('Password changed successfully!');
-            
-            // Hide section and clear fields
-            passwordSection.style.display = 'none';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('confirmPassword').value = '';
-        });
-
-        // Profile picture upload
-        changePicOverlay.addEventListener('click', function() {
-            profilePicInput.click();
-        });
-
-        profilePicInput.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    profileImage.src = e.target.result;
-                    showNotification('Profile picture updated');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Store original values on load
-        profileInputs.forEach(input => {
-            input.setAttribute('data-original', input.value);
-        });
+        console.log('Profile page ready (new Firebase save system)');
     }
-
-    // Override showPage to call initProfilePage when profile page is shown
+    
+    // ==================== PROFILE PAGE WITH FIREBASE SAVE ====================
+    
+    // جلب بيانات الملف الشخصي من Firebase
+    async function loadProfileFromFirebase() {
+        if (!careSyncPatientId) {
+            setTimeout(loadProfileFromFirebase, 2000);
+            return;
+        }
+        
+        try {
+            const snapshot = await firebase.database().ref(`patients/${careSyncPatientId}/profile`).once('value');
+            const data = snapshot.val();
+            
+            if (data && Object.keys(data).length > 0) {
+                updateProfileUI(data);
+                console.log('📋 Profile loaded from Firebase');
+            } else {
+                // حفظ البيانات الافتراضية لأول مرة
+                const defaultProfile = {
+                    fullName: document.getElementById('profileFullName')?.innerText || 'Ahmed Mohamed Ali',
+                    name: 'Ahmed Mohamed',
+                    email: document.getElementById('profileEmail')?.innerText || 'ahmed.mohamed@example.com',
+                    phone: document.getElementById('profilePhone')?.innerText || '+20 123 456 7890',
+                    dob: '1985-03-15',
+                    gender: 'Male',
+                    bloodType: 'O+',
+                    weight: 78,
+                    height: 175,
+                    address: '42 Nile Street, Cairo, Egypt',
+                    emergencyContact: 'Sara Ahmed - +20 122 345 6789',
+                    physician: 'Dr. Sarah Ahmed (Cardiology)',
+                    chronicDiseases: 'Type 2 Diabetes, Hypertension',
+                    allergies: 'Penicillin, Dust',
+                    medications: 'Metformin 500mg, Lisinopril 10mg',
+                    lastUpdated: Date.now()
+                };
+                await firebase.database().ref(`patients/${careSyncPatientId}/profile`).set(defaultProfile);
+                updateProfileUI(defaultProfile);
+            }
+        } catch (error) {
+            console.error('Error loading profile:', error);
+        }
+    }
+    
+    // تحديث واجهة المستخدم بالبيانات
+    function updateProfileUI(data) {
+        if (data.fullName) document.getElementById('profileFullName').innerText = data.fullName;
+        if (data.name) document.getElementById('profileName').innerText = data.name;
+        if (data.email) document.getElementById('profileEmail').innerText = data.email;
+        if (data.phone) document.getElementById('profilePhone').innerText = data.phone;
+        if (data.dob) {
+            const date = new Date(data.dob);
+            document.getElementById('profileDob').innerText = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        }
+        if (data.gender) document.getElementById('profileGender').innerText = data.gender;
+        if (data.bloodType) document.getElementById('profileBloodType').innerText = data.bloodType;
+        if (data.weight) document.getElementById('profileWeight').innerHTML = data.weight + ' <span style="font-size:0.7rem;">kg</span>';
+        if (data.height) document.getElementById('profileHeight').innerHTML = data.height + ' <span style="font-size:0.7rem;">cm</span>';
+        if (data.address) document.getElementById('profileAddress').innerText = data.address;
+        if (data.emergencyContact) document.getElementById('profileEmergency').innerText = data.emergencyContact;
+        if (data.physician) document.getElementById('profilePhysician').innerText = data.physician;
+        if (data.chronicDiseases) document.getElementById('profileChronic').innerText = data.chronicDiseases;
+        if (data.allergies) document.getElementById('profileAllergies').innerText = data.allergies;
+        if (data.medications) document.getElementById('profileMedications').innerText = data.medications;
+        
+        // حساب BMI
+        if (data.weight && data.height) {
+            const heightM = data.height / 100;
+            const bmi = (data.weight / (heightM * heightM)).toFixed(1);
+            document.getElementById('profileBMI').innerHTML = bmi;
+            
+            let status = '';
+            if (bmi < 18.5) status = 'Underweight';
+            else if (bmi < 25) status = 'Normal';
+            else if (bmi < 30) status = 'Overweight';
+            else status = 'Obese';
+            document.getElementById('bmiStatus').innerText = status;
+        }
+    }
+    
+    // حفظ البيانات إلى Firebase
+    async function saveProfileToFirebase(event) {
+        event.preventDefault();
+        
+        if (!careSyncPatientId) {
+            showNotification('Please wait, loading patient data...', 'error');
+            return;
+        }
+        
+        const profileData = {
+            fullName: document.getElementById('edit_fullName').value,
+            name: document.getElementById('edit_fullName').value.split(' ')[0] || '',
+            email: document.getElementById('edit_email').value,
+            phone: document.getElementById('edit_phone').value,
+            dob: document.getElementById('edit_dob').value,
+            gender: document.getElementById('edit_gender').value,
+            bloodType: document.getElementById('edit_bloodType').value,
+            weight: parseFloat(document.getElementById('edit_weight').value) || 0,
+            height: parseFloat(document.getElementById('edit_height').value) || 0,
+            address: document.getElementById('edit_address').value,
+            emergencyContact: document.getElementById('edit_emergency').value,
+            physician: document.getElementById('edit_physician').value,
+            chronicDiseases: document.getElementById('edit_chronic').value,
+            allergies: document.getElementById('edit_allergies').value,
+            medications: document.getElementById('edit_medications').value,
+            lastUpdated: Date.now()
+        };
+        
+        try {
+            await firebase.database().ref(`patients/${careSyncPatientId}/profile`).set(profileData);
+            updateProfileUI(profileData);
+            closeModal();
+            showNotification('✅ Profile saved successfully!', 'success');
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            showNotification('❌ Error saving profile: ' + error.message, 'error');
+        }
+    }
+    
+    // ==================== EDIT PROFILE MODAL ====================
+    
+    function createEditModal() {
+        if (document.getElementById('editProfileModal')) return;
+        
+        const modalHTML = `
+        <div id="editProfileModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center;">
+            <div style="background: var(--surface); border-radius: 32px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 style="font-size: 1.8rem; font-weight: 700;"><i class="fas fa-user-edit"></i> Edit Profile</h2>
+                    <button id="closeModalBtn" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
+                </div>
+                <form id="profileForm">
+                    <div style="display: grid; gap: 1rem;">
+                        <div><label style="font-weight: 600;">Full Name *</label><input type="text" id="edit_fullName" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
+                        <div><label style="font-weight: 600;">Email *</label><input type="email" id="edit_email" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
+                        <div><label style="font-weight: 600;">Phone Number</label><input type="text" id="edit_phone" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
+                        <div><label style="font-weight: 600;">Date of Birth</label><input type="date" id="edit_dob" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
+                        <div><label style="font-weight: 600;">Gender</label><select id="edit_gender" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"><option>Male</option><option>Female</option><option>Other</option></select></div>
+                        <div><label style="font-weight: 600;">Blood Type</label><select id="edit_bloodType" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
+                        <div><label style="font-weight: 600;">Weight (kg)</label><input type="number" step="0.1" id="edit_weight" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
+                        <div><label style="font-weight: 600;">Height (cm)</label><input type="number" step="0.1" id="edit_height" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
+                        <div><label style="font-weight: 600;">Address</label><textarea id="edit_address" rows="2" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></textarea></div>
+                        <div><label style="font-weight: 600;">Emergency Contact</label><input type="text" id="edit_emergency" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
+                        <div><label style="font-weight: 600;">Primary Physician</label><input type="text" id="edit_physician" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
+                        <div><label style="font-weight: 600;">Chronic Diseases</label><input type="text" id="edit_chronic" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);" placeholder="e.g., Diabetes, Hypertension"></div>
+                        <div><label style="font-weight: 600;">Allergies</label><input type="text" id="edit_allergies" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);" placeholder="e.g., Penicillin, Dust"></div>
+                        <div><label style="font-weight: 600;">Current Medications</label><input type="text" id="edit_medications" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);" placeholder="e.g., Metformin 500mg"></div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <button type="submit" class="export-btn" style="flex: 1;"><i class="fas fa-save"></i> Save Changes</button>
+                        <button type="button" id="cancelModalBtn" style="flex: 1; background: var(--border); border: none; border-radius: 50px; font-weight: 700; cursor: pointer;"><i class="fas fa-times"></i> Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        const modal = document.getElementById('editProfileModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelModalBtn = document.getElementById('cancelModalBtn');
+        const profileForm = document.getElementById('profileForm');
+        
+        window.openEditModal = function() {
+            document.getElementById('edit_fullName').value = document.getElementById('profileFullName')?.innerText || '';
+            document.getElementById('edit_email').value = document.getElementById('profileEmail')?.innerText || '';
+            document.getElementById('edit_phone').value = document.getElementById('profilePhone')?.innerText || '';
+            
+            const dobText = document.getElementById('profileDob')?.innerText || '';
+            if (dobText) {
+                const parts = dobText.split(' ');
+                if (parts.length >= 3) {
+                    const date = new Date(`${parts[1]} ${parts[0]}, ${parts[2]}`);
+                    if (!isNaN(date)) document.getElementById('edit_dob').value = date.toISOString().split('T')[0];
+                }
+            }
+            
+            document.getElementById('edit_gender').value = document.getElementById('profileGender')?.innerText || 'Male';
+            document.getElementById('edit_bloodType').value = document.getElementById('profileBloodType')?.innerText || 'O+';
+            document.getElementById('edit_weight').value = parseFloat(document.getElementById('profileWeight')?.innerText) || '';
+            document.getElementById('edit_height').value = parseFloat(document.getElementById('profileHeight')?.innerText) || '';
+            document.getElementById('edit_address').value = document.getElementById('profileAddress')?.innerText || '';
+            document.getElementById('edit_emergency').value = document.getElementById('profileEmergency')?.innerText || '';
+            document.getElementById('edit_physician').value = document.getElementById('profilePhysician')?.innerText || '';
+            document.getElementById('edit_chronic').value = document.getElementById('profileChronic')?.innerText || '';
+            document.getElementById('edit_allergies').value = document.getElementById('profileAllergies')?.innerText || '';
+            document.getElementById('edit_medications').value = document.getElementById('profileMedications')?.innerText || '';
+            
+            modal.style.display = 'flex';
+        };
+        
+        window.closeModal = function() {
+            modal.style.display = 'none';
+        };
+        
+        closeModalBtn?.addEventListener('click', () => modal.style.display = 'none');
+        cancelModalBtn?.addEventListener('click', () => modal.style.display = 'none');
+        profileForm?.addEventListener('submit', saveProfileToFirebase);
+        modal?.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+    }
+    
+    // ربط زر Edit Profile
+    function bindEditProfileButton() {
+        const editBtn = document.getElementById('editProfileBtn');
+        if (editBtn) {
+            const newEditBtn = editBtn.cloneNode(true);
+            editBtn.parentNode.replaceChild(newEditBtn, editBtn);
+            
+            newEditBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Edit button clicked');
+                if (window.openEditModal) window.openEditModal();
+            });
+        } else {
+            setTimeout(bindEditProfileButton, 1000);
+        }
+    }
+    
+    // تحديث بيانات الضغط والسكر في صفحة Profile
+    function syncVitalsToProfile() {
+        setInterval(() => {
+            const glucoseEl = document.getElementById('glucoseValue');
+            if (glucoseEl && glucoseEl.innerText !== '--') {
+                const glucoseVal = glucoseEl.innerText.split(' ')[0];
+                if (glucoseVal && !isNaN(glucoseVal)) {
+                    const profileGlucose = document.getElementById('profileGlucose');
+                    if (profileGlucose) profileGlucose.innerHTML = glucoseVal + ' <span style="font-size:0.7rem;">mg/dL</span>';
+                }
+            }
+            
+            const bpEl = document.getElementById('bpValue');
+            if (bpEl && bpEl.innerText !== '--/--') {
+                const bpVal = bpEl.innerText.split(' ')[0];
+                if (bpVal) {
+                    const profileBP = document.getElementById('profileBP');
+                    if (profileBP) profileBP.innerHTML = bpVal;
+                }
+            }
+        }, 3000);
+    }
+    
+    // استدعاء الدوال عند تحميل الصفحة
+    setTimeout(() => {
+        console.log('Initializing profile system...');
+        createEditModal();
+        bindEditProfileButton();
+        loadProfileFromFirebase();
+        syncVitalsToProfile();
+    }, 4000);
+    
+    // Override showPage to keep compatibility
     const originalShowPage = showPage;
     showPage = function(pageId) {
         originalShowPage(pageId);
-        // Close any open dropdowns when changing page
         if (filterDropdown) filterDropdown.classList.remove('active');
         if (dateDropdown) dateDropdown.classList.remove('active');
         if (pageId === 'profile') {
@@ -1336,254 +1394,10 @@ document.getElementById('exportBtn')?.addEventListener('click', function() {
     setTimeout(() => {
         startCareSyncListener();
     }, 3000);
-
-    // ==================== INITIAL PAGE ====================
+        // ==================== INITIAL PAGE ====================
     showPage('dashboard');
-        // ==================== PROFILE PAGE WITH FIREBASE SAVE ====================
     
-    // جلب بيانات الملف الشخصي من Firebase
-    async function loadProfileFromFirebase() {
-        if (!careSyncPatientId) {
-            setTimeout(loadProfileFromFirebase, 2000);
-            return;
-        }
+})();
+
         
-        try {
-            const snapshot = await firebase.database().ref(`patients/${careSyncPatientId}/profile`).once('value');
-            const data = snapshot.val();
-            
-            if (data && Object.keys(data).length > 0) {
-                updateProfileUI(data);
-                console.log('📋 Profile loaded from Firebase');
-            } else {
-                // حفظ البيانات الافتراضية لأول مرة
-                const defaultProfile = {
-                    fullName: document.getElementById('profileFullName')?.innerText || 'Ahmed Mohamed Ali',
-                    name: 'Ahmed Mohamed',
-                    email: document.getElementById('profileEmail')?.innerText || 'ahmed.mohamed@example.com',
-                    phone: document.getElementById('profilePhone')?.innerText || '+20 123 456 7890',
-                    dob: '1985-03-15',
-                    gender: 'Male',
-                    bloodType: 'O+',
-                    weight: 78,
-                    height: 175,
-                    address: '42 Nile Street, Cairo, Egypt',
-                    emergencyContact: 'Sara Ahmed - +20 122 345 6789',
-                    physician: 'Dr. Sarah Ahmed (Cardiology)',
-                    chronicDiseases: 'Type 2 Diabetes, Hypertension',
-                    allergies: 'Penicillin, Dust',
-                    medications: 'Metformin 500mg, Lisinopril 10mg',
-                    lastUpdated: Date.now()
-                };
-                await firebase.database().ref(`patients/${careSyncPatientId}/profile`).set(defaultProfile);
-                updateProfileUI(defaultProfile);
-            }
-        } catch (error) {
-            console.error('Error loading profile:', error);
-        }
-    }
-    
-    // تحديث واجهة المستخدم بالبيانات
-    function updateProfileUI(data) {
-        if (data.fullName) document.getElementById('profileFullName').innerText = data.fullName;
-        if (data.name) document.getElementById('profileName').innerText = data.name;
-        if (data.email) document.getElementById('profileEmail').innerText = data.email;
-        if (data.phone) document.getElementById('profilePhone').innerText = data.phone;
-        if (data.dob) {
-            const date = new Date(data.dob);
-            document.getElementById('profileDob').innerText = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-        }
-        if (data.gender) document.getElementById('profileGender').innerText = data.gender;
-        if (data.bloodType) document.getElementById('profileBloodType').innerText = data.bloodType;
-        if (data.weight) document.getElementById('profileWeight').innerHTML = data.weight + ' <span style="font-size:0.7rem;">kg</span>';
-        if (data.height) document.getElementById('profileHeight').innerHTML = data.height + ' <span style="font-size:0.7rem;">cm</span>';
-        if (data.address) document.getElementById('profileAddress').innerText = data.address;
-        if (data.emergencyContact) document.getElementById('profileEmergency').innerText = data.emergencyContact;
-        if (data.physician) document.getElementById('profilePhysician').innerText = data.physician;
-        if (data.chronicDiseases) document.getElementById('profileChronic').innerText = data.chronicDiseases;
-        if (data.allergies) document.getElementById('profileAllergies').innerText = data.allergies;
-        if (data.medications) document.getElementById('profileMedications').innerText = data.medications;
-        
-        // حساب BMI
-        if (data.weight && data.height) {
-            const heightM = data.height / 100;
-            const bmi = (data.weight / (heightM * heightM)).toFixed(1);
-            document.getElementById('profileBMI').innerHTML = bmi;
-            
-            let status = '';
-            if (bmi < 18.5) status = 'Underweight';
-            else if (bmi < 25) status = 'Normal';
-            else if (bmi < 30) status = 'Overweight';
-            else status = 'Obese';
-            document.getElementById('bmiStatus').innerText = status;
-        }
-    }
-    
-    // حفظ البيانات إلى Firebase
-    async function saveProfileToFirebase(event) {
-        event.preventDefault();
-        
-        if (!careSyncPatientId) {
-            showNotification('Please wait, loading patient data...', 'error');
-            return;
-        }
-        
-        const profileData = {
-            fullName: document.getElementById('edit_fullName').value,
-            name: document.getElementById('edit_fullName').value.split(' ')[0] || '',
-            email: document.getElementById('edit_email').value,
-            phone: document.getElementById('edit_phone').value,
-            dob: document.getElementById('edit_dob').value,
-            gender: document.getElementById('edit_gender').value,
-            bloodType: document.getElementById('edit_bloodType').value,
-            weight: parseFloat(document.getElementById('edit_weight').value) || 0,
-            height: parseFloat(document.getElementById('edit_height').value) || 0,
-            address: document.getElementById('edit_address').value,
-            emergencyContact: document.getElementById('edit_emergency').value,
-            physician: document.getElementById('edit_physician').value,
-            chronicDiseases: document.getElementById('edit_chronic').value,
-            allergies: document.getElementById('edit_allergies').value,
-            medications: document.getElementById('edit_medications').value,
-            lastUpdated: Date.now()
-        };
-        
-        try {
-            await firebase.database().ref(`patients/${careSyncPatientId}/profile`).set(profileData);
-            updateProfileUI(profileData);
-            closeModal();
-            showNotification('✅ Profile saved successfully!', 'success');
-        } catch (error) {
-            console.error('Error saving profile:', error);
-            showNotification('❌ Error saving profile: ' + error.message, 'error');
-        }
-    }
-    
-    // ==================== EDIT PROFILE MODAL ====================
-    
-    function createEditModal() {
-        const modalHTML = `
-        <div id="editProfileModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center;">
-            <div style="background: var(--surface); border-radius: 32px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h2 style="font-size: 1.8rem; font-weight: 700;"><i class="fas fa-user-edit"></i> Edit Profile</h2>
-                    <button id="closeModalBtn" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
-                </div>
-                <form id="profileForm">
-                    <div style="display: grid; gap: 1rem;">
-                        <div><label style="font-weight: 600;">Full Name *</label><input type="text" id="edit_fullName" class="stat-card" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
-                        <div><label style="font-weight: 600;">Email *</label><input type="email" id="edit_email" class="stat-card" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
-                        <div><label style="font-weight: 600;">Phone Number</label><input type="text" id="edit_phone" class="stat-card" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
-                        <div><label style="font-weight: 600;">Date of Birth</label><input type="date" id="edit_dob" class="stat-card" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
-                        <div><label style="font-weight: 600;">Gender</label><select id="edit_gender" class="stat-card" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"><option>Male</option><option>Female</option><option>Other</option></select></div>
-                        <div><label style="font-weight: 600;">Blood Type</label><select id="edit_bloodType" class="stat-card" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
-                        <div><label style="font-weight: 600;">Weight (kg)</label><input type="number" step="0.1" id="edit_weight" class="stat-card" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
-                        <div><label style="font-weight: 600;">Height (cm)</label><input type="number" step="0.1" id="edit_height" class="stat-card" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
-                        <div><label style="font-weight: 600;">Address</label><textarea id="edit_address" rows="2" class="stat-card" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></textarea></div>
-                        <div><label style="font-weight: 600;">Emergency Contact</label><input type="text" id="edit_emergency" class="stat-card" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
-                        <div><label style="font-weight: 600;">Primary Physician</label><input type="text" id="edit_physician" class="stat-card" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);"></div>
-                        <div><label style="font-weight: 600;">Chronic Diseases</label><input type="text" id="edit_chronic" class="stat-card" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);" placeholder="e.g., Diabetes, Hypertension"></div>
-                        <div><label style="font-weight: 600;">Allergies</label><input type="text" id="edit_allergies" class="stat-card" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);" placeholder="e.g., Penicillin, Dust"></div>
-                        <div><label style="font-weight: 600;">Current Medications</label><input type="text" id="edit_medications" class="stat-card" style="width: 100%; padding: 0.8rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);" placeholder="e.g., Metformin 500mg"></div>
-                    </div>
-                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                        <button type="submit" class="export-btn" style="flex: 1;"><i class="fas fa-save"></i> Save Changes</button>
-                        <button type="button" id="cancelModalBtn" style="flex: 1; background: var(--border); border: none; border-radius: 50px; font-weight: 700; cursor: pointer;"><i class="fas fa-times"></i> Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        `;
-        
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
-        const modal = document.getElementById('editProfileModal');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const cancelModalBtn = document.getElementById('cancelModalBtn');
-        const profileForm = document.getElementById('profileForm');
-        
-        window.openEditModal = function() {
-            // Load current values into form
-            document.getElementById('edit_fullName').value = document.getElementById('profileFullName')?.innerText || '';
-            document.getElementById('edit_email').value = document.getElementById('profileEmail')?.innerText || '';
-            document.getElementById('edit_phone').value = document.getElementById('profilePhone')?.innerText || '';
-            
-            const dobText = document.getElementById('profileDob')?.innerText || '';
-            if (dobText) {
-                const parts = dobText.split(' ');
-                if (parts.length >= 3) {
-                    const date = new Date(`${parts[1]} ${parts[0]}, ${parts[2]}`);
-                    if (!isNaN(date)) document.getElementById('edit_dob').value = date.toISOString().split('T')[0];
-                }
-            }
-            
-            document.getElementById('edit_gender').value = document.getElementById('profileGender')?.innerText || 'Male';
-            document.getElementById('edit_bloodType').value = document.getElementById('profileBloodType')?.innerText || 'O+';
-            
-            const weightText = document.getElementById('profileWeight')?.innerText || '0';
-            document.getElementById('edit_weight').value = parseFloat(weightText) || '';
-            
-            const heightText = document.getElementById('profileHeight')?.innerText || '0';
-            document.getElementById('edit_height').value = parseFloat(heightText) || '';
-            
-            document.getElementById('edit_address').value = document.getElementById('profileAddress')?.innerText || '';
-            document.getElementById('edit_emergency').value = document.getElementById('profileEmergency')?.innerText || '';
-            document.getElementById('edit_physician').value = document.getElementById('profilePhysician')?.innerText || '';
-            document.getElementById('edit_chronic').value = document.getElementById('profileChronic')?.innerText || '';
-            document.getElementById('edit_allergies').value = document.getElementById('profileAllergies')?.innerText || '';
-            document.getElementById('edit_medications').value = document.getElementById('profileMedications')?.innerText || '';
-            
-            modal.style.display = 'flex';
-        };
-        
-        window.closeModal = function() {
-            modal.style.display = 'none';
-        };
-        
-        closeModalBtn?.addEventListener('click', () => modal.style.display = 'none');
-        cancelModalBtn?.addEventListener('click', () => modal.style.display = 'none');
-        profileForm?.addEventListener('submit', saveProfileToFirebase);
-        
-        modal?.addEventListener('click', (e) => {
-            if (e.target === modal) modal.style.display = 'none';
-        });
-    }
-    
-    // ربط زر Edit Profile
-    function bindEditProfileButton() {
-        const editBtn = document.getElementById('editProfileBtn');
-        if (editBtn) {
-            editBtn.addEventListener('click', () => {
-                if (window.openEditModal) window.openEditModal();
-            });
-        }
-    }
-    
-    // تحديث بيانات الضغط والسكر في صفحة Profile
-    function syncVitalsToProfile() {
-        setInterval(() => {
-            const glucoseEl = document.getElementById('glucoseValue');
-            if (glucoseEl && glucoseEl.innerText !== '--') {
-                const glucoseVal = glucoseEl.innerText.split(' ')[0];
-                if (glucoseVal && !isNaN(glucoseVal)) {
-                    document.getElementById('profileGlucose').innerHTML = glucoseVal + ' <span style="font-size:0.7rem;">mg/dL</span>';
-                }
-            }
-            
-            const bpEl = document.getElementById('bpValue');
-            if (bpEl && bpEl.innerText !== '--/--') {
-                const bpVal = bpEl.innerText.split(' ')[0];
-                if (bpVal) {
-                    document.getElementById('profileBP').innerHTML = bpVal;
-                }
-            }
-        }, 3000);
-    }
-    
-    // استدعاء الدوال عند تحميل الصفحة
-    setTimeout(() => {
-        createEditModal();
-        bindEditProfileButton();
-        loadProfileFromFirebase();
-        syncVitalsToProfile();
-    }, 4000);
 })();
