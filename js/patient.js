@@ -1398,6 +1398,3 @@ document.getElementById('exportBtn')?.addEventListener('click', function() {
     showPage('dashboard');
     
 })();
-
-        
-})();
