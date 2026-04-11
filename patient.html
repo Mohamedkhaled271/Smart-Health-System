@@ -439,6 +439,17 @@
     </style>
 </head>
 <body>
+    <!-- شاشة تسجيل الدخول -->
+<div id="loginModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 10000;">
+    <div style="background: white; border-radius: 40px; padding: 2rem; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.3);">
+        <i class="fas fa-heartbeat" style="font-size: 3rem; color: #0284c7;"></i>
+        <h2 style="margin: 1rem 0; color: #0f172a;">HELIOS Portal</h2>
+        <p style="color: #475569; margin-bottom: 1.5rem;">أدخل Patient ID الخاص بك</p>
+        <input type="text" id="loginPatientId" placeholder="مثال: patient_001" style="width: 100%; padding: 1rem; margin-bottom: 1rem; border-radius: 30px; border: 1px solid #ccc; font-size: 1rem;">
+        <button id="loginBtn" style="width: 100%; padding: 1rem; background: linear-gradient(135deg, #0284c7, #0369a1); border: none; border-radius: 30px; color: white; font-weight: bold; cursor: pointer; font-size: 1rem;">تسجيل الدخول</button>
+        <div id="loginError" style="color: #ef4444; margin-top: 1rem; font-size: 0.8rem;"></div>
+    </div>
+</div>
     <div class="app-wrapper">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -1067,6 +1078,160 @@
         startESP32Listener();
         console.log("✅ HELIOS Dashboard Ready - Listening to ESP32 Firebase Data");
 let careSyncPatientId = null;
+        // إظهار شاشة الدخول
+function showLoginModal() {
+    const modal = document.getElementById('loginModal');
+    if(modal) modal.style.display = 'flex';
+}
+
+// إخفاء شاشة الدخول
+function hideLoginModal() {
+    const modal = document.getElementById('loginModal');
+    if(modal) modal.style.display = 'none';
+}
+
+// دالة تسجيل الدخول
+async function loginUser(patientId) {
+    try {
+        // التحقق من وجود المريض في Firebase
+        const check = await database.ref(`patients/${patientId}`).once('value');
+        
+        if (!check.exists()) {
+            const errorDiv = document.getElementById('loginError');
+            if(errorDiv) errorDiv.innerText = '❌ هذا Patient ID غير موجود';
+            return false;
+        }
+        
+        // حفظ ID المريض
+        currentPatientId = patientId;
+        localStorage.setItem('currentPatientId', patientId);
+        
+        // إخفاء شاشة الدخول
+        hideLoginModal();
+        
+        // بدء جلب بيانات هذا المريض
+        startPatientDataSync(patientId);
+        
+        // عرض اسم المريض في الواجهة
+        const patientData = check.val();
+        if(patientData && patientData.name) {
+            const topBar = document.querySelector('.top-bar');
+            if(topBar && !document.getElementById('patientNameDisplay')) {
+                const nameSpan = document.createElement('span');
+                nameSpan.id = 'patientNameDisplay';
+                nameSpan.style.cssText = 'background: #8b5cf6; padding: 8px 16px; border-radius: 30px; color: white; font-size: 0.8rem; margin-left: 10px;';
+                nameSpan.innerHTML = `<i class="fas fa-user"></i> ${patientData.name}`;
+                topBar.appendChild(nameSpan);
+            }
+        }
+        
+        console.log(`✅ تم تسجيل الدخول للمريض: ${patientId}`);
+        return true;
+        
+    } catch(error) {
+        console.error('خطأ في تسجيل الدخول:', error);
+        const errorDiv = document.getElementById('loginError');
+        if(errorDiv) errorDiv.innerText = '❌ خطأ في الاتصال بقاعدة البيانات';
+        return false;
+    }
+}
+
+// ربط زر تسجيل الدخول
+const loginBtn = document.getElementById('loginBtn');
+if(loginBtn) {
+    loginBtn.onclick = function() {
+        const input = document.getElementById('loginPatientId');
+        const patientId = input ? input.value.trim() : '';
+        
+        if(patientId === '') {
+            const errorDiv = document.getElementById('loginError');
+            if(errorDiv) errorDiv.innerText = '❌ من فضلك أدخل Patient ID';
+        } else {
+            loginUser(patientId);
+        }
+    };
+}
+
+// السماح بالدخول بضغط Enter
+const loginInput = document.getElementById('loginPatientId');
+if(loginInput) {
+    loginInput.onkeypress = function(e) {
+        if(e.key === 'Enter') {
+            const btn = document.getElementById('loginBtn');
+            if(btn) btn.click();
+        }
+    };
+}
+
+// التحقق من وجود جلسة سابقة
+const savedPatientId = localStorage.getItem('currentPatientId');
+if(savedPatientId) {
+    currentPatientId = savedPatientId;
+    hideLoginModal();
+    startPatientDataSync(savedPatientId);
+} else {
+    showLoginModal();
+}
+        // ==========================================
+// جلب بيانات المريض بعد تسجيل الدخول
+// ==========================================
+function startPatientDataSync(patientId) {
+    if(!patientId) {
+        console.log('❌ لا يوجد Patient ID');
+        return;
+    }
+    
+    console.log(`🩺 بدء جلب بيانات المريض: ${patientId}`);
+    
+    // 1. جلب بيانات المعامل (Lab Results)
+    const labResultsRef = database.ref(`patients/${patientId}/labResults`);
+    labResultsRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if(data) {
+            updateAllLabResults(data);
+            console.log(`📊 تم تحديث بيانات المعامل للمريض: ${patientId}`);
+        } else {
+            console.log(`⚠️ لا توجد بيانات معامل للمريض: ${patientId}`);
+        }
+    });
+    
+    // 2. جلب ملاحظات الدكتور (Doctor Notes)
+    const doctorNotesRef = database.ref(`patients/${patientId}/doctorNotes`);
+    doctorNotesRef.on('value', (snapshot) => {
+        const notes = snapshot.val();
+        if(notes) {
+            updateDoctorNotesUI(notes);
+            console.log(`📝 تم تحديث ملاحظات الدكتور للمريض: ${patientId}`);
+        } else {
+            console.log(`⚠️ لا توجد ملاحظات دكتور للمريض: ${patientId}`);
+        }
+    });
+    
+    // 3. جلب بيانات الضغط والسكر (Care Sync Readings)
+    const readingsRef = database.ref(`patients/${patientId}/readings`);
+    
+    // جلب آخر قراءة محدثة
+    readingsRef.orderByKey().limitToLast(1).on('child_added', (snapshot) => {
+        const reading = snapshot.val();
+        if(reading && reading.vitals) {
+            const vitals = {
+                sbp: reading.vitals.systolic_bp || 0,
+                dbp: reading.vitals.diastolic_bp || 0,
+                glucose: reading.vitals.glucose || 0,
+                hr: reading.vitals.heart_rate || 0,
+                timestamp: snapshot.key
+            };
+            updateUICareSync(vitals);
+            console.log(`💓 تم تحديث بيانات الضغط والسكر للمريض: ${patientId}`);
+        }
+    });
+    
+    // تحديث حالة الاتصال في الواجهة
+    const liveBadge = document.getElementById('liveStatusBadge');
+    if(liveBadge) {
+        liveBadge.innerHTML = `<i class="fas fa-circle" style="font-size:0.6rem; color:#10b981;"></i><span>متصل: ${patientId}</span>`;
+    }
+}
 let careSyncLastAlert = 0;
 const CARE_SYNC_ALERT_COOLDOWN = 30000;
 
@@ -1316,61 +1481,98 @@ function updateUICareSync(vitals) {
         }
     }
 }
-
-// بدء الاستماع لبيانات Care Sync
-function startCareSyncListener() {
-    console.log('🔥 Starting Care Sync Firebase listener...');
-    addCareSyncUIElements();
-    
-    setTimeout(() => {
-        initCareSyncGauges();
-    }, 500);
-    
-    getLatestCareSyncPatient().then(patientId => {
-        if (!patientId) {
-            console.log('No Care Sync patient data found. Waiting...');
-            setTimeout(startCareSyncListener, 10000);
-            return;
-        }
         
-        careSyncPatientId = patientId;
-        console.log(`✅ Connected to Care Sync patient: ${patientId}`);
-        
-        const readingsRef = database.ref(`patients/${patientId}/readings`);
-        
-        readingsRef.on('child_added', (snapshot) => {
-            const reading = snapshot.val();
-            if (reading && reading.vitals) {
-                const vitals = {
-                    sbp: reading.vitals.systolic_bp,
-                    dbp: reading.vitals.diastolic_bp,
-                    glucose: reading.vitals.glucose,
-                    hr: reading.vitals.heart_rate,
-                    timestamp: snapshot.key
-                };
-                updateUICareSync(vitals);
-                
-                const statusBadge = document.getElementById('liveStatusBadge');
-                if (statusBadge) {
-                    statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size:0.6rem; color:#10b981;"></i><span>Care Sync Live</span>';
-                }
-            }
-        });
-        
-        getLatestCareSyncVitals(patientId).then(vitals => {
-            if (vitals) updateUICareSync(vitals);
-        });
-        
-    }).catch(error => {
-        console.error('Care Sync error:', error);
-        setTimeout(startCareSyncListener, 15000);
-    });
-}
 
 // بدء الاستماع
-setTimeout(() => {
-    startCareSyncListener();
-}, 3000);
+        // ==================== LAB RESULTS & DOCTOR NOTES LISTENER ====================
+// هذا الكود يجلب بيانات المعامل وملاحظات الدكتور التي يدخلها الدكتور يدوياً
+// ولا يؤثر على بيانات ESP32 أو AI/Care Sync
+
+function updateLabElement(elementId, value, suffix = '') {
+    const element = document.getElementById(elementId);
+    if (element && value !== undefined && value !== null) {
+        element.innerHTML = `${value} <span style="font-size: 0.8rem;">${suffix}</span>`;
+        element.classList.add('data-update-pulse');
+        setTimeout(() => element.classList.remove('data-update-pulse'), 400);
+    }
+}
+
+function updateAllLabResults(data) {
+    if (!data) return;
+    
+    // 🩸 Diabetes Profile
+    if (data.diabetes) {
+        updateLabElement('lab_fbg', data.diabetes.fbg, 'mg/dL');
+        updateLabElement('lab_hba1c', data.diabetes.hba1c, '%');
+        updateLabElement('lab_ppg', data.diabetes.ppg, 'mg/dL');
+        updateLabElement('lab_rbs', data.diabetes.rbs, 'mg/dL');
+    }
+    
+    // 🫀 Kidney Function
+    if (data.kidney) {
+        updateLabElement('lab_creatinine', data.kidney.creatinine, 'mg/dL');
+        updateLabElement('lab_bun', data.kidney.bun, 'mg/dL');
+        updateLabElement('lab_egfr', data.kidney.egfr, 'mL/min');
+        updateLabElement('lab_uric_acid', data.kidney.uricAcid, 'mg/dL');
+    }
+    
+    // 🧪 Liver Function
+    if (data.liver) {
+        updateLabElement('lab_alt', data.liver.alt, 'U/L');
+        updateLabElement('lab_ast', data.liver.ast, 'U/L');
+        updateLabElement('lab_alp', data.liver.alp, 'U/L');
+        updateLabElement('lab_bilirubin', data.liver.bilirubin, 'mg/dL');
+    }
+    
+    // 🦋 Thyroid Function
+    if (data.thyroid) {
+        updateLabElement('lab_tsh', data.thyroid.tsh, 'µIU/mL');
+        updateLabElement('lab_t3', data.thyroid.t3, 'ng/dL');
+        updateLabElement('lab_t4', data.thyroid.t4, 'µg/dL');
+    }
+    
+    // ❤️ Cardiac Markers
+    if (data.cardiac) {
+        updateLabElement('lab_troponin', data.cardiac.troponin, 'ng/mL');
+        updateLabElement('lab_ckmb', data.cardiac.ckmb, 'ng/mL');
+        updateLabElement('lab_bnp', data.cardiac.bnp, 'pg/mL');
+    }
+    
+    // 🔥 Inflammation
+    if (data.inflammation) {
+        updateLabElement('lab_crp', data.inflammation.crp, 'mg/L');
+        updateLabElement('lab_esr', data.inflammation.esr, 'mm/hr');
+        updateLabElement('lab_pct', data.inflammation.pct, 'ng/mL');
+    }
+    
+    // تحديث وقت آخر تحديث
+    const lastUpdateSpan = document.getElementById('labLastUpdate');
+    if (lastUpdateSpan && data.lastUpdated) {
+        const date = new Date(data.lastUpdated);
+        lastUpdateSpan.innerHTML = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    }
+}
+
+function updateDoctorNotesUI(notes) {
+    if (!notes) return;
+    
+    const doctorNotesDiv = document.getElementById('doctorNotes');
+    const doctorNotesDate = document.getElementById('doctorNotesDate');
+    
+    if (doctorNotesDiv && notes.summary) {
+        doctorNotesDiv.innerHTML = `
+            <i class="fas fa-quote-right" style="color: #8b5cf6; float: right; opacity: 0.5;"></i>
+            <p>📋 <strong>Clinical Summary:</strong> ${notes.summary || 'No summary available'}</p>
+            <p style="margin-top: 10px;">💊 <strong>Recommendations:</strong> ${notes.recommendations || 'No recommendations'}</p>
+            <p style="margin-top: 10px;">✅ <strong>Next Appointment:</strong> ${notes.nextAppointment || 'Not scheduled'}</p>
+        `;
+    }
+    
+    if (doctorNotesDate && notes.doctorName) {
+        doctorNotesDate.innerHTML = `${notes.lastUpdated ? new Date(notes.lastUpdated).toLocaleDateString() : 'Today'} | <i class="fas fa-user-md"></i> ${notes.doctorName}`;
+    }
+}
+
     </script>
 </body>
 </html>
