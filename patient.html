@@ -1,19 +1,30 @@
 <!DOCTYPE html>
-<html lang="ar" data-theme="light">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Care Sync PIMA · Patient Dashboard · Real-time Vitals</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007bff'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E">
+    <title>HELIOS · Medical Dashboard · Real-time IoT Vitals</title>
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007bff'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E">
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <!-- Google Fonts Inter + Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js & ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
             --bg: linear-gradient(135deg, #eef2f7 0%, #e2e8f0 100%);
             --surface: rgba(255,255,255,0.95);
@@ -22,15 +33,19 @@
             --text-secondary: #475569;
             --border: rgba(226,232,240,0.8);
             --primary: #0284c7;
-            --primary-gradient: linear-gradient(135deg, #0284c7, #0369a1);
+            --primary-dark: #0369a1;
+            --primary-gradient: linear-gradient(135deg, #0284c7, #0369a1, #0ea5e9);
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
-            --purple: #8b5cf6;
+            --info: #8b5cf6;
+            --purple: #a855f7;
             --orange: #f97316;
+            --sidebar-bg: rgba(255,255,255,0.98);
             --card-shadow: 0 20px 35px -10px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.02);
             --glow: 0 0 20px rgba(2,132,199,0.3);
         }
+
         body.dark {
             --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             --surface: rgba(30,41,59,0.95);
@@ -38,10 +53,24 @@
             --text-primary: #f1f5f9;
             --text-secondary: #94a3b8;
             --border: rgba(51,65,85,0.8);
+            --sidebar-bg: rgba(15,23,42,0.98);
             --card-shadow: 0 20px 35px -10px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.05);
         }
-        body { background: var(--bg); color: var(--text-primary); font-family: 'Inter', sans-serif; transition: all 0.3s ease; }
-        .app-wrapper { display: flex; min-height: 100vh; }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            font-family: 'Inter', 'Poppins', sans-serif;
+            min-height: 100vh;
+        }
+
+        .app-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR - Premium Glassmorphism */
         .sidebar {
             width: 280px;
             background: var(--surface-glass);
@@ -52,14 +81,62 @@
             position: sticky;
             top: 0;
             height: 100vh;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 1.8rem 1.5rem; border-bottom: 1px solid var(--border); }
-        .logo-area { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.5rem; background: var(--primary-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .logo-area i { background: none; color: var(--primary); font-size: 1.8rem; }
-        .collapse-btn { background: transparent; border: none; cursor: pointer; font-size: 1.2rem; color: var(--text-secondary); width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
-        .collapse-btn:hover { background: var(--border); }
-        .sidebar-menu { flex: 1; padding: 1.5rem 0; }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.8rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-area i {
+            background: none;
+            -webkit-background-clip: unset;
+            background-clip: unset;
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        .collapse-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            transition: 0.2s;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .collapse-btn:hover {
+            background: var(--border);
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 1.5rem 0;
+        }
+
         .menu-item {
             display: flex;
             align-items: center;
@@ -67,17 +144,46 @@
             padding: 0.9rem 1.5rem;
             color: var(--text-secondary);
             text-decoration: none;
+            transition: all 0.2s;
             font-weight: 500;
             cursor: pointer;
             margin: 6px 12px;
             border-radius: 16px;
-            transition: all 0.2s;
         }
-        .menu-item i { width: 26px; font-size: 1.2rem; }
-        .menu-item.active, .menu-item:hover { background: var(--primary-gradient); color: white; box-shadow: var(--glow); transform: translateX(4px); }
-        .sidebar-footer { padding: 1rem 0; border-top: 1px solid var(--border); }
-        .main-content { flex: 1; padding: 1.8rem 2.2rem; overflow-x: auto; }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+
+        .menu-item i {
+            width: 26px;
+            font-size: 1.2rem;
+        }
+
+        .menu-item.active, .menu-item:hover {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: var(--glow);
+            transform: translateX(4px);
+        }
+
+        .sidebar-footer {
+            padding: 1rem 0;
+            border-top: 1px solid var(--border);
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            padding: 1.8rem 2.2rem;
+            overflow-x: auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
         .time-clock {
             background: var(--surface-glass);
             backdrop-filter: blur(8px);
@@ -86,8 +192,11 @@
             font-family: monospace;
             font-size: 1.4rem;
             font-weight: 700;
+            letter-spacing: 2px;
             border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
         }
+
         .live-indicator {
             display: flex;
             align-items: center;
@@ -98,31 +207,54 @@
             font-size: 0.75rem;
             font-weight: 600;
             color: white;
+            box-shadow: 0 2px 10px rgba(16,185,129,0.4);
         }
+
+        /* Stats Grid Premium */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
+
         .stat-card {
             background: var(--surface);
             backdrop-filter: blur(10px);
             padding: 1.3rem 1.5rem;
             border-radius: 32px;
-            border: 1px solid var(--border);
             box-shadow: var(--card-shadow);
-            transition: transform 0.3s;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
         }
-        .stat-card:hover { transform: translateY(-5px); }
-        .stat-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-secondary); font-weight: 600; }
-        .stat-value { font-size: 2rem; font-weight: 800; margin: 0.5rem 0; }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 40px -12px rgba(0,0,0,0.2);
+        }
+
+        .stat-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0.5rem 0;
+        }
+
+        /* Vitals Grid */
         .vitals-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
+
         .vital-card {
             background: var(--surface);
             border-radius: 32px;
@@ -133,27 +265,97 @@
             position: relative;
             overflow: hidden;
         }
-        .vital-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--primary-gradient); }
-        .vital-card:hover { transform: translateY(-5px); }
-        .vital-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
-        .vital-header i { font-size: 2rem; }
-        .vital-value { font-size: 2.3rem; font-weight: 800; }
-        .vital-value span { font-size: 0.9rem; font-weight: normal; }
-        .indicator-normal { color: #10b981; }
-        .indicator-warning { color: #f59e0b; }
-        .indicator-danger { color: #ef4444; }
+
+        .vital-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .vital-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .vital-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .vital-header i {
+            font-size: 2rem;
+        }
+
+        .vital-value {
+            font-size: 2.3rem;
+            font-weight: 800;
+        }
+
+        .vital-value span {
+            font-size: 0.9rem;
+            font-weight: normal;
+        }
+
+        /* Gauge Chart Container */
+        .gauge-container {
+            height: 140px;
+            margin: 0.5rem 0;
+        }
+
+        /* Environment Grid */
+        .env-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .env-card {
+            background: var(--surface-glass);
+            backdrop-filter: blur(8px);
+            border-radius: 24px;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .env-card i {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .env-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        /* Charts Row */
         .charts-row {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 1.5rem;
             margin: 1.5rem 0;
         }
+
         .chart-card {
             background: var(--surface);
             border-radius: 28px;
             padding: 1.2rem;
             border: 1px solid var(--border);
         }
+
+        .chart-card h4 {
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        /* Alerts Section */
         .alerts-section {
             background: var(--surface-glass);
             backdrop-filter: blur(8px);
@@ -162,7 +364,12 @@
             margin: 1.5rem 0;
             border: 1px solid var(--border);
         }
-        .alerts-list { max-height: 150px; overflow-y: auto; }
+
+        .alerts-list {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
         .alert-item {
             display: flex;
             align-items: center;
@@ -172,6 +379,7 @@
             margin-bottom: 8px;
             background: var(--surface);
         }
+
         .export-btn {
             background: var(--primary-gradient);
             border: none;
@@ -181,46 +389,72 @@
             font-weight: 700;
             cursor: pointer;
             margin: 1rem 0;
+            transition: all 0.3s;
             box-shadow: var(--glow);
         }
-        .page-section { display: none; }
-        .page-section.active { display: block; animation: fadeInUp 0.4s ease; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .data-update-pulse { animation: pulse 0.3s ease-in-out; }
-        @keyframes pulse { 0% { opacity: 0.6; transform: scale(0.98);} 100% { opacity: 1; transform: scale(1);} }
-        @media (max-width: 1200px) { .vitals-grid { grid-template-columns: repeat(2, 1fr); } .charts-row { grid-template-columns: 1fr; } }
-        @media (max-width: 768px) { .sidebar { width: 80px; } .sidebar span { display: none; } .vitals-grid { grid-template-columns: 1fr; } }
+
+        .export-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(2,132,199,0.4);
+        }
+
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .data-update-pulse {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; transform: scale(0.98);}
+            100% { opacity: 1; transform: scale(1);}
+        }
+
+        @media (max-width: 1200px) {
+            .vitals-grid { grid-template-columns: 1fr; }
+            .env-grid { grid-template-columns: repeat(2, 1fr); }
+            .charts-row { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 80px; }
+            .sidebar span { display: none; }
+            .main-content { padding: 1rem; }
+        }
+
+        .indicator-normal { color: #10b981; }
+        .indicator-warning { color: #f59e0b; }
+        .indicator-danger { color: #ef4444; }
     </style>
 </head>
 <body>
-    <!-- Login Modal -->
-    <div id="loginModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 10000;">
-        <div style="background: white; border-radius: 40px; padding: 2rem; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.3);">
-            <i class="fas fa-heartbeat" style="font-size: 3rem; color: #0284c7;"></i>
-            <h2 style="margin: 1rem 0; color: #0f172a;">Care Sync PIMA</h2>
-            <p style="color: #475569; margin-bottom: 1.5rem;">أدخل Patient ID من برنامج Python</p>
-            <input type="text" id="loginPatientId" placeholder="مثال: CS_PIMA_20241215_143022" style="width: 100%; padding: 1rem; margin-bottom: 1rem; border-radius: 30px; border: 1px solid #ccc;">
-            <button id="loginBtn" style="width: 100%; padding: 1rem; background: linear-gradient(135deg, #0284c7, #0369a1); border: none; border-radius: 30px; color: white; font-weight: bold; cursor: pointer;">اتصال</button>
-            <div id="loginError" style="color: #ef4444; margin-top: 1rem; font-size: 0.8rem;"></div>
-        </div>
-    </div>
-
     <div class="app-wrapper">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="logo-area"><i class="fas fa-heartbeat"></i><span>Care Sync</span></div>
+                <div class="logo-area"><i class="fas fa-heartbeat"></i><span>HELIOS</span></div>
                 <button class="collapse-btn" id="collapseSidebar"><i class="fas fa-chevron-left"></i></button>
             </div>
             <div class="sidebar-menu">
-                <a href="#" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
-                <a href="#" class="menu-item" data-page="profile"><i class="fas fa-user-circle"></i><span>Profile</span></a>
-                <a href="#" class="menu-item" data-page="history"><i class="fas fa-history"></i><span>History</span></a>
-                <a href="#" class="menu-item" data-page="appointments"><i class="fas fa-calendar-check"></i><span>Appointments</span></a>
-                <a href="#" class="menu-item" data-page="reports"><i class="fas fa-file-alt"></i><span>Reports</span></a>
-                <a href="#" class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
+                <a href="javascript:void(0)" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+                <a href="javascript:void(0)" class="menu-item" data-page="profile"><i class="fas fa-user-circle"></i><span>Profile</span></a>
+                <a href="javascript:void(0)" class="menu-item" data-page="history"><i class="fas fa-history"></i><span>History</span></a>
+                <a href="javascript:void(0)" class="menu-item" data-page="appointments"><i class="fas fa-calendar-check"></i><span>Appointments</span></a>
+                <a href="javascript:void(0)" class="menu-item" data-page="reports"><i class="fas fa-file-alt"></i><span>Reports</span></a>
+                <a href="javascript:void(0)" class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
             </div>
             <div class="sidebar-footer">
-                <a href="#" class="menu-item" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>خروج</span></a>
+                <a href="javascript:void(0)" class="menu-item" data-page="support"><i class="fas fa-headset"></i><span>Support</span></a>
             </div>
         </aside>
 
@@ -230,7 +464,7 @@
                 <div style="display: flex; gap: 1rem; align-items: center;">
                     <div class="live-indicator" id="liveStatusBadge">
                         <i class="fas fa-circle" style="font-size: 0.6rem;"></i>
-                        <span>Care Sync Live</span>
+                        <span>ESP32 Live</span>
                     </div>
                     <button class="collapse-btn" id="themeToggle" style="width:42px;height:42px;"><i class="fas fa-moon"></i></button>
                 </div>
@@ -239,150 +473,59 @@
             <!-- DASHBOARD PAGE -->
             <div class="page-section active" id="dashboardPage">
                 <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-title">HEALTH SCORE</div><div class="stat-value" id="healthScore">--</div><div class="stat-sub">AI based</div></div>
+                    <div class="stat-card"><div class="stat-title">HEALTH SCORE</div><div class="stat-value" id="healthScore">--</div><div class="stat-sub">Based on vitals</div></div>
                     <div class="stat-card"><div class="stat-title">ACTIVE ALERTS</div><div class="stat-value" id="activeAlertsCount">0</div><div class="stat-sub">Critical threshold</div></div>
-                    <div class="stat-card"><div class="stat-title">LAST UPDATE</div><div class="stat-value" id="lastUpdate" style="font-size:1.2rem;">--</div><div class="stat-sub">Care Sync sync</div></div>
+                    <div class="stat-card"><div class="stat-title">LAST UPDATE</div><div class="stat-value" style="font-size:1.2rem;" id="lastUpdate">--</div><div class="stat-sub">ESP32 sync</div></div>
                 </div>
 
-                <!-- Main Vitals with 4 cards: BP, Glucose, HR, SpO2 (SpO2 placeholder) -->
+                <!-- Main Vitals with Gauge Charts -->
                 <div class="vitals-grid">
                     <div class="vital-card">
-                        <div class="vital-header"><i class="fas fa-tachometer-alt" style="color:#8b5cf6;"></i><h3>Blood Pressure</h3></div>
-                        <div class="vital-value" id="bpValue">--/-- <span>mmHg</span></div>
-                        <div class="card-indicator" id="bpIndicator">--</div>
-                    </div>
-                    <div class="vital-card">
-                        <div class="vital-header"><i class="fas fa-tint" style="color:#f97316;"></i><h3>Blood Glucose</h3></div>
-                        <div class="vital-value" id="glucoseValue">-- <span>mg/dL</span></div>
-                        <div class="card-indicator" id="glucoseIndicator">--</div>
-                    </div>
-                    <div class="vital-card">
-                        <div class="vital-header"><i class="fas fa-heart" style="color:#ef4444;"></i><h3>Heart Rate</h3></div>
+                        <div class="vital-header"><i class="fas fa-heart" style="color:#ef4444; font-size:2rem;"></i><h3>Heart Rate</h3></div>
                         <div class="vital-value" id="heartValue">-- <span>bpm</span></div>
-                        <div class="card-indicator" id="heartIndicator">--</div>
+                        <div id="heartGauge" class="gauge-container"></div>
+                        <div class="card-indicator" id="heartIndicator" style="font-weight:600;">Normal</div>
                     </div>
                     <div class="vital-card">
-                        <div class="vital-header"><i class="fas fa-lungs" style="color:#10b981;"></i><h3>Oxygen Saturation</h3></div>
+                        <div class="vital-header"><i class="fas fa-lungs" style="color:#10b981; font-size:2rem;"></i><h3>Oxygen Saturation</h3></div>
                         <div class="vital-value" id="spo2Value">-- <span>%</span></div>
-                        <div class="card-indicator" id="spo2Indicator">--</div>
+                        <div id="spo2Gauge" class="gauge-container"></div>
+                        <div class="card-indicator" id="spo2Indicator" style="font-weight:600;">Normal</div>
+                    </div>
+                    <div class="vital-card">
+                        <div class="vital-header"><i class="fas fa-thermometer-half" style="color:#f59e0b; font-size:2rem;"></i><h3>Body Temperature</h3></div>
+                        <div class="vital-value" id="tempValue">-- <span>°C</span></div>
+                        <div id="tempGauge" class="gauge-container"></div>
+                        <div class="card-indicator" id="tempIndicator" style="font-weight:600;">Normal</div>
                     </div>
                 </div>
 
-                <!-- Environment Data (optional, kept for compatibility) -->
+                <!-- Environment Data -->
                 <div class="env-grid">
                     <div class="env-card"><i class="fas fa-temperature-low" style="color:#3b82f6;"></i><div class="env-label">Room Temp</div><div class="env-value" id="roomTempValue">-- °C</div></div>
                     <div class="env-card"><i class="fas fa-tint" style="color:#06b6d4;"></i><div class="env-label">Humidity</div><div class="env-value" id="humidityValue">-- %</div></div>
                     <div class="env-card"><i class="fas fa-shoe-prints" style="color:#a855f7;"></i><div class="env-label">Motion Index</div><div class="env-value" id="motionValue">-- m/s²</div></div>
                 </div>
 
-                <!-- Trend Charts: Glucose and BP -->
+                <!-- Trend Charts -->
                 <div class="charts-row">
-                    <div class="chart-card"><h4><i class="fas fa-chart-line"></i> Glucose Trend (last 20 readings)</h4><canvas id="glucoseChart" style="height:200px;"></canvas></div>
-                    <div class="chart-card"><h4><i class="fas fa-chart-line"></i> Blood Pressure Trend</h4><canvas id="bpChart" style="height:200px;"></canvas></div>
+                    <div class="chart-card"><h4><i class="fas fa-chart-line"></i> Heart Rate Trend (24h)</h4><canvas id="heartTrendChart" style="height:200px;"></canvas></div>
+                    <div class="chart-card"><h4><i class="fas fa-chart-line"></i> SpO₂ & Temperature Trend</h4><canvas id="multiTrendChart" style="height:200px;"></canvas></div>
                 </div>
                 
                 <button class="export-btn" id="exportBtn"><i class="fas fa-download"></i> Export Comprehensive Report</button>
 
                 <div class="alerts-section">
                     <div class="alerts-header"><h3><i class="fas fa-bell"></i> Critical Alerts</h3><button class="mute-button" id="muteAlerts" style="background:transparent;border:1px solid var(--border);padding:0.3rem 1rem;border-radius:20px;">Mute</button></div>
-                    <div class="alerts-list" id="alertsList"><div class="alert-item">✅ Waiting for data from Care Sync...</div></div>
-                </div>
-
-                <!-- ==================== LABORATORY RESULTS SECTION ==================== -->
-                <div class="lab-results-section" style="margin: 2rem 0;">
-                    <div class="section-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); width: 50px; height: 50px; border-radius: 25px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(139,92,246,0.4);">
-                                <i class="fas fa-microscope" style="font-size: 1.8rem; color: white;"></i>
-                            </div>
-                            <div>
-                                <h2 style="font-size: 1.6rem; font-weight: 700; background: linear-gradient(135deg, #8b5cf6, #c084fc); -webkit-background-clip: text; background-clip: text; color: transparent;">🔬 Laboratory Results</h2>
-                                <p style="font-size: 0.8rem; color: var(--text-secondary);">Entered by Doctor · Last updated: <span id="labLastUpdate">Today</span></p>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <span style="background: rgba(139,92,246,0.2); padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; color: #8b5cf6;"><i class="fas fa-chart-line"></i> Reference ranges shown</span>
-                        </div>
-                    </div>
-                    
-                    <div class="vital-card" style="padding: 1.8rem; background: linear-gradient(135deg, var(--surface), rgba(139,92,246,0.03));">
-                        <!-- Diabetes Profile Card -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
-                            <div style="background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.02)); border-radius: 24px; padding: 1.3rem; border: 1px solid rgba(239,68,68,0.25);">
-                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1.2rem; border-bottom: 2px solid rgba(239,68,68,0.3); padding-bottom: 0.8rem;">
-                                    <div style="background: linear-gradient(135deg, #ef4444, #dc2626); width: 45px; height: 45px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-droplet" style="font-size: 1.4rem; color: white;"></i>
-                                    </div>
-                                    <div><h3 style="color: #ef4444; font-weight: 700;">🩸 Diabetes Profile</h3><small style="color: var(--text-secondary);">Glucose & Metabolic Control</small></div>
-                                </div>
-                                <div style="display: flex; flex-direction: column; gap: 0.8rem;">
-                                    <div style="display: flex; justify-content: space-between;"><span><i class="fas fa-chart-line"></i> Fasting Blood Glucose (FBG)</span><div style="text-align: right;"><span id="lab_fbg">118</span> <span style="font-size:0.7rem;">mg/dL</span><div style="font-size:0.6rem;">Normal: 70-100</div></div></div>
-                                    <div style="display: flex; justify-content: space-between;"><span><i class="fas fa-chart-line"></i> HbA1c</span><div><span id="lab_hba1c">5.7</span> <span style="font-size:0.7rem;">%</span><div style="font-size:0.6rem;">Prediabetes: 5.7-6.4</div></div></div>
-                                    <div style="display: flex; justify-content: space-between;"><span><i class="fas fa-utensils"></i> Postprandial Glucose (PPG)</span><div><span id="lab_ppg">140</span> <span style="font-size:0.7rem;">mg/dL</span><div style="font-size:0.6rem;">Normal: <140</div></div></div>
-                                    <div style="display: flex; justify-content: space-between;"><span><i class="fas fa-random"></i> Random Blood Sugar (RBS)</span><div><span id="lab_rbs">125</span> <span style="font-size:0.7rem;">mg/dL</span><div style="font-size:0.6rem;">Normal: <140</div></div></div>
-                                </div>
-                            </div>
-                            <!-- Kidney Function Card -->
-                            <div style="background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(59,130,246,0.02)); border-radius: 24px; padding: 1.3rem; border: 1px solid rgba(59,130,246,0.25);">
-                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1.2rem; border-bottom: 2px solid rgba(59,130,246,0.3);"><div style="background: linear-gradient(135deg, #3b82f6, #2563eb); width:45px; height:45px; border-radius:20px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-kidneys" style="color:white;"></i></div><div><h3 style="color:#3b82f6;">🫀 Kidney Function</h3><small>Renal Profile</small></div></div>
-                                <div style="display: flex; flex-direction: column; gap:0.8rem;">
-                                    <div><span>Creatinine</span><span style="float:right"><span id="lab_creatinine">0.9</span> mg/dL <span style="font-size:0.6rem;">Normal:0.6-1.2</span></span></div>
-                                    <div><span>Blood Urea Nitrogen (BUN)</span><span style="float:right"><span id="lab_bun">12</span> mg/dL <span style="font-size:0.6rem;">Normal:7-20</span></span></div>
-                                    <div><span>eGFR</span><span style="float:right"><span id="lab_egfr">95</span> mL/min <span style="font-size:0.6rem;">Normal:>60</span></span></div>
-                                    <div><span>Uric Acid</span><span style="float:right"><span id="lab_uric_acid">5.2</span> mg/dL <span style="font-size:0.6rem;">Normal:3.5-7.2</span></span></div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Liver + Thyroid -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
-                            <div style="background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.02)); border-radius: 24px; padding: 1.3rem; border: 1px solid rgba(16,185,129,0.25);">
-                                <div style="display: flex; align-items: center; gap: 12px; border-bottom: 2px solid rgba(16,185,129,0.3);"><div style="background: linear-gradient(135deg, #10b981, #059669); width:45px; height:45px; border-radius:20px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-liver" style="color:white;"></i></div><div><h3 style="color:#10b981;">🧪 Liver Function</h3><small>Hepatic Panel</small></div></div>
-                                <div><span>ALT (SGPT)</span><span style="float:right"><span id="lab_alt">25</span> U/L <span style="font-size:0.6rem;">Normal:10-40</span></span></div>
-                                <div><span>AST (SGOT)</span><span style="float:right"><span id="lab_ast">22</span> U/L <span style="font-size:0.6rem;">Normal:10-35</span></span></div>
-                                <div><span>ALP</span><span style="float:right"><span id="lab_alp">70</span> U/L <span style="font-size:0.6rem;">Normal:30-120</span></span></div>
-                                <div><span>Bilirubin (Total)</span><span style="float:right"><span id="lab_bilirubin">0.8</span> mg/dL <span style="font-size:0.6rem;">Normal:0.3-1.2</span></span></div>
-                            </div>
-                            <div style="background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.02)); border-radius: 24px; padding: 1.3rem; border: 1px solid rgba(245,158,11,0.25);">
-                                <div style="display: flex; align-items: center; gap: 12px; border-bottom: 2px solid rgba(245,158,11,0.3);"><div style="background: linear-gradient(135deg, #f59e0b, #d97706); width:45px; height:45px; border-radius:20px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-thyroid" style="color:white;"></i></div><div><h3 style="color:#f59e0b;">🦋 Thyroid Function</h3><small>Thyroid Profile</small></div></div>
-                                <div><span>TSH</span><span style="float:right"><span id="lab_tsh">2.5</span> µIU/mL <span style="font-size:0.6rem;">Normal:0.4-4.0</span></span></div>
-                                <div><span>T3</span><span style="float:right"><span id="lab_t3">110</span> ng/dL <span style="font-size:0.6rem;">Normal:80-200</span></span></div>
-                                <div><span>T4</span><span style="float:right"><span id="lab_t4">7.5</span> µg/dL <span style="font-size:0.6rem;">Normal:5-12</span></span></div>
-                            </div>
-                        </div>
-                        <!-- Cardiac + Inflammation -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
-                            <div style="background: linear-gradient(135deg, rgba(236,72,153,0.1), rgba(236,72,153,0.02)); border-radius: 24px; padding: 1.3rem; border: 1px solid rgba(236,72,153,0.25);">
-                                <div style="display: flex; align-items: center; gap: 12px; border-bottom: 2px solid rgba(236,72,153,0.3);"><div style="background: linear-gradient(135deg, #ec4899, #db2777); width:45px; height:45px; border-radius:20px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-heartbeat" style="color:white;"></i></div><div><h3 style="color:#ec4899;">❤️ Cardiac Markers</h3><small>Cardiac Profile</small></div></div>
-                                <div><span>Troponin I</span><span style="float:right"><span id="lab_troponin">0.02</span> ng/mL <span style="font-size:0.6rem;">Normal:<0.04</span></span></div>
-                                <div><span>CK-MB</span><span style="float:right"><span id="lab_ckmb">1.2</span> ng/mL <span style="font-size:0.6rem;">Normal:<5.0</span></span></div>
-                                <div><span>NT-proBNP</span><span style="float:right"><span id="lab_bnp">85</span> pg/mL <span style="font-size:0.6rem;">Normal:<125</span></span></div>
-                            </div>
-                            <div style="background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(139,92,246,0.02)); border-radius: 24px; padding: 1.3rem; border: 1px solid rgba(139,92,246,0.25);">
-                                <div style="display: flex; align-items: center; gap: 12px; border-bottom: 2px solid rgba(139,92,246,0.3);"><div style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); width:45px; height:45px; border-radius:20px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-biohazard" style="color:white;"></i></div><div><h3 style="color:#8b5cf6;">🔥 Inflammation & Infection</h3><small>Inflammatory Markers</small></div></div>
-                                <div><span>C-Reactive Protein (CRP)</span><span style="float:right"><span id="lab_crp">2.5</span> mg/L <span style="font-size:0.6rem;">Normal:<5.0</span></span></div>
-                                <div><span>ESR</span><span style="float:right"><span id="lab_esr">12</span> mm/hr <span style="font-size:0.6rem;">Normal:<20</span></span></div>
-                                <div><span>Procalcitonin (PCT)</span><span style="float:right"><span id="lab_pct">0.05</span> ng/mL <span style="font-size:0.6rem;">Normal:<0.15</span></span></div>
-                            </div>
-                        </div>
-                        <!-- Doctor's Notes -->
-                        <div style="margin-top: 1.8rem; background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.05)); border-radius: 28px; padding: 1.5rem;">
-                            <div style="display: flex; align-items: center; gap: 12px;"><div style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); width:45px; height:45px; border-radius:25px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-stethoscope" style="color:white;"></i></div><div><h4>👨‍⚕️ Doctor's Clinical Assessment</h4><p><i class="fas fa-calendar-alt"></i> Last reviewed: <span id="doctorNotesDate">October 15, 2024</span> | <i class="fas fa-user-md"></i> Dr. Sarah Ahmed</p></div></div>
-                            <div id="doctorNotes" style="font-size: 0.95rem; line-height: 1.6; padding: 1rem; border-radius: 20px; border-right: 3px solid #8b5cf6;">
-                                <i class="fas fa-quote-right" style="color: #8b5cf6; float: right;"></i>
-                                <p>📋 <strong>Clinical Summary:</strong> Patient presents with well-controlled type 2 diabetes (HbA1c 5.7%). Blood pressure is within normal range. Kidney and liver function tests are normal.</p>
-                                <p>💊 <strong>Recommendations:</strong> Continue Metformin 500mg twice daily. Follow up in 3 months.</p>
-                                <p>✅ <strong>Next Appointment:</strong> January 15, 2025 - 10:00 AM</p>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="alerts-list" id="alertsList"><div class="alert-item">✅ All vitals within normal range</div></div>
                 </div>
             </div>
 
-            <!-- Other Pages (placeholders) -->
-            <div class="page-section" id="profilePage"><h2>My Profile</h2><div class="stat-card"><p>Patient ID: <span id="profilePatientId">--</span></p><p>Device: Care Sync PIMA</p></div></div>
+            <!-- Other Pages -->
+            <div class="page-section" id="profilePage"><h2>My Profile</h2><div class="stat-card"><p>Patient profile information</p></div></div>
             <div class="page-section" id="historyPage"><h2>Medical History</h2><div class="stat-card"><p>Historical records will appear here</p></div></div>
             <div class="page-section" id="appointmentsPage"><h2>Appointments</h2><div class="stat-card"><p>Upcoming appointments</p></div></div>
-            <div class="page-section" id="reportsPage"><h2>Health Reports</h2><div class="stat-card"><button class="export-btn" id="downloadReportBtn">Download PDF</button></div></div>
+            <div class="page-section" id="reportsPage"><h2>Health Reports</h2><div class="stat-card"><p>Submit or view reports</p></div></div>
             <div class="page-section" id="settingsPage"><h2>Settings</h2><div class="stat-card"><button class="export-btn" id="saveSettingsBtn">Save Preferences</button></div></div>
             <div class="page-section" id="supportPage"><h2>Support</h2><div class="stat-card"><p>Email: support@helios.com</p></div></div>
         </main>
@@ -398,19 +541,70 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Global variables
-        let currentPatientId = null;
-        let glucoseChart, bpChart;
-        let glucoseHistory = [], sbpHistory = [], dbpHistory = [], timeLabels = [];
-        let lastAlertTime = 0;
-        const ALERT_COOLDOWN = 30000;
-        let alertSoundEnabled = true;
+        // ApexCharts Gauges
+        let heartGauge, spo2Gauge, tempGauge;
+        let heartTrendChart, multiTrendChart;
+        const heartHistory = [], spo2History = [], tempHistory = [], timeLabels = [];
+        const MAX_HISTORY = 12;
 
-        // Helper functions
-        function updateValue(id, value, unit) {
+        function initGauges() {
+            heartGauge = new ApexCharts(document.querySelector("#heartGauge"), {
+                series: [0], chart: { type: 'radialBar', height: 130, sparkline: { enabled: true } }, plotOptions: { radialBar: { startAngle: -90, endAngle: 90, track: { background: '#e2e8f0', strokeWidth: '97%' }, dataLabels: { name: { show: false }, value: { fontSize: '20px', fontWeight: 700, color: '#ef4444' } } } }, colors: ['#ef4444']
+            });
+            heartGauge.render();
+            
+            spo2Gauge = new ApexCharts(document.querySelector("#spo2Gauge"), {
+                series: [0], chart: { type: 'radialBar', height: 130, sparkline: { enabled: true } }, plotOptions: { radialBar: { startAngle: -90, endAngle: 90, track: { background: '#e2e8f0' }, dataLabels: { name: { show: false }, value: { fontSize: '20px', fontWeight: 700, color: '#10b981' } } } }, colors: ['#10b981']
+            });
+            spo2Gauge.render();
+            
+            tempGauge = new ApexCharts(document.querySelector("#tempGauge"), {
+                series: [0], chart: { type: 'radialBar', height: 130, sparkline: { enabled: true } }, plotOptions: { radialBar: { startAngle: -90, endAngle: 90, track: { background: '#e2e8f0' }, dataLabels: { name: { show: false }, value: { fontSize: '20px', fontWeight: 700, color: '#f59e0b' } } } }, colors: ['#f59e0b']
+            });
+            tempGauge.render();
+        }
+
+        function initTrendCharts() {
+            const heartCtx = document.getElementById('heartTrendChart')?.getContext('2d');
+            const multiCtx = document.getElementById('multiTrendChart')?.getContext('2d');
+            
+            if(heartCtx) {
+                heartTrendChart = new Chart(heartCtx, {
+                    type: 'line', data: { labels: [], datasets: [{ label: 'Heart Rate (BPM)', data: [], borderColor: '#ef4444', backgroundColor: '#ef444410', tension: 0.3, fill: true, borderWidth: 3 }] },
+                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } }, scales: { y: { min: 40, max: 140 } } }
+                });
+            }
+            if(multiCtx) {
+                multiTrendChart = new Chart(multiCtx, {
+                    type: 'line', data: { labels: [], datasets: [{ label: 'SpO₂ (%)', data: [], borderColor: '#10b981', tension: 0.3, borderWidth: 2 }, { label: 'Temp (°C)', data: [], borderColor: '#f59e0b', tension: 0.3, borderWidth: 2 }] },
+                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } }, scales: { y: { min: 30, max: 110 } } }
+                });
+            }
+        }
+
+        function updateGauges(heart, spo2, temp) {
+            if(heartGauge) heartGauge.updateSeries([heart]);
+            if(spo2Gauge) spo2Gauge.updateSeries([spo2]);
+            if(tempGauge) tempGauge.updateSeries([((temp - 35) / 5) * 100]);
+        }
+
+        function updateTrends(heart, spo2, temp) {
+            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            timeLabels.push(now);
+            heartHistory.push(heart);
+            spo2History.push(spo2);
+            tempHistory.push(temp);
+            if(timeLabels.length > MAX_HISTORY) {
+                timeLabels.shift(); heartHistory.shift(); spo2History.shift(); tempHistory.shift();
+            }
+            if(heartTrendChart) { heartTrendChart.data.labels = [...timeLabels]; heartTrendChart.data.datasets[0].data = [...heartHistory]; heartTrendChart.update('none'); }
+            if(multiTrendChart) { multiTrendChart.data.labels = [...timeLabels]; multiTrendChart.data.datasets[0].data = [...spo2History]; multiTrendChart.data.datasets[1].data = [...tempHistory]; multiTrendChart.update('none'); }
+        }
+
+        function updateValue(id, value, unit, decimals=0) {
             const el = document.getElementById(id);
-            if (el && value !== undefined && value !== null && value > 0) {
-                el.innerHTML = `${value} <span>${unit}</span>`;
+            if(el && value !== null && !isNaN(value)) {
+                el.innerHTML = `${decimals===1?value.toFixed(1):Math.round(value)} <span>${unit}</span>`;
                 el.classList.add('data-update-pulse');
                 setTimeout(() => el.classList.remove('data-update-pulse'), 400);
                 return true;
@@ -418,311 +612,91 @@
             return false;
         }
 
-        function updateIndicator(elId, value, thresholds) {
-            const el = document.getElementById(elId);
-            if (!el || !value || value === 0) { if(el) el.innerHTML = '--'; return; }
-            if (value >= thresholds.criticalMin || (thresholds.criticalMax && value <= thresholds.criticalMax)) {
-                el.className = 'indicator-danger'; el.innerHTML = thresholds.criticalText || 'Critical';
-            } else if (value >= thresholds.warningMin || (thresholds.warningMax && value <= thresholds.warningMax)) {
-                el.className = 'indicator-warning'; el.innerHTML = thresholds.warningText || 'Warning';
-            } else {
-                el.className = 'indicator-normal'; el.innerHTML = thresholds.normalText || 'Normal';
-            }
-        }
-
-        function showAlert(message, type = 'warning') {
-            const now = Date.now();
-            if (now - lastAlertTime < ALERT_COOLDOWN) return;
-            lastAlertTime = now;
-            const alertsDiv = document.getElementById('alertsList');
-            if (alertsDiv) {
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert-item';
-                alertDiv.innerHTML = `<i class="fas fa-exclamation-triangle" style="color: ${type === 'danger' ? '#ef4444' : '#f59e0b'}"></i> ${message}`;
-                alertsDiv.prepend(alertDiv);
-                if (alertsDiv.children.length > 10) alertsDiv.removeChild(alertsDiv.lastChild);
-            }
-            // Optional sound
-            if (alertSoundEnabled && type === 'danger') {
-                try {
-                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.frequency.value = 800;
-                    gain.gain.value = 0.2;
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.2);
-                } catch(e) {}
-            }
-        }
-
-        function updateHealthScore(glucose, sbp, hr) {
-            let score = 100;
-            if (glucose > 180) score -= 30;
-            else if (glucose > 140) score -= 15;
-            if (sbp > 140) score -= 20;
-            if (hr > 100 || hr < 60) score -= 15;
-            score = Math.max(0, Math.min(100, score));
-            document.getElementById('healthScore').innerText = score;
-            return score;
-        }
-
-        // Charts initialization
-        function initCharts() {
-            const glucoseCtx = document.getElementById('glucoseChart')?.getContext('2d');
-            const bpCtx = document.getElementById('bpChart')?.getContext('2d');
-            if (glucoseCtx) {
-                glucoseChart = new Chart(glucoseCtx, {
-                    type: 'line',
-                    data: { labels: [], datasets: [{ label: 'Glucose (mg/dL)', data: [], borderColor: '#f97316', backgroundColor: '#f9731620', tension: 0.3, fill: true }] },
-                    options: { responsive: true, maintainAspectRatio: true, scales: { y: { min: 60, max: 300 } } }
-                });
-            }
-            if (bpCtx) {
-                bpChart = new Chart(bpCtx, {
-                    type: 'line',
-                    data: { labels: [], datasets: [{ label: 'Systolic', data: [], borderColor: '#ef4444', tension: 0.3 }, { label: 'Diastolic', data: [], borderColor: '#3b82f6', tension: 0.3 }] },
-                    options: { responsive: true, maintainAspectRatio: true, scales: { y: { min: 50, max: 200 } } }
-                });
-            }
-        }
-
-        function updateCharts(glucose, sbp, dbp) {
-            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            timeLabels.push(now);
-            if (timeLabels.length > 20) timeLabels.shift();
-            if (glucose && glucose > 0) {
-                glucoseHistory.push(glucose);
-                if (glucoseHistory.length > 20) glucoseHistory.shift();
-                if (glucoseChart) {
-                    glucoseChart.data.labels = [...timeLabels];
-                    glucoseChart.data.datasets[0].data = [...glucoseHistory];
-                    glucoseChart.update();
-                }
-            }
-            if (sbp && sbp > 0) {
-                sbpHistory.push(sbp);
-                dbpHistory.push(dbp);
-                if (sbpHistory.length > 20) { sbpHistory.shift(); dbpHistory.shift(); }
-                if (bpChart) {
-                    bpChart.data.labels = [...timeLabels];
-                    bpChart.data.datasets[0].data = [...sbpHistory];
-                    bpChart.data.datasets[1].data = [...dbpHistory];
-                    bpChart.update();
-                }
-            }
-        }
-
-        // Core Firebase listener for Care Sync data
-        function startCareSyncListener(patientId) {
-            if (!patientId) return;
-            console.log(`🩺 Starting Care Sync listener for: ${patientId}`);
-            document.getElementById('liveStatusBadge').innerHTML = `<i class="fas fa-circle" style="font-size:0.6rem;"></i><span>متصل: ${patientId.slice(0,20)}</span>`;
-            document.getElementById('profilePatientId').innerText = patientId;
-
-            const readingsRef = database.ref(`patients/${patientId}/readings`);
-            let recordCount = 0;
-
-            readingsRef.on('child_added', (snapshot) => {
-                const reading = snapshot.val();
-                const timestamp = snapshot.key;
-                if (reading && reading.vitals) {
-                    recordCount++;
-                    const v = reading.vitals;
-                    const sbp = v.systolic_bp;
-                    const dbp = v.diastolic_bp;
-                    const glucose = v.glucose;
-                    const hr = v.heart_rate;
-
-                    console.log(`📊 New reading: BP=${sbp}/${dbp}, Glucose=${glucose}, HR=${hr}`);
-
-                    // Update BP
-                    if (sbp && dbp && sbp > 0) {
-                        updateValue('bpValue', `${sbp}/${dbp}`, 'mmHg');
-                        updateIndicator('bpIndicator', sbp, {
-                            criticalMin: 180, criticalText: 'Crisis',
-                            warningMin: 140, warningText: 'Hypertension',
-                            normalText: 'Normal'
-                        });
-                    }
-                    // Update Glucose
-                    if (glucose && glucose > 0) {
-                        updateValue('glucoseValue', Math.round(glucose), 'mg/dL');
-                        if (glucose >= 300) {
-                            updateIndicator('glucoseIndicator', glucose, { criticalMin: 300, criticalText: 'Critical', warningMin: 200, warningText: 'Very High', normalText: 'Normal' });
-                            showAlert(`🚨 CRITICAL: Blood Glucose ${Math.round(glucose)} mg/dL`, 'danger');
-                        } else if (glucose >= 200) {
-                            updateIndicator('glucoseIndicator', glucose, { criticalMin: 300, criticalText: 'Critical', warningMin: 200, warningText: 'Very High', normalText: 'Normal' });
-                            showAlert(`⚠️ High Blood Glucose: ${Math.round(glucose)} mg/dL`);
-                        } else if (glucose <= 70) {
-                            updateIndicator('glucoseIndicator', glucose, { criticalMin: 300, criticalMax: 70, criticalText: 'Low', warningMin: 200, warningMax: 70, warningText: 'Low', normalText: 'Normal' });
-                            showAlert(`⚠️ Low Blood Glucose: ${Math.round(glucose)} mg/dL`);
-                        } else {
-                            updateIndicator('glucoseIndicator', glucose, { criticalMin: 300, criticalMax: 70, criticalText: 'Critical', warningMin: 200, warningMax: 100, warningText: 'Prediabetes', normalText: 'Normal' });
-                        }
-                    }
-                    // Update Heart Rate
-                    if (hr && hr > 0) {
-                        updateValue('heartValue', hr, 'bpm');
-                        updateIndicator('heartIndicator', hr, {
-                            criticalMin: 120, criticalMax: 50, criticalText: 'Critical',
-                            warningMin: 100, warningMax: 60, warningText: 'Warning',
-                            normalText: 'Normal'
-                        });
-                    }
-                    // SpO2 not available – keep placeholder
-                    document.getElementById('spo2Value').innerHTML = '-- <span>%</span>';
-                    document.getElementById('spo2Indicator').innerHTML = '--';
-
-                    // Update clinical stats if available
-                    if (reading.clinical) {
-                        if (reading.clinical.hba1c) document.getElementById('lab_hba1c').innerText = reading.clinical.hba1c;
-                        if (reading.clinical.time_in_range) document.getElementById('timeInRange').innerHTML = `${reading.clinical.time_in_range}<span style="font-size:0.9rem;">%</span>`;
-                    } else {
-                        // Estimate HbA1c from glucose history
-                        if (glucoseHistory.length > 0) {
-                            let avg = glucoseHistory.reduce((a,b)=>a+b,0)/glucoseHistory.length;
-                            let estHbA1c = (avg + 46.7) / 28.7;
-                            document.getElementById('lab_hba1c').innerText = estHbA1c.toFixed(1);
-                        }
-                    }
-
-                    updateCharts(glucose, sbp, dbp);
-                    updateHealthScore(glucose, sbp, hr);
-                    document.getElementById('lastUpdate').innerHTML = new Date(parseInt(timestamp)).toLocaleTimeString();
-                    document.getElementById('activeAlertsCount').innerText = document.getElementById('alertsList').children.length;
-                }
-            });
-        }
-
-        // Lab Results and Doctor Notes listeners (keep original)
-        function updateLabElement(elementId, value, suffix = '') {
-            const el = document.getElementById(elementId);
-            if (el && value !== undefined && value !== null) {
-                el.innerHTML = `${value} <span style="font-size:0.8rem;">${suffix}</span>`;
+        function updateEnvValue(id, value, unit) {
+            const el = document.getElementById(id);
+            if(el && value !== null && !isNaN(value)) {
+                el.innerHTML = `${value.toFixed(1)} ${unit}`;
                 el.classList.add('data-update-pulse');
                 setTimeout(() => el.classList.remove('data-update-pulse'), 400);
             }
         }
 
-        function updateAllLabResults(data) {
-            if (!data) return;
-            if (data.diabetes) {
-                updateLabElement('lab_fbg', data.diabetes.fbg, 'mg/dL');
-                updateLabElement('lab_hba1c', data.diabetes.hba1c, '%');
-                updateLabElement('lab_ppg', data.diabetes.ppg, 'mg/dL');
-                updateLabElement('lab_rbs', data.diabetes.rbs, 'mg/dL');
-            }
-            if (data.kidney) {
-                updateLabElement('lab_creatinine', data.kidney.creatinine, 'mg/dL');
-                updateLabElement('lab_bun', data.kidney.bun, 'mg/dL');
-                updateLabElement('lab_egfr', data.kidney.egfr, 'mL/min');
-                updateLabElement('lab_uric_acid', data.kidney.uricAcid, 'mg/dL');
-            }
-            if (data.liver) {
-                updateLabElement('lab_alt', data.liver.alt, 'U/L');
-                updateLabElement('lab_ast', data.liver.ast, 'U/L');
-                updateLabElement('lab_alp', data.liver.alp, 'U/L');
-                updateLabElement('lab_bilirubin', data.liver.bilirubin, 'mg/dL');
-            }
-            if (data.thyroid) {
-                updateLabElement('lab_tsh', data.thyroid.tsh, 'µIU/mL');
-                updateLabElement('lab_t3', data.thyroid.t3, 'ng/dL');
-                updateLabElement('lab_t4', data.thyroid.t4, 'µg/dL');
-            }
-            if (data.cardiac) {
-                updateLabElement('lab_troponin', data.cardiac.troponin, 'ng/mL');
-                updateLabElement('lab_ckmb', data.cardiac.ckmb, 'ng/mL');
-                updateLabElement('lab_bnp', data.cardiac.bnp, 'pg/mL');
-            }
-            if (data.inflammation) {
-                updateLabElement('lab_crp', data.inflammation.crp, 'mg/L');
-                updateLabElement('lab_esr', data.inflammation.esr, 'mm/hr');
-                updateLabElement('lab_pct', data.inflammation.pct, 'ng/mL');
-            }
-            if (data.lastUpdated) {
-                const date = new Date(data.lastUpdated);
-                document.getElementById('labLastUpdate').innerHTML = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-            }
+        function updateIndicator(id, value, normalMin, normalMax, warnMin, warnMax) {
+            const el = document.getElementById(id);
+            if(!el) return;
+            if(value < normalMin || value > normalMax) { el.className = 'indicator-danger'; el.innerHTML = 'Critical'; }
+            else if((warnMin && value < warnMin) || (warnMax && value > warnMax)) { el.className = 'indicator-warning'; el.innerHTML = 'Warning'; }
+            else { el.className = 'indicator-normal'; el.innerHTML = 'Normal'; }
         }
 
-        function updateDoctorNotesUI(notes) {
-            if (!notes) return;
-            const notesDiv = document.getElementById('doctorNotes');
-            const dateSpan = document.getElementById('doctorNotesDate');
-            if (notesDiv && notes.summary) {
-                notesDiv.innerHTML = `<i class="fas fa-quote-right" style="color:#8b5cf6; float:right;"></i>
-                    <p>📋 <strong>Clinical Summary:</strong> ${notes.summary}</p>
-                    <p>💊 <strong>Recommendations:</strong> ${notes.recommendations}</p>
-                    <p>✅ <strong>Next Appointment:</strong> ${notes.nextAppointment}</p>`;
-            }
-            if (dateSpan && notes.doctorName) {
-                dateSpan.innerHTML = `${notes.lastUpdated ? new Date(notes.lastUpdated).toLocaleDateString() : 'Today'} | <i class="fas fa-user-md"></i> ${notes.doctorName}`;
-            }
+        function calculateHealthScore(heart, spo2, temp) {
+            let score = 100;
+            if(heart && (heart > 100 || heart < 60)) score -= 20;
+            if(spo2 && spo2 < 95) score -= 25;
+            if(temp && (temp > 37.5 || temp < 36.0)) score -= 15;
+            return Math.max(0, Math.min(100, score));
         }
 
-        // Combined patient data sync (including lab and doctor notes)
-        function startPatientDataSync(patientId) {
-            if (!patientId) return;
-            console.log(`🩺 Full sync started for: ${patientId}`);
-            // Lab results
-            database.ref(`patients/${patientId}/labResults`).on('value', (snap) => { if(snap.val()) updateAllLabResults(snap.val()); });
-            // Doctor notes
-            database.ref(`patients/${patientId}/doctorNotes`).on('value', (snap) => { if(snap.val()) updateDoctorNotesUI(snap.val()); });
-            // Vitals (Care Sync)
-            startCareSyncListener(patientId);
+        // Live Clock (12-hour format)
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            document.getElementById('liveClock').innerHTML = `${hours.toString().padStart(2,'0')}:${minutes}:${seconds} ${ampm}`;
         }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-        // Login logic
-        async function loginUser(patientId) {
-            if (!patientId.trim()) { document.getElementById('loginError').innerText = 'الرجاء إدخال Patient ID'; return false; }
-            try {
-                const check = await database.ref(`patients/${patientId.trim()}`).once('value');
-                if (!check.exists()) {
-                    document.getElementById('loginError').innerText = '❌ Patient ID غير موجود. تأكد من الرقم الظاهر في Python.';
-                    return false;
-                }
-                currentPatientId = patientId.trim();
-                localStorage.setItem('careSyncPatientId', currentPatientId);
-                document.getElementById('loginModal').style.display = 'none';
-                initCharts();
-                startPatientDataSync(currentPatientId);
-                return true;
-            } catch(err) {
-                console.error(err);
-                document.getElementById('loginError').innerText = 'خطأ في الاتصال بقاعدة البيانات';
-                return false;
-            }
-        }
-
-        // Event listeners
-        document.getElementById('loginBtn').onclick = () => loginUser(document.getElementById('loginPatientId').value);
-        document.getElementById('loginPatientId').addEventListener('keypress', (e) => { if(e.key === 'Enter') loginUser(e.target.value); });
-        const savedId = localStorage.getItem('careSyncPatientId');
-        if (savedId) {
-            document.getElementById('loginPatientId').value = savedId;
-            loginUser(savedId);
-        } else {
-            document.getElementById('loginModal').style.display = 'flex';
-        }
-
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('careSyncPatientId');
-            currentPatientId = null;
-            document.getElementById('loginModal').style.display = 'flex';
-            document.getElementById('loginPatientId').value = '';
-            // reset UI
-            document.getElementById('bpValue').innerHTML = '--/-- <span>mmHg</span>';
-            document.getElementById('glucoseValue').innerHTML = '-- <span>mg/dL</span>';
-            document.getElementById('heartValue').innerHTML = '-- <span>bpm</span>';
-            document.getElementById('healthScore').innerText = '--';
-            document.getElementById('activeAlertsCount').innerText = '0';
-            glucoseHistory = []; sbpHistory = []; dbpHistory = []; timeLabels = [];
-            if (glucoseChart) { glucoseChart.data.labels = []; glucoseChart.data.datasets[0].data = []; glucoseChart.update(); }
-            if (bpChart) { bpChart.data.labels = []; bpChart.data.datasets.forEach(d => d.data = []); bpChart.update(); }
+        let alertSoundEnabled = true;
+        document.getElementById('muteAlerts')?.addEventListener('click', function() {
+            alertSoundEnabled = !alertSoundEnabled;
+            this.innerHTML = alertSoundEnabled ? 'Mute' : 'Unmute';
         });
+
+        // Firebase Listener
+        function startESP32Listener() {
+            const vitalsRef = database.ref('/HELIOS_DATA_LIVE/Vitals');
+            vitalsRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if(data && typeof data === 'object') {
+                    const heart = data.HeartRate;
+                    const spo2 = data.SpO2;
+                    const temp = data.BodyTemp;
+                    const roomTemp = data.RoomTemp;
+                    const humidity = data.Humidity;
+                    const motion = data.Motion;
+                    
+                    if(heart) { updateValue('heartValue', heart, 'bpm'); updateIndicator('heartIndicator', heart, 60, 100, 55, 110); }
+                    if(spo2) { updateValue('spo2Value', spo2, '%'); updateIndicator('spo2Indicator', spo2, 95, 100, 90, 100); }
+                    if(temp) { updateValue('tempValue', temp, '°C', 1); updateIndicator('tempIndicator', temp, 36.0, 37.5, 35.5, 38.0); }
+                    if(roomTemp) updateEnvValue('roomTempValue', roomTemp, '°C');
+                    if(humidity) updateEnvValue('humidityValue', humidity, '%');
+                    if(motion) updateEnvValue('motionValue', motion, 'm/s²');
+                    
+                    if(heart && spo2 && temp) {
+                        updateGauges(heart, spo2, temp);
+                        updateTrends(heart, spo2, temp);
+                        const score = calculateHealthScore(heart, spo2, temp);
+                        document.getElementById('healthScore').innerHTML = score;
+                        
+                        let alerts = [];
+                        if(heart > 120 || heart < 50) alerts.push(`⚠️ Abnormal Heart Rate: ${heart} BPM`);
+                        if(spo2 < 90) alerts.push(`⚠️ Low Oxygen: ${spo2}%`);
+                        if(temp > 38.5 || temp < 35.5) alerts.push(`⚠️ Abnormal Temperature: ${temp}°C`);
+                        document.getElementById('activeAlertsCount').innerText = alerts.length;
+                        const alertsContainer = document.getElementById('alertsList');
+                        if(alerts.length > 0) alertsContainer.innerHTML = alerts.map(a => `<div class="alert-item"><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i>${a}</div>`).join('');
+                        else alertsContainer.innerHTML = '<div class="alert-item">✅ All vitals within normal range</div>';
+                    }
+                    document.getElementById('lastUpdate').innerHTML = new Date().toLocaleTimeString();
+                    document.querySelector('#liveStatusBadge span').innerHTML = 'ESP32 Online';
+                    document.querySelector('#liveStatusBadge').style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                }
+            });
+        }
 
         // Navigation
         document.querySelectorAll('.menu-item[data-page]').forEach(item => {
@@ -735,64 +709,41 @@
             });
         });
 
-        // Theme toggle
+        // Theme Toggle
         const themeToggle = document.getElementById('themeToggle');
-        themeToggle.addEventListener('click', () => {
+        themeToggle?.addEventListener('click', () => {
             document.body.classList.toggle('dark');
             localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
         });
-        if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
-
-        // Mute alerts
-        document.getElementById('muteAlerts').addEventListener('click', function() {
-            alertSoundEnabled = !alertSoundEnabled;
-            this.innerHTML = alertSoundEnabled ? 'Mute' : 'Unmute';
-        });
+        if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
 
         // Export PDF
-        document.getElementById('exportBtn').addEventListener('click', () => {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+        document.getElementById('exportBtn')?.addEventListener('click', () => {
+            const doc = new jspdf.jsPDF();
             doc.setFontSize(22);
-            doc.text("Care Sync Health Report", 105, 20, { align: "center" });
-            doc.setFontSize(10);
-            doc.text(`Generated: ${new Date().toLocaleString()}`, 105, 30, { align: "center" });
-            doc.text(`Patient ID: ${currentPatientId || 'N/A'}`, 14, 50);
-            doc.text(`Blood Pressure: ${document.getElementById('bpValue')?.innerText || '--'}`, 14, 70);
-            doc.text(`Blood Glucose: ${document.getElementById('glucoseValue')?.innerText || '--'}`, 14, 80);
-            doc.text(`Heart Rate: ${document.getElementById('heartValue')?.innerText || '--'}`, 14, 90);
-            doc.text(`Health Score: ${document.getElementById('healthScore')?.innerText || '--'}`, 14, 110);
-            doc.save(`care_sync_report_${new Date().toISOString().slice(0,19)}.pdf`);
+            doc.text("HELIOS - Medical Health Report", 14, 20);
+            doc.setFontSize(12);
+            doc.text(`Heart Rate: ${document.getElementById('heartValue')?.innerText || '--'}`, 14, 45);
+            doc.text(`Oxygen Saturation: ${document.getElementById('spo2Value')?.innerText || '--'}`, 14, 55);
+            doc.text(`Body Temperature: ${document.getElementById('tempValue')?.innerText || '--'}`, 14, 65);
+            doc.text(`Room Temperature: ${document.getElementById('roomTempValue')?.innerText || '--'}`, 14, 75);
+            doc.text(`Humidity: ${document.getElementById('humidityValue')?.innerText || '--'}`, 14, 85);
+            doc.text(`Health Score: ${document.getElementById('healthScore')?.innerText || '--'}`, 14, 105);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 120);
+            doc.save("helios_medical_report.pdf");
         });
 
-        // Live Clock
-        function updateClock() {
-            const now = new Date();
-            let hours = now.getHours();
-            const minutes = now.getMinutes().toString().padStart(2,'0');
-            const seconds = now.getSeconds().toString().padStart(2,'0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12 || 12;
-            document.getElementById('liveClock').innerHTML = `${hours.toString().padStart(2,'0')}:${minutes}:${seconds} ${ampm}`;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        // Sidebar collapse
-        document.getElementById('collapseSidebar').addEventListener('click', () => {
+        document.getElementById('collapseSidebar')?.addEventListener('click', () => {
             const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('collapsed');
-            const icon = document.querySelector('#collapseSidebar i');
-            if (sidebar.classList.contains('collapsed')) {
-                icon.classList.remove('fa-chevron-left');
-                icon.classList.add('fa-chevron-right');
-            } else {
-                icon.classList.remove('fa-chevron-right');
-                icon.classList.add('fa-chevron-left');
-            }
+            sidebar.style.width = sidebar.style.width === '80px' ? '280px' : '80px';
+            document.querySelectorAll('.sidebar span').forEach(span => span.style.display = sidebar.style.width === '80px' ? 'none' : 'inline');
         });
 
-        console.log("✅ Dashboard ready - Waiting for Care Sync data from Python");
+        // Initialize
+        initGauges();
+        initTrendCharts();
+        startESP32Listener();
+        console.log("✅ HELIOS Dashboard Ready - Listening to ESP32 Firebase Data");
     </script>
 </body>
 </html>
