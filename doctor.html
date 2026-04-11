@@ -226,4 +226,109 @@
         <div class="alerts-section"><div class="alerts-header"><h3><i class="fas fa-bell"></i> Active Alerts</h3><button class="mute-button" id="muteAlerts"><i class="fas fa-volume-up"></i> Mute</button></div><div class="alerts-list" id="alertsList"></div></div>
     </div>
     <div class="page-section" id="appointmentsPage"><h2>📅 Appointments</h2><div class="table-container"><input type="text" id="appointmentSearch" class="form-control" placeholder="Search..."><table id="appointmentsTable"><thead><tr><th>Patient</th><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody><tr><td>John Doe</td><td>2025-03-27</td><td>10:30</td><td>Scheduled</td></tr></tbody></table></div></div>
-    <div class="page-section" id="patientsPage"><h2>👥 Patients List</h2><div class="table-container"><input type="text" id="patientSearch" class="form-control" placeholder="Search..."><table id="patientsFullTable"><thead><tr><th>Name</th><th>Age</th><th>Condition</th><th>Status</th></tr></thead><tbody><tr><td>Emily Davis</td><td>45</td><td>Post-surgery<\/td><td><span class=\"status-badge status-completed\">Stable</span></td></tr>\n                </tbody>\n            </table>\n        </div>\n    </div>\n    <div class=\"page-section\" id=\"timelogPage\"><h2>⏱️ Time Log</h2><div class=\"table-container\"><table class=\"data-table\"><thead><tr><th>Date</th><th>Clock In</th><th>Clock Out</th><th>Hours</th></tr></thead><tbody><tr><td>2025-03-26</td><td>08:15</td><td>16:30</td><td>8.25</td></tr></tbody></table></div></div>\n    <div class=\"page-section\" id=\"reportsPage\"><h2>📝 Patient Report</h2><form id=\"patientReportForm\"><div class=\"form-group\"><label>Patient Name</label><input type=\"text\" id=\"patientName\" required></div><div class=\"form-group\"><label>Age</label><input type=\"number\" id=\"patientAge\" required></div><div class=\"form-group\"><label>Gender</label><select id=\"patientGender\"><option>Male</option><option>Female</option></select></div><div class=\"form-group\"><label>Health Condition</label><textarea id=\"healthCondition\" rows=\"3\" required></textarea></div><div class=\"form-group\"><label>Medications</label><textarea id=\"medications\" rows=\"2\" required></textarea></div><button type=\"submit\" class=\"btn-submit\">Save Report</button></form></div>\n    <div class=\"page-section\" id=\"settingsPage\"><h2>⚙️ Settings</h2><div class=\"form-container\"><div class=\"form-group\"><label>Email</label><input type=\"email\" id=\"settingsEmail\"></div><div class=\"form-group\"><label>Language</label><select id=\"settingsLanguage\"><option>English</option><option>Arabic</option></select></div><button class=\"btn\" id=\"saveSettings\">Save</button></div></div>\n    <div class=\"page-section\" id=\"supportPage\"><h2>🆘 Support</h2><p>support@smarthealth.com</p></div>\n</main>\n</div>\n\n<!-- Firebase SDKs -->\n<script src=\"https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js\"></script>\n<script src=\"https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js\"></script>\n<script src=\"https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js\"></script>\n<script src=\"https://unpkg.com/mqtt/dist/mqtt.min.js\"></script>\n<script src=\"js/firebase.js\"></script>\n<script src=\"js/doctor.js\"></script>\n<script src=\"js/theme.js\"></script>\n\n<script>\n// ==================== PERMANENT FIX: LOAD PATIENTS FROM USERS ====================\nconsole.log(\"🔧 PERMANENT FIX: Loading patients from users...\");\n\nasync function loadPatientsPermanent() {\n    try {\n        const db = firebase.database();\n        const snapshot = await db.ref('users').once('value');\n        const users = snapshot.val();\n        \n        console.log(\"📊 Users from Firebase:\", users);\n        \n        if (!users) {\n            console.log(\"❌ No users found!\");\n            return;\n        }\n        \n        const patientsList = [];\n        for (const [uid, userData] of Object.entries(users)) {\n            if (userData.role === 'patient') {\n                patientsList.push({\n                    uid: uid,\n                    name: userData.name || \"Unknown\",\n                    email: userData.email || \"\"\n                });\n                console.log(`✅ Found patient: ${userData.name}`);\n            }\n        }\n        \n        console.log(`📊 Total patients found: ${patientsList.length}`);\n        \n        // تحديث عدد المرضى\n        const totalEl = document.getElementById('totalPatients');\n        const dashboardTotalEl = document.getElementById('dashboardTotalPatients');\n        if (totalEl) totalEl.innerHTML = patientsList.length;\n        if (dashboardTotalEl) dashboardTotalEl.innerHTML = patientsList.length;\n        \n        // تحديث قائمة Lab Results\n        const labSelect = document.getElementById('labPatientSelect');\n        if (labSelect) {\n            labSelect.innerHTML = '<option value=\"\">-- Select Patient --</option>';\n            for (const p of patientsList) {\n                const option = document.createElement('option');\n                option.value = p.uid;\n                option.textContent = p.name;\n                labSelect.appendChild(option);\n            }\n            console.log(`✅ Added ${patientsList.length} patients to Lab select`);\n        }\n        \n        // تحديث قائمة Vitals\n        const vitalsSelect = document.getElementById('vitalsPatientSelect');\n        if (vitalsSelect) {\n            vitalsSelect.innerHTML = '<option value=\"\">-- Select Patient --</option>';\n            for (const p of patientsList) {\n                const option = document.createElement('option');\n                option.value = p.uid;\n                option.textContent = p.name;\n                vitalsSelect.appendChild(option);\n            }\n            console.log(`✅ Added ${patientsList.length} patients to Vitals select`);\n        }\n        \n        if (patientsList.length === 0) {\n            console.log(\"⚠️ No patients found! Creating a test patient...\");\n            const testUid = \"patient_\" + Date.now();\n            await db.ref(`users/${testUid}`).set({\n                name: \"Demo Patient\",\n                email: \"demo@patient.com\",\n                role: \"patient\",\n                createdAt: Date.now()\n            });\n            console.log(\"✅ Test patient created! Refreshing...\");\n            setTimeout(() => location.reload(), 1500);\n        }\n        \n    } catch (error) {\n        console.error(\"❌ Error loading patients:\", error);\n    }\n}\n\n// تشغيل الدالة بعد تحميل الصفحة\nsetTimeout(() => {\n    loadPatientsPermanent();\n}, 1500);\n</script>\n\n</body>\n</html>
+    <div class="page-section" id="patientsPage"><h2>👥 Patients List</h2><div class="table-container"><input type="text" id="patientSearch" class="form-control" placeholder="Search..."><table id="patientsFullTable"><thead><tr><th>Name</th><th>Age</th><th>Condition</th><th>Status</th></tr></thead><tbody><tr><td>Emily Davis</td><td>45</td><td>Post-surgery</td><td>Stable</td></tr></tbody></table></div></div>
+    <div class="page-section" id="timelogPage"><h2>⏱️ Time Log</h2><div class="table-container"><table><thead><tr><th>Date</th><th>Clock In</th><th>Clock Out</th><th>Hours</th></tr></thead><tbody><tr><td>2025-03-26</td><td>08:15</td><td>16:30</td><td>8.25</td></tr></tbody></table></div></div>
+    <div class="page-section" id="reportsPage"><h2>📝 Patient Report</h2><form id="patientReportForm"><div class="form-group"><label>Patient Name</label><input type="text" id="patientName" required></div><div class="form-group"><label>Age</label><input type="number" id="patientAge" required></div><div class="form-group"><label>Gender</label><select id="patientGender"><option>Male</option><option>Female</option></select></div><div class="form-group"><label>Health Condition</label><textarea id="healthCondition" rows="3" required></textarea></div><div class="form-group"><label>Medications</label><textarea id="medications" rows="2" required></textarea></div><button type="submit" class="btn-submit">Save Report</button></form></div>
+    <div class="page-section" id="settingsPage"><h2>⚙️ Settings</h2><div class="form-container"><div class="form-group"><label>Email</label><input type="email" id="settingsEmail"></div><div class="form-group"><label>Language</label><select id="settingsLanguage"><option>English</option><option>Arabic</option></select></div><button class="btn" id="saveSettings">Save</button></div></div>
+    <div class="page-section" id="supportPage"><h2>🆘 Support</h2><p>support@smarthealth.com</p></div>
+</main>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script src="js/firebase.js"></script>
+<script src="js/doctor.js"></script>
+<script src="js/theme.js"></script>
+
+<script>
+// ==================== PERMANENT FIX: LOAD PATIENTS FROM USERS ====================
+console.log("🔧 PERMANENT FIX: Loading patients from users...");
+
+async function loadPatientsPermanent() {
+    try {
+        const db = firebase.database();
+        const snapshot = await db.ref('users').once('value');
+        const users = snapshot.val();
+        
+        console.log("📊 Users from Firebase:", users);
+        
+        if (!users) {
+            console.log("❌ No users found!");
+            return;
+        }
+        
+        const patientsList = [];
+        for (const [uid, userData] of Object.entries(users)) {
+            if (userData.role === 'patient') {
+                patientsList.push({
+                    uid: uid,
+                    name: userData.name || "Unknown",
+                    email: userData.email || ""
+                });
+                console.log(`✅ Found patient: ${userData.name}`);
+            }
+        }
+        
+        console.log(`📊 Total patients found: ${patientsList.length}`);
+        
+        // تحديث عدد المرضى
+        const totalEl = document.getElementById('totalPatients');
+        const dashboardTotalEl = document.getElementById('dashboardTotalPatients');
+        if (totalEl) totalEl.innerHTML = patientsList.length;
+        if (dashboardTotalEl) dashboardTotalEl.innerHTML = patientsList.length;
+        
+        // تحديث قائمة Lab Results
+        const labSelect = document.getElementById('labPatientSelect');
+        if (labSelect) {
+            labSelect.innerHTML = '<option value="">-- Select Patient --</option>';
+            for (const p of patientsList) {
+                const option = document.createElement('option');
+                option.value = p.uid;
+                option.textContent = p.name;
+                labSelect.appendChild(option);
+            }
+            console.log(`✅ Added ${patientsList.length} patients to Lab select`);
+        }
+        
+        // تحديث قائمة Vitals
+        const vitalsSelect = document.getElementById('vitalsPatientSelect');
+        if (vitalsSelect) {
+            vitalsSelect.innerHTML = '<option value="">-- Select Patient --</option>';
+            for (const p of patientsList) {
+                const option = document.createElement('option');
+                option.value = p.uid;
+                option.textContent = p.name;
+                vitalsSelect.appendChild(option);
+            }
+            console.log(`✅ Added ${patientsList.length} patients to Vitals select`);
+        }
+        
+        if (patientsList.length === 0) {
+            console.log("⚠️ No patients found! Creating a test patient...");
+            const testUid = "patient_" + Date.now();
+            await db.ref(`users/${testUid}`).set({
+                name: "Demo Patient",
+                email: "demo@patient.com",
+                role: "patient",
+                createdAt: Date.now()
+            });
+            console.log("✅ Test patient created! Refreshing...");
+            setTimeout(() => location.reload(), 1500);
+        }
+        
+    } catch (error) {
+        console.error("❌ Error loading patients:", error);
+    }
+}
+
+// تشغيل الدالة بعد تحميل الصفحة
+setTimeout(() => {
+    loadPatientsPermanent();
+}, 1500);
+</script>
+
+</body>
+</html>
