@@ -3800,8 +3800,13 @@ function initSupportPage() {
                     
                     if (confirm('Are you sure you want to logout?')) {
                         console.log('Logging out...');
-                        
+                        // تعطيل Auth Guard
+if (typeof authGuardEnabled !== 'undefined') {
+    window.authGuardEnabled = false;
+}
+window.__logoutInProgress = true;
                         localStorage.clear();
+                        
                         sessionStorage.clear();
                         
                         document.cookie.split(";").forEach(function(c) {
