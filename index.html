@@ -219,5 +219,23 @@
   <script src="js/index.js"></script>
   <script src="js/theme.js"></script>
   <script src="js/auth.js"></script>
+  <script>
+// منع إعادة الدخول بعد Logout
+(function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('logout') === 'true') {
+        console.log("🚪 Logout parameter detected");
+        sessionStorage.setItem('logout_in_progress', 'true');
+        localStorage.setItem('logout_in_progress', 'true');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        // مسح الفلاج بعد 3 ثواني
+        setTimeout(() => {
+            sessionStorage.removeItem('logout_in_progress');
+            localStorage.removeItem('logout_in_progress');
+        }, 3000);
+    }
+})();
+</script>
 </body>
 </html>
