@@ -824,24 +824,37 @@ document.getElementById('exportBtn')?.addEventListener('click', function() {
         showNotification(`Settings saved: Email ${email}, Language ${lang}`);
     });
 
-    // ==================== LOGOUT BUTTON ====================
-    const footer = document.querySelector('.sidebar-footer');
-    const logoutBtn = document.createElement('a');
-    logoutBtn.href = 'javascript:void(0)';
-    logoutBtn.className = 'menu-item';
-    logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i><span>Logout</span>';
-    logoutBtn.addEventListener('click', async () => {
-        if (confirm('Logout?')) {
-            try {
-                await firebase.auth().signOut();
-                window.location.href = 'index.html';
-            } catch (error) {
-                console.error('Logout error:', error);
-                showNotification('Logout failed', 'error');
+    // ==================== LOGOUT BUTTON (FIXED) ====================
+(function() {
+    const logoutBtn = document.getElementById('logoutSidebarBtn');
+    
+    if (logoutBtn) {
+        const newLogoutBtn = logoutBtn.cloneNode(true);
+        logoutBtn.parentNode.replaceChild(newLogoutBtn, logoutBtn);
+        
+        newLogoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (confirm('⚠️ Are you sure you want to logout?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                if (typeof firebase !== 'undefined' && firebase.auth) {
+                    firebase.auth().signOut()
+                        .then(function() {
+                            window.location.replace('index.html');
+                        })
+                        .catch(function(error) {
+                            window.location.replace('index.html');
+                        });
+                } else {
+                    window.location.replace('index.html');
+                }
             }
-        }
-    });
-    footer.appendChild(logoutBtn);
+        });
+    }
+})();
 
     // ==================== CLEANUP ====================
     window.addEventListener('beforeunload', () => {
