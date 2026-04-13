@@ -1339,4 +1339,443 @@ document.getElementById('exportBtn')?.addEventListener('click', function() {
 
     // ==================== INITIAL PAGE ====================
     showPage('dashboard');
+        // ==================== SETTINGS PAGE FUNCTIONALITY ====================
+    // دوال إعدادات الصفحة التي تعمل مع الكود الموجود
+    
+    // Tab switching for settings page
+    function initSettingsTabs() {
+        const tabBtns = document.querySelectorAll('.settings-tab-btn');
+        const tabPanels = document.querySelectorAll('.settings-tab-panel');
+        
+        if (tabBtns.length === 0) return;
+        
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                tabBtns.forEach(b => {
+                    b.style.borderBottomColor = 'transparent';
+                    b.style.color = 'var(--text-primary)';
+                });
+                tabPanels.forEach(p => p.style.display = 'none');
+                btn.style.borderBottomColor = 'var(--primary)';
+                btn.style.color = 'var(--primary)';
+                const activePanel = document.getElementById(`panel-${tabId}`);
+                if (activePanel) activePanel.style.display = 'block';
+            });
+        });
+    }
+    
+    // Theme options for settings
+    function initThemeOptions() {
+        const themeOptionBtns = document.querySelectorAll('.theme-option-btn');
+        if (themeOptionBtns.length === 0) return;
+        
+        function setThemeSettings(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            } else if (theme === 'light') {
+                document.body.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else if (theme === 'auto') {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (prefersDark) document.body.classList.add('dark');
+                else document.body.classList.remove('dark');
+                localStorage.setItem('theme', 'auto');
+            }
+            themeOptionBtns.forEach(btn => {
+                btn.style.background = 'var(--surface)';
+                btn.style.color = 'var(--text-primary)';
+                if (btn.dataset.theme === theme) {
+                    btn.style.background = 'var(--primary-gradient)';
+                    btn.style.color = 'white';
+                }
+            });
+        }
+        
+        themeOptionBtns.forEach(btn => {
+            btn.addEventListener('click', () => setThemeSettings(btn.dataset.theme));
+        });
+        
+        const savedThemeSetting = localStorage.getItem('theme') || 'light';
+        setThemeSettings(savedThemeSetting);
+    }
+    
+    // Font size control
+    function initFontSizeControl() {
+        const fontSizeSelect = document.getElementById('fontSizeSelect');
+        if (!fontSizeSelect) return;
+        
+        function setFontSize(size) {
+            document.body.classList.remove('font-small', 'font-medium', 'font-large');
+            document.body.classList.add(`font-${size}`);
+            localStorage.setItem('fontSize', size);
+            if (fontSizeSelect) fontSizeSelect.value = size;
+        }
+        
+        const savedFontSize = localStorage.getItem('fontSize') || 'medium';
+        setFontSize(savedFontSize);
+        fontSizeSelect.addEventListener('change', (e) => setFontSize(e.target.value));
+    }
+    
+    // Compact view control
+    function initCompactView() {
+        const compactToggle = document.getElementById('compactViewToggle');
+        if (!compactToggle) return;
+        
+        function setCompactView(enabled) {
+            if (enabled) document.body.classList.add('compact-view');
+            else document.body.classList.remove('compact-view');
+            localStorage.setItem('compactView', enabled);
+            if (compactToggle) compactToggle.checked = enabled;
+        }
+        
+        setCompactView(localStorage.getItem('compactView') === 'true');
+        compactToggle.addEventListener('change', (e) => setCompactView(e.target.checked));
+    }
+    
+    // Animations control
+    function initAnimationsControl() {
+        const animationsToggle = document.getElementById('animationsToggle');
+        if (!animationsToggle) return;
+        
+        function setAnimations(enabled) {
+            if (!enabled) document.body.classList.add('disable-animations');
+            else document.body.classList.remove('disable-animations');
+            localStorage.setItem('animations', enabled);
+            if (animationsToggle) animationsToggle.checked = enabled;
+        }
+        
+        setAnimations(localStorage.getItem('animations') !== 'false');
+        animationsToggle.addEventListener('change', (e) => setAnimations(e.target.checked));
+    }
+    
+    // Alert sound control
+    function initAlertSoundControl() {
+        const alertSoundToggle = document.getElementById('alertSoundToggle');
+        if (!alertSoundToggle) return;
+        
+        function setAlertSound(enabled) {
+            window.alertSoundEnabled = enabled;
+            localStorage.setItem('alertSoundEnabled', enabled);
+            if (alertSoundToggle) alertSoundToggle.checked = enabled;
+        }
+        
+        setAlertSound(localStorage.getItem('alertSoundEnabled') !== 'false');
+        alertSoundToggle.addEventListener('change', (e) => setAlertSound(e.target.checked));
+    }
+    
+    // Auto refresh control
+    function initAutoRefreshControl() {
+        const autoRefreshToggle = document.getElementById('autoRefreshToggle');
+        if (!autoRefreshToggle) return;
+        
+        function setAutoRefresh(enabled) {
+            localStorage.setItem('autoRefresh', enabled);
+            if (autoRefreshToggle) autoRefreshToggle.checked = enabled;
+            if (!enabled && mqttSimInterval) {
+                clearInterval(mqttSimInterval);
+                mqttSimInterval = null;
+            } else if (enabled && !mqttSimInterval && typeof generateRandomVitals === 'function') {
+                mqttSimInterval = setInterval(() => {
+                    const newVitals = generateRandomVitals();
+                    if (typeof updateUI === 'function') updateUI(newVitals);
+                }, 5000);
+            }
+        }
+        
+        setAutoRefresh(localStorage.getItem('autoRefresh') !== 'false');
+        autoRefreshToggle.addEventListener('change', (e) => setAutoRefresh(e.target.checked));
+    }
+    
+    // Export data button
+    function initExportData() {
+        const exportDataBtn = document.getElementById('exportDataBtn');
+        if (!exportDataBtn) return;
+        
+        exportDataBtn.addEventListener('click', () => {
+            if (typeof exportHistoryToCSV === 'function') {
+                exportHistoryToCSV();
+                showNotification('Medical history exported successfully!');
+            } else {
+                showNotification('Export function not available', 'error');
+            }
+        });
+    }
+    
+    // Clear cache button
+    function initClearCache() {
+        const clearCacheBtn = document.getElementById('clearCacheBtn');
+        if (!clearCacheBtn) return;
+        
+        clearCacheBtn.addEventListener('click', () => {
+            if (confirm('⚠️ Clear all cached data? This will reset your preferences.')) {
+                const keysToKeep = ['theme', 'fontSize', 'compactView', 'animations', 'alertSoundEnabled', 'autoRefresh'];
+                const tempStorage = {};
+                keysToKeep.forEach(key => {
+                    const value = localStorage.getItem(key);
+                    if (value !== null) tempStorage[key] = value;
+                });
+                localStorage.clear();
+                Object.keys(tempStorage).forEach(key => {
+                    localStorage.setItem(key, tempStorage[key]);
+                });
+                showNotification('Cache cleared! Page will reload.');
+                setTimeout(() => location.reload(), 1500);
+            }
+        });
+    }
+    
+    // Change password button
+    function initChangePassword() {
+        const changePasswordBtn = document.getElementById('changePasswordBtn');
+        if (!changePasswordBtn) return;
+        
+        changePasswordBtn.addEventListener('click', () => {
+            showPage('profile');
+            setTimeout(() => {
+                const editProfileBtn = document.getElementById('editProfileBtn');
+                if (editProfileBtn) editProfileBtn.click();
+                const changePwdBtn = document.getElementById('changePasswordBtn');
+                if (changePwdBtn && changePwdBtn.style.display !== 'none') {
+                    changePwdBtn.click();
+                }
+                showNotification('Navigate to Profile to change password');
+            }, 300);
+        });
+    }
+    
+    // Save all settings button
+    function initSaveAllSettings() {
+        const saveAllBtn = document.getElementById('saveAllSettingsBtn');
+        if (!saveAllBtn) return;
+        
+        saveAllBtn.addEventListener('click', () => {
+            const fontSizeSelect = document.getElementById('fontSizeSelect');
+            const compactToggle = document.getElementById('compactViewToggle');
+            const animationsToggle = document.getElementById('animationsToggle');
+            const alertSoundToggle = document.getElementById('alertSoundToggle');
+            const autoRefreshToggle = document.getElementById('autoRefreshToggle');
+            
+            if (fontSizeSelect) {
+                document.body.classList.remove('font-small', 'font-medium', 'font-large');
+                document.body.classList.add(`font-${fontSizeSelect.value}`);
+                localStorage.setItem('fontSize', fontSizeSelect.value);
+            }
+            if (compactToggle) {
+                if (compactToggle.checked) document.body.classList.add('compact-view');
+                else document.body.classList.remove('compact-view');
+                localStorage.setItem('compactView', compactToggle.checked);
+            }
+            if (animationsToggle) {
+                if (!animationsToggle.checked) document.body.classList.add('disable-animations');
+                else document.body.classList.remove('disable-animations');
+                localStorage.setItem('animations', animationsToggle.checked);
+            }
+            if (alertSoundToggle) {
+                window.alertSoundEnabled = alertSoundToggle.checked;
+                localStorage.setItem('alertSoundEnabled', alertSoundToggle.checked);
+            }
+            if (autoRefreshToggle) {
+                localStorage.setItem('autoRefresh', autoRefreshToggle.checked);
+                if (!autoRefreshToggle.checked && mqttSimInterval) {
+                    clearInterval(mqttSimInterval);
+                    mqttSimInterval = null;
+                } else if (autoRefreshToggle.checked && !mqttSimInterval && typeof generateRandomVitals === 'function') {
+                    mqttSimInterval = setInterval(() => {
+                        const newVitals = generateRandomVitals();
+                        if (typeof updateUI === 'function') updateUI(newVitals);
+                    }, 5000);
+                }
+            }
+            showNotification('✨ All settings saved successfully!');
+        });
+    }
+    
+    // ==================== SUPPORT PAGE FUNCTIONALITY ====================
+    
+    // FAQ Accordion
+    function initFaqAccordion() {
+        const faqQuestions = document.querySelectorAll('.faq-question');
+        if (faqQuestions.length === 0) return;
+        
+        faqQuestions.forEach(question => {
+            question.addEventListener('click', () => {
+                const answer = question.nextElementSibling;
+                const icon = question.querySelector('.fa-chevron-down');
+                const isOpen = answer.style.display === 'block';
+                
+                document.querySelectorAll('.faq-answer').forEach(a => a.style.display = 'none');
+                document.querySelectorAll('.faq-question .fa-chevron-down').forEach(i => {
+                    if (i) i.style.transform = 'rotate(0deg)';
+                });
+                
+                if (!isOpen) {
+                    answer.style.display = 'block';
+                    if (icon) icon.style.transform = 'rotate(180deg)';
+                }
+            });
+        });
+    }
+    
+    // Quick Actions
+    function initQuickActions() {
+        const openGuideBtn = document.getElementById('openGuideBtn');
+        const openFaqBtn = document.getElementById('openFaqBtn');
+        const reportBugBtn = document.getElementById('reportBugBtn');
+        const requestFeatureBtn = document.getElementById('requestFeatureBtn');
+        const supportSubject = document.getElementById('supportSubject');
+        const supportMessage = document.getElementById('supportMessage');
+        
+        if (openGuideBtn) {
+            openGuideBtn.addEventListener('click', () => {
+                showNotification('Opening user guide...');
+                // window.open('/guide.pdf', '_blank');
+            });
+        }
+        
+        if (openFaqBtn) {
+            openFaqBtn.addEventListener('click', () => {
+                const firstFaq = document.querySelector('.faq-question');
+                if (firstFaq) firstFaq.click();
+                showNotification('Scrolling to FAQ section...');
+            });
+        }
+        
+        if (reportBugBtn && supportSubject && supportMessage) {
+            reportBugBtn.addEventListener('click', () => {
+                supportSubject.value = 'technical';
+                supportMessage.focus();
+                showNotification('Please describe the issue below');
+            });
+        }
+        
+        if (requestFeatureBtn && supportSubject && supportMessage) {
+            requestFeatureBtn.addEventListener('click', () => {
+                supportSubject.value = 'feature';
+                supportMessage.focus();
+                showNotification('Tell us about your idea!');
+            });
+        }
+    }
+    
+    // Send Message
+    function initContactForm() {
+        const sendSupportBtn = document.getElementById('sendSupportBtn');
+        if (!sendSupportBtn) return;
+        
+        sendSupportBtn.addEventListener('click', () => {
+            const name = document.getElementById('supportName')?.value.trim();
+            const email = document.getElementById('supportEmail')?.value.trim();
+            const message = document.getElementById('supportMessage')?.value.trim();
+            
+            if (!name || !email || !message) {
+                showNotification('Please fill all required fields', 'error');
+                return;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showNotification('Please enter a valid email', 'error');
+                return;
+            }
+            
+            showNotification('Message sent! We\'ll respond within 24 hours.');
+            
+            if (document.getElementById('supportName')) document.getElementById('supportName').value = '';
+            if (document.getElementById('supportEmail')) document.getElementById('supportEmail').value = '';
+            if (document.getElementById('supportMessage')) document.getElementById('supportMessage').value = '';
+        });
+    }
+    
+    // ==================== ADD CSS STYLES FOR SETTINGS & SUPPORT ====================
+    function addDynamicStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            /* Font Sizes */
+            body.font-small { font-size: 13px; }
+            body.font-medium { font-size: 16px; }
+            body.font-large { font-size: 18px; }
+            
+            /* Compact View */
+            body.compact-view .vital-card,
+            body.compact-view .stat-card,
+            body.compact-view .chart-card { padding: 0.8rem !important; }
+            body.compact-view .stats-grid { gap: 0.8rem !important; }
+            body.compact-view .vital-value { font-size: 1.8rem !important; }
+            
+            /* Disable Animations */
+            body.disable-animations * { animation: none !important; transition: none !important; }
+            
+            /* Toggle Switch Styles */
+            .toggle-switch {
+                position: relative;
+                display: inline-block;
+                width: 52px;
+                height: 28px;
+            }
+            .toggle-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+            .toggle-slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+                transition: 0.3s;
+                border-radius: 34px;
+            }
+            .toggle-slider:before {
+                position: absolute;
+                content: "";
+                height: 22px;
+                width: 22px;
+                left: 3px;
+                bottom: 3px;
+                background-color: white;
+                transition: 0.3s;
+                border-radius: 50%;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            }
+            input:checked + .toggle-slider {
+                background: linear-gradient(135deg, #10b981, #059669);
+            }
+            input:checked + .toggle-slider:before {
+                transform: translateX(24px);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // Initialize all settings and support features
+    function initSettingsAndSupport() {
+        addDynamicStyles();
+        initSettingsTabs();
+        initThemeOptions();
+        initFontSizeControl();
+        initCompactView();
+        initAnimationsControl();
+        initAlertSoundControl();
+        initAutoRefreshControl();
+        initExportData();
+        initClearCache();
+        initChangePassword();
+        initSaveAllSettings();
+        initFaqAccordion();
+        initQuickActions();
+        initContactForm();
+    }
+    
+    // Run initialization when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSettingsAndSupport);
+    } else {
+        initSettingsAndSupport();
+    }
 })();
+
