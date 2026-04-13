@@ -2961,31 +2961,60 @@ setTimeout(() => {
                 };
             }
         })();
-                // ==================== LOGOUT BUTTON IN SIDEBAR ====================
+                        // ==================== LOGOUT BUTTON IN SIDEBAR (FIXED) ====================
         (function() {
             const logoutBtn = document.getElementById('logoutSidebarBtn');
             if (logoutBtn) {
-                logoutBtn.addEventListener('click', async function(e) {
+                // Remove existing listeners by cloning
+                const newLogoutBtn = logoutBtn.cloneNode(true);
+                logoutBtn.parentNode.replaceChild(newLogoutBtn, logoutBtn);
+                
+                newLogoutBtn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    if (confirm('Are you sure you want to logout?')) {
-                        try {
-                            if (typeof firebase !== 'undefined' && firebase.auth) {
-                                await firebase.auth().signOut();
-                                showNotification('Logged out successfully');
+                    e.stopPropagation();
+                    
+                    if (confirm('⚠️ Are you sure you want to logout?')) {
+                        // Show notification
+                        const notif = document.createElement('div');
+                        notif.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#f59e0b; color:white; padding:12px 24px; border-radius:50px; z-index:10000;';
+                        notif.innerText = 'Logging out...';
+                        document.body.appendChild(notif);
+                        
+                        // Firebase logout
+                        if (typeof firebase !== 'undefined' && firebase.auth) {
+                            firebase.auth().signOut()
+                                .then(function() {
+                                    console.log('User signed out successfully');
+                                    notif.innerText = 'Logged out! Redirecting...';
+                                    notif.style.background = '#10b981';
+                                    setTimeout(function() {
+                                        window.location.href = 'index.html';
+                                    }, 500);
+                                })
+                                .catch(function(error) {
+                                    console.error('Logout error:', error);
+                                    notif.innerText = 'Logout failed: ' + error.message;
+                                    notif.style.background = '#ef4444';
+                                    setTimeout(function() {
+                                        notif.remove();
+                                    }, 2000);
+                                });
+                        } else {
+                            // Demo mode
+                            console.log('Demo mode: logging out');
+                            notif.innerText = 'Logged out (demo mode)';
+                            notif.style.background = '#10b981';
+                            setTimeout(function() {
                                 window.location.href = 'index.html';
-                            } else {
-                                // For testing without Firebase
-                                showNotification('Logged out (demo mode)');
-                                // window.location.href = 'index.html';
-                            }
-                        } catch (error) {
-                            console.error('Logout error:', error);
-                            showNotification('Logout failed', 'error');
+                            }, 500);
                         }
                     }
                 });
+            } else {
+                console.log('Logout button not found - check ID: logoutSidebarBtn');
             }
         })();
+                
             
     </script>
 </body>
