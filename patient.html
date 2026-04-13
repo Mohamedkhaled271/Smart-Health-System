@@ -4177,6 +4177,192 @@ function initSupportPage() {
 })();
 </script>
 <!-- ============================================================== -->
+                <!-- ========== FIX: DISPLAY CARE SYNC DATA ON INTERFACE ========== -->
+<script>
+(function() {
+    console.log("🟢 FIX: Force displaying Care Sync data on UI...");
+    
+    // دالة قوية لتحديث واجهة BP و Glucose
+    function forceUpdateCareSyncDisplay() {
+        // محاولة جلب آخر بيانات من Care Sync
+        const checkForData = setInterval(async () => {
+            try {
+                // جلب patient ID الحالي
+                let patientId = null;
+                const patientsSnap = await database.ref('patients').once('value');
+                const patients = patientsSnap.val();
+                
+                if (patients) {
+                    // البحث عن أحدث مريض
+                    let latestPatient = null;
+                    let latestTime = 0;
+                    
+                    for (const pid of Object.keys(patients)) {
+                        const readings = patients[pid]?.readings;
+                        if (readings) {
+                            const times = Object.keys(readings);
+                            if (times.length > 0) {
+                                const lastTime = parseInt(times[times.length - 1]);
+                                if (lastTime > latestTime) {
+                                    latestTime = lastTime;
+                                    latestPatient = pid;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (latestPatient) {
+                        patientId = latestPatient;
+                        console.log("✅ Found Care Sync patient:", patientId);
+                        
+                        // جلب آخر قراءة
+                        const readingsRef = database.ref(`patients/${patientId}/readings`);
+                        const snapshot = await readingsRef.orderByKey().limitToLast(1).once('value');
+                        const readings = snapshot.val();
+                        
+                        if (readings) {
+                            const timestamp = Object.keys(readings)[0];
+                            const data = readings[timestamp];
+                            
+                            if (data && data.vitals) {
+                                const sbp = data.vitals.systolic_bp;
+                                const dbp = data.vitals.diastolic_bp;
+                                const glucose = data.vitals.glucose;
+                                const hr = data.vitals.heart_rate;
+                                
+                                console.log("📊 Updating UI with Care Sync data:", {sbp, dbp, glucose, hr});
+                                
+                                // تحديث ضغط الدم
+                                if (sbp && dbp) {
+                                    const bpElement = document.getElementById('bpValue');
+                                    if (bpElement) {
+                                        bpElement.innerHTML = `${sbp}/${dbp} <span>mmHg</span>`;
+                                        bpElement.classList.add('data-update-pulse');
+                                        setTimeout(() => bpElement.classList.remove('data-update-pulse'), 400);
+                                    }
+                                    
+                                    const bpIndicator = document.getElementById('bpIndicator');
+                                    if (bpIndicator) {
+                                        if (sbp >= 180 || dbp >= 120) {
+                                            bpIndicator.className = 'indicator-danger';
+                                            bpIndicator.innerHTML = 'Crisis';
+                                        } else if (sbp >= 140 || dbp >= 90) {
+                                            bpIndicator.className = 'indicator-warning';
+                                            bpIndicator.innerHTML = 'Hypertension';
+                                        } else if (sbp >= 120) {
+                                            bpIndicator.className = 'indicator-warning';
+                                            bpIndicator.innerHTML = 'Elevated';
+                                        } else {
+                                            bpIndicator.className = 'indicator-normal';
+                                            bpIndicator.innerHTML = 'Normal';
+                                        }
+                                    }
+                                    
+                                    // تحديث الـ BP Gauge
+                                    if (typeof bpGauge !== 'undefined' && bpGauge) {
+                                        let percent = Math.min(100, Math.max(0, (sbp - 80) / 120 * 100));
+                                        bpGauge.updateSeries([percent]);
+                                    }
+                                }
+                                
+                                // تحديث السكر
+                                if (glucose) {
+                                    const glucoseElement = document.getElementById('glucoseValue');
+                                    if (glucoseElement) {
+                                        glucoseElement.innerHTML = `${Math.round(glucose)} <span>mg/dL</span>`;
+                                        glucoseElement.classList.add('data-update-pulse');
+                                        setTimeout(() => glucoseElement.classList.remove('data-update-pulse'), 400);
+                                    }
+                                    
+                                    const glucoseIndicator = document.getElementById('glucoseIndicator');
+                                    if (glucoseIndicator) {
+                                        if (glucose >= 300) {
+                                            glucoseIndicator.className = 'indicator-danger';
+                                            glucoseIndicator.innerHTML = 'Critical';
+                                        } else if (glucose >= 200) {
+                                            glucoseIndicator.className = 'indicator-danger';
+                                            glucoseIndicator.innerHTML = 'Very High';
+                                        } else if (glucose >= 126) {
+                                            glucoseIndicator.className = 'indicator-warning';
+                                            glucoseIndicator.innerHTML = 'High (Diabetes)';
+                                        } else if (glucose >= 100) {
+                                            glucoseIndicator.className = 'indicator-warning';
+                                            glucoseIndicator.innerHTML = 'Prediabetes';
+                                        } else if (glucose < 70) {
+                                            glucoseIndicator.className = 'indicator-danger';
+                                            glucoseIndicator.innerHTML = 'Low';
+                                        } else {
+                                            glucoseIndicator.className = 'indicator-normal';
+                                            glucoseIndicator.innerHTML = 'Normal';
+                                        }
+                                    }
+                                    
+                                    // تحديث الـ Glucose Gauge
+                                    if (typeof glucoseGauge !== 'undefined' && glucoseGauge) {
+                                        let percent = Math.min(100, Math.max(0, (glucose - 70) / 250 * 100));
+                                        glucoseGauge.updateSeries([percent]);
+                                    }
+                                }
+                                
+                                // تحديث وقت آخر تحديث في Care Sync
+                                const careSyncUpdate = document.getElementById('careSyncLastUpdate');
+                                if (careSyncUpdate) {
+                                    const date = new Date(parseInt(timestamp));
+                                    careSyncUpdate.innerHTML = `<i class="fas fa-sync-alt"></i> ${date.toLocaleTimeString()}`;
+                                }
+                                
+                                // تحديث حالة الاتصال
+                                const statusBadge = document.getElementById('liveStatusBadge');
+                                if (statusBadge && statusBadge.innerHTML.includes('Care Sync') === false) {
+                                    // لا نغيرها إذا كانت ESP32 Live
+                                    if (!statusBadge.innerHTML.includes('ESP32 Live')) {
+                                        statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size:0.6rem; color:#10b981;"></i><span>Care Sync Live</span>';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch(e) {
+                console.error("Error in forceUpdate:", e);
+            }
+        }, 3000); // كل 3 ثوان
+        
+        return checkForData;
+    }
+    
+    // بدء التحديث القسري
+    setTimeout(() => {
+        const interval = forceUpdateCareSyncDisplay();
+        console.log("✅ Force update for Care Sync started - BP and Glucose should appear now");
+    }, 2000);
+    
+    // أيضاً تحديث عند وصول بيانات جديدة من Care Sync listener
+    const originalUpdateUICareSync = window.updateUICareSync;
+    if (originalUpdateUICareSync) {
+        window.updateUICareSync = function(vitals) {
+            console.log("🎯 Intercepted Care Sync update:", vitals);
+            originalUpdateUICareSync(vitals);
+            
+            // تحديث إضافي للتأكد
+            if (vitals.sbp && vitals.dbp) {
+                const bpElement = document.getElementById('bpValue');
+                if (bpElement && bpElement.innerHTML === '--/--') {
+                    bpElement.innerHTML = `${vitals.sbp}/${vitals.dbp} <span>mmHg</span>`;
+                }
+            }
+            if (vitals.glucose) {
+                const glucoseElement = document.getElementById('glucoseValue');
+                if (glucoseElement && glucoseElement.innerHTML === '--') {
+                    glucoseElement.innerHTML = `${Math.round(vitals.glucose)} <span>mg/dL</span>`;
+                }
+            }
+        };
+    }
+    
+})();
+</script>
+<!-- ================================================== -->
                
 
 </body>
