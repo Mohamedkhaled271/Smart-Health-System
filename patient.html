@@ -973,7 +973,101 @@
         </div>
     </div>
 </div>
-            <div class="page-section" id="historyPage"><h2>Medical History</h2><div class="stat-card"><p>Historical records will appear here</p></div></div>
+            <div class="page-section" id="historyPage">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #0284c7, #0ea5e9); -webkit-background-clip: text; background-clip: text; color: transparent;">
+                <i class="fas fa-history"></i> Medical History
+            </h2>
+            <p style="color: var(--text-secondary);">Complete patient medical records from ESP32 + AI Model</p>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <button class="export-btn" id="exportHistoryBtn" style="background: linear-gradient(135deg, #10b981, #059669); padding: 0.7rem 1.5rem;">
+                <i class="fas fa-download"></i> Export CSV
+            </button>
+            <button class="export-btn" id="refreshHistoryBtn" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); padding: 0.7rem 1.5rem;">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="stats-grid" style="margin-bottom: 2rem;">
+        <div class="stat-card">
+            <div class="stat-title">Total Readings</div>
+            <div class="stat-value" id="totalReadings">0</div>
+            <div class="stat-sub">From ESP32 + AI</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Avg Glucose</div>
+            <div class="stat-value" id="avgGlucose">--</div>
+            <div class="stat-sub">mg/dL (AI Model)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Avg BP</div>
+            <div class="stat-value" id="avgBP">--/--</div>
+            <div class="stat-sub">mmHg (AI Model)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Avg Heart Rate</div>
+            <div class="stat-value" id="avgHeartRate">--</div>
+            <div class="stat-sub">bpm (ESP32)</div>
+        </div>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="vital-card" style="margin-bottom: 1.5rem; padding: 1rem;">
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <div style="position: relative;">
+                    <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
+                    <input type="text" id="historySearch" placeholder="Search by date or value..." style="padding: 0.7rem 1rem 0.7rem 2.5rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); width: 250px;">
+                </div>
+                <select id="historyFilter" style="padding: 0.7rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface);">
+                    <option value="all">All Records</option>
+                    <option value="glucose">Glucose Only</option>
+                    <option value="bp">Blood Pressure Only</option>
+                    <option value="heart">Heart Rate Only</option>
+                </select>
+                <input type="date" id="historyStartDate" style="padding: 0.7rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface);">
+                <span>to</span>
+                <input type="date" id="historyEndDate" style="padding: 0.7rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface);">
+                <button id="applyHistoryFilter" class="export-btn" style="padding: 0.7rem 1.5rem; margin: 0;">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Table -->
+    <div class="vital-card" style="padding: 0; overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: linear-gradient(135deg, rgba(2,132,199,0.1), rgba(139,92,246,0.1));">
+                    <th style="padding: 1rem; text-align: left;">Date & Time</th>
+                    <th style="padding: 1rem; text-align: left;">Glucose (mg/dL)</th>
+                    <th style="padding: 1rem; text-align: left;">Blood Pressure (mmHg)</th>
+                    <th style="padding: 1rem; text-align: left;">Heart Rate (bpm)</th>
+                    <th style="padding: 1rem; text-align: left;">SpO₂ (%)</th>
+                    <th style="padding: 1rem; text-align: left;">Status</th>
+                </tr>
+            </thead>
+            <tbody id="historyTableBody">
+                <tr><td colspan="6" style="text-align: center; padding: 2rem;">Loading medical history from Firebase...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row" style="margin-top: 1.5rem;">
+        <div class="chart-card">
+            <h4><i class="fas fa-chart-line"></i> Glucose Trend (AI Model)</h4>
+            <canvas id="glucoseHistoryChart" style="height: 250px;"></canvas>
+        </div>
+        <div class="chart-card">
+            <h4><i class="fas fa-chart-line"></i> Blood Pressure Trend (AI Model)</h4>
+            <canvas id="bpHistoryChart" style="height: 250px;"></canvas>
+        </div>
+    </div>
+</div>
             <div class="page-section" id="appointmentsPage"><h2>Appointments</h2><div class="stat-card"><p>Upcoming appointments</p></div></div>
             <div class="page-section" id="reportsPage"><h2>Health Reports</h2><div class="stat-card"><p>Submit or view reports</p></div></div>
             <div class="page-section" id="settingsPage"><h2>Settings</h2><div class="stat-card"><button class="export-btn" id="saveSettingsBtn">Save Preferences</button></div></div>
@@ -1643,6 +1737,274 @@ function startLabResultsSync() {
 setTimeout(() => {
     startLabResultsSync();
 }, 5000);
+            // ==================== MEDICAL HISTORY FROM FIREBASE (ESP32 + AI) ====================
+    
+    let allHistoryData = [];
+    let glucoseChart = null;
+    let bpChart = null;
+    
+    // Load all readings from Firebase
+    async function loadMedicalHistory() {
+        if (!careSyncPatientId) {
+            console.log('Waiting for patient ID...');
+            setTimeout(loadMedicalHistory, 2000);
+            return;
+        }
+        
+        try {
+            const readingsRef = database.ref(`patients/${careSyncPatientId}/readings`);
+            const snapshot = await readingsRef.once('value');
+            const readings = snapshot.val();
+            
+            if (readings) {
+                // Convert to array and sort by timestamp (newest first)
+                allHistoryData = Object.entries(readings).map(([timestamp, data]) => ({
+                    timestamp: parseInt(timestamp),
+                    date: new Date(parseInt(timestamp)),
+                    vitals: data.vitals || {},
+                    clinical: data.clinical || {}
+                })).sort((a, b) => b.timestamp - a.timestamp);
+                
+                updateHistoryUI();
+                updateHistoryCharts();
+                console.log(`✅ Loaded ${allHistoryData.length} medical records from Firebase`);
+            } else {
+                document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No medical history found in Firebase</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error loading history:', error);
+            document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">Error loading history</td></tr>';
+        }
+    }
+    
+    // Update UI with statistics and table
+    function updateHistoryUI() {
+        const total = allHistoryData.length;
+        document.getElementById('totalReadings').innerText = total;
+        
+        // Calculate averages
+        let glucoseSum = 0, glucoseCount = 0;
+        let sbpSum = 0, dbpSum = 0, bpCount = 0;
+        let hrSum = 0, hrCount = 0;
+        
+        allHistoryData.forEach(record => {
+            if (record.vitals.glucose && record.vitals.glucose > 0) {
+                glucoseSum += record.vitals.glucose;
+                glucoseCount++;
+            }
+            if (record.vitals.systolic_bp && record.vitals.diastolic_bp) {
+                sbpSum += record.vitals.systolic_bp;
+                dbpSum += record.vitals.diastolic_bp;
+                bpCount++;
+            }
+            if (record.vitals.heart_rate && record.vitals.heart_rate > 0) {
+                hrSum += record.vitals.heart_rate;
+                hrCount++;
+            }
+        });
+        
+        document.getElementById('avgGlucose').innerHTML = glucoseCount > 0 ? Math.round(glucoseSum / glucoseCount) : '--';
+        document.getElementById('avgBP').innerHTML = bpCount > 0 ? `${Math.round(sbpSum / bpCount)}/${Math.round(dbpSum / bpCount)}` : '--/--';
+        document.getElementById('avgHeartRate').innerHTML = hrCount > 0 ? Math.round(hrSum / hrCount) : '--';
+        
+        renderHistoryTable();
+    }
+    
+    // Render table with filters
+    function renderHistoryTable() {
+        const searchTerm = document.getElementById('historySearch')?.value.toLowerCase() || '';
+        const filterType = document.getElementById('historyFilter')?.value || 'all';
+        const startDate = document.getElementById('historyStartDate')?.value;
+        const endDate = document.getElementById('historyEndDate')?.value;
+        
+        let filtered = [...allHistoryData];
+        
+        // Apply search
+        if (searchTerm) {
+            filtered = filtered.filter(record => 
+                record.date.toLocaleString().toLowerCase().includes(searchTerm) ||
+                (record.vitals.glucose && record.vitals.glucose.toString().includes(searchTerm)) ||
+                (record.vitals.systolic_bp && record.vitals.systolic_bp.toString().includes(searchTerm))
+            );
+        }
+        
+        // Apply filter type
+        if (filterType !== 'all') {
+            filtered = filtered.filter(record => {
+                if (filterType === 'glucose') return record.vitals.glucose && record.vitals.glucose > 0;
+                if (filterType === 'bp') return record.vitals.systolic_bp && record.vitals.systolic_bp > 0;
+                if (filterType === 'heart') return record.vitals.heart_rate && record.vitals.heart_rate > 0;
+                return true;
+            });
+        }
+        
+        // Apply date filter
+        if (startDate) {
+            const start = new Date(startDate);
+            filtered = filtered.filter(record => record.date >= start);
+        }
+        if (endDate) {
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59);
+            filtered = filtered.filter(record => record.date <= end);
+        }
+        
+        const tbody = document.getElementById('historyTableBody');
+        
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No records found</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = filtered.map(record => {
+            const glucose = record.vitals.glucose || '--';
+            const sbp = record.vitals.systolic_bp || '--';
+            const dbp = record.vitals.diastolic_bp || '--';
+            const hr = record.vitals.heart_rate || '--';
+            const spo2 = record.vitals.spo2 || '--';
+            
+            // Determine status based on values
+            let status = '', statusColor = '';
+            if (glucose !== '--') {
+                if (glucose >= 200) { status = 'High Glucose'; statusColor = '#ef4444'; }
+                else if (glucose >= 126) { status = 'Elevated Glucose'; statusColor = '#f59e0b'; }
+                else if (glucose < 70 && glucose > 0) { status = 'Low Glucose'; statusColor = '#ef4444'; }
+                else if (sbp !== '--' && sbp >= 140) { status = 'High BP'; statusColor = '#f59e0b'; }
+                else { status = 'Normal'; statusColor = '#10b981'; }
+            } else if (sbp !== '--' && sbp >= 140) {
+                status = 'High BP';
+                statusColor = '#f59e0b';
+            } else {
+                status = 'Normal';
+                statusColor = '#10b981';
+            }
+            
+            return `
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 1rem;">${record.date.toLocaleDateString()} ${record.date.toLocaleTimeString()}</td>
+                    <td style="padding: 1rem; font-weight: 600;">${glucose !== '--' ? glucose + ' mg/dL' : '--'}</td>
+                    <td style="padding: 1rem; font-weight: 600;">${sbp !== '--' ? sbp + '/' + dbp + ' mmHg' : '--'}</td>
+                    <td style="padding: 1rem; font-weight: 600;">${hr !== '--' ? hr + ' bpm' : '--'}</td>
+                    <td style="padding: 1rem; font-weight: 600;">${spo2 !== '--' ? spo2 + ' %' : '--'}</td>
+                    <td style="padding: 1rem;"><span style="background: ${statusColor}20; color: ${statusColor}; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">${status}</span></td>
+                </tr>
+            `;
+        }).join('');
+    }
+    
+    // Initialize and update charts
+    function initHistoryCharts() {
+        const glucoseCtx = document.getElementById('glucoseHistoryChart')?.getContext('2d');
+        const bpCtx = document.getElementById('bpHistoryChart')?.getContext('2d');
+        
+        if (glucoseCtx) {
+            glucoseChart = new Chart(glucoseCtx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: 'Glucose (mg/dL) - AI Model', data: [], borderColor: '#ef4444', backgroundColor: '#ef444420', tension: 0.3, fill: true }] },
+                options: { responsive: true, maintainAspectRatio: true, scales: { y: { min: 0, max: 300, title: { display: true, text: 'mg/dL' } } } }
+            });
+        }
+        
+        if (bpCtx) {
+            bpChart = new Chart(bpCtx, {
+                type: 'line',
+                data: { labels: [], datasets: [
+                    { label: 'Systolic BP - AI Model', data: [], borderColor: '#3b82f6', tension: 0.3 },
+                    { label: 'Diastolic BP - AI Model', data: [], borderColor: '#10b981', tension: 0.3 }
+                ] },
+                options: { responsive: true, maintainAspectRatio: true, scales: { y: { min: 40, max: 200, title: { display: true, text: 'mmHg' } } } }
+            });
+        }
+    }
+    
+    function updateHistoryCharts() {
+        if (!glucoseChart && !bpChart) return;
+        
+        // Get last 30 readings for charts (oldest to newest)
+        const last30 = [...allHistoryData].reverse().slice(-30);
+        
+        const labels = last30.map(r => r.date.toLocaleDateString());
+        const glucoseData = last30.map(r => r.vitals.glucose || null);
+        const sbpData = last30.map(r => r.vitals.systolic_bp || null);
+        const dbpData = last30.map(r => r.vitals.diastolic_bp || null);
+        
+        if (glucoseChart) {
+            glucoseChart.data.labels = labels;
+            glucoseChart.data.datasets[0].data = glucoseData;
+            glucoseChart.update();
+        }
+        
+        if (bpChart) {
+            bpChart.data.labels = labels;
+            bpChart.data.datasets[0].data = sbpData;
+            bpChart.data.datasets[1].data = dbpData;
+            bpChart.update();
+        }
+    }
+    
+    // Export to CSV
+    function exportHistoryToCSV() {
+        if (allHistoryData.length === 0) {
+            alert('No data to export');
+            return;
+        }
+        
+        const headers = ['Date', 'Time', 'Glucose (mg/dL)', 'Systolic BP', 'Diastolic BP', 'Heart Rate (bpm)', 'SpO₂ (%)', 'Status'];
+        const rows = allHistoryData.map(record => {
+            const glucose = record.vitals.glucose || '';
+            const sbp = record.vitals.systolic_bp || '';
+            const dbp = record.vitals.diastolic_bp || '';
+            const hr = record.vitals.heart_rate || '';
+            const spo2 = record.vitals.spo2 || '';
+            
+            let status = '';
+            if (glucose >= 200) status = 'High Glucose';
+            else if (glucose >= 126) status = 'Elevated Glucose';
+            else if (glucose < 70 && glucose > 0) status = 'Low Glucose';
+            else if (sbp >= 140) status = 'High BP';
+            else status = 'Normal';
+            
+            return [record.date.toLocaleDateString(), record.date.toLocaleTimeString(), glucose, sbp, dbp, hr, spo2, status];
+        });
+        
+        const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `medical_history_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showNotification('History exported successfully!');
+    }
+    
+    // Setup event listeners
+    function setupHistoryListeners() {
+        document.getElementById('historySearch')?.addEventListener('input', () => renderHistoryTable());
+        document.getElementById('historyFilter')?.addEventListener('change', () => renderHistoryTable());
+        document.getElementById('applyHistoryFilter')?.addEventListener('click', () => renderHistoryTable());
+        document.getElementById('exportHistoryBtn')?.addEventListener('click', exportHistoryToCSV);
+        document.getElementById('refreshHistoryBtn')?.addEventListener('click', () => {
+            loadMedicalHistory();
+            showNotification('Refreshing medical history...');
+        });
+    }
+    
+    // Initialize history system
+    setTimeout(() => {
+        initHistoryCharts();
+        setupHistoryListeners();
+        loadMedicalHistory();
+    }, 4000);
+    
+    // Show notification function
+    function showNotification(msg) {
+        const notif = document.createElement('div');
+        notif.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#10b981; color:white; padding:12px 24px; border-radius:50px; z-index:10000;';
+        notif.innerText = msg;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 3000);
+    }
     </script>
 </body>
 </html>
