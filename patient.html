@@ -2564,6 +2564,403 @@ setTimeout(() => {
                 };
             }
         })();
+                // ==================== SETTINGS PAGE FULL FUNCTIONALITY ====================
+        (function() {
+            
+            // ========== 1. SETTINGS TABS ==========
+            function initSettingsTabs() {
+                const tabBtns = document.querySelectorAll('.settings-tab-btn');
+                const tabPanels = document.querySelectorAll('.settings-tab-panel');
+                
+                if (tabBtns.length === 0) return;
+                
+                tabBtns.forEach(btn => {
+                    btn.removeEventListener('click', handleTabClick);
+                    btn.addEventListener('click', handleTabClick);
+                });
+                
+                function handleTabClick() {
+                    const tabId = this.dataset.tab;
+                    tabBtns.forEach(b => {
+                        b.style.borderBottomColor = 'transparent';
+                        b.style.color = 'var(--text-primary)';
+                    });
+                    tabPanels.forEach(p => p.style.display = 'none');
+                    this.style.borderBottomColor = 'var(--primary)';
+                    this.style.color = 'var(--primary)';
+                    const activePanel = document.getElementById(`panel-${tabId}`);
+                    if (activePanel) activePanel.style.display = 'block';
+                }
+            }
+            
+            // ========== 2. THEME MODE (Light/Dark/Auto) ==========
+            function initThemeOptions() {
+                const themeBtns = document.querySelectorAll('.theme-option-btn');
+                if (themeBtns.length === 0) return;
+                
+                function setTheme(theme) {
+                    if (theme === 'dark') {
+                        document.body.classList.add('dark');
+                        localStorage.setItem('theme', 'dark');
+                    } else if (theme === 'light') {
+                        document.body.classList.remove('dark');
+                        localStorage.setItem('theme', 'light');
+                    } else if (theme === 'auto') {
+                        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        if (prefersDark) document.body.classList.add('dark');
+                        else document.body.classList.remove('dark');
+                        localStorage.setItem('theme', 'auto');
+                    }
+                    
+                    themeBtns.forEach(btn => {
+                        btn.style.background = 'var(--surface)';
+                        btn.style.color = 'var(--text-primary)';
+                        if (btn.dataset.theme === theme) {
+                            btn.style.background = 'var(--primary-gradient)';
+                            btn.style.color = 'white';
+                        }
+                    });
+                }
+                
+                themeBtns.forEach(btn => {
+                    btn.removeEventListener('click', () => {});
+                    btn.addEventListener('click', () => setTheme(btn.dataset.theme));
+                });
+                
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                setTheme(savedTheme);
+            }
+            
+            // ========== 3. FONT SIZE ==========
+            function initFontSize() {
+                const fontSizeSelect = document.getElementById('fontSizeSelect');
+                if (!fontSizeSelect) return;
+                
+                function setFontSize(size) {
+                    document.body.classList.remove('font-small', 'font-medium', 'font-large');
+                    document.body.classList.add(`font-${size}`);
+                    localStorage.setItem('fontSize', size);
+                    if (fontSizeSelect) fontSizeSelect.value = size;
+                }
+                
+                fontSizeSelect.removeEventListener('change', () => {});
+                fontSizeSelect.addEventListener('change', (e) => setFontSize(e.target.value));
+                
+                const savedFontSize = localStorage.getItem('fontSize') || 'medium';
+                setFontSize(savedFontSize);
+            }
+            
+            // ========== 4. COMPACT VIEW ==========
+            function initCompactView() {
+                const compactToggle = document.getElementById('compactViewToggle');
+                if (!compactToggle) return;
+                
+                function setCompactView(enabled) {
+                    if (enabled) {
+                        document.body.classList.add('compact-view');
+                    } else {
+                        document.body.classList.remove('compact-view');
+                    }
+                    localStorage.setItem('compactView', enabled);
+                    if (compactToggle) compactToggle.checked = enabled;
+                    
+                    // Update toggle visual
+                    const slider = compactToggle.parentElement?.querySelector('span:first-of-type');
+                    const knob = compactToggle.parentElement?.querySelector('span:last-of-type');
+                    if (slider && knob) {
+                        if (enabled) {
+                            slider.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                            knob.style.transform = 'translateX(24px)';
+                        } else {
+                            slider.style.background = 'linear-gradient(135deg, #cbd5e1, #94a3b8)';
+                            knob.style.transform = 'translateX(0)';
+                        }
+                    }
+                }
+                
+                compactToggle.removeEventListener('change', () => {});
+                compactToggle.addEventListener('change', (e) => setCompactView(e.target.checked));
+                
+                const savedCompact = localStorage.getItem('compactView') === 'true';
+                setCompactView(savedCompact);
+            }
+            
+            // ========== 5. ANIMATIONS ==========
+            function initAnimations() {
+                const animationsToggle = document.getElementById('animationsToggle');
+                if (!animationsToggle) return;
+                
+                function setAnimations(enabled) {
+                    if (!enabled) {
+                        document.body.classList.add('disable-animations');
+                    } else {
+                        document.body.classList.remove('disable-animations');
+                    }
+                    localStorage.setItem('animations', enabled);
+                    if (animationsToggle) animationsToggle.checked = enabled;
+                    
+                    // Update toggle visual
+                    const slider = animationsToggle.parentElement?.querySelector('span:first-of-type');
+                    const knob = animationsToggle.parentElement?.querySelector('span:last-of-type');
+                    if (slider && knob) {
+                        if (enabled) {
+                            slider.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                            knob.style.transform = 'translateX(24px)';
+                        } else {
+                            slider.style.background = 'linear-gradient(135deg, #cbd5e1, #94a3b8)';
+                            knob.style.transform = 'translateX(0)';
+                        }
+                    }
+                }
+                
+                animationsToggle.removeEventListener('change', () => {});
+                animationsToggle.addEventListener('change', (e) => setAnimations(e.target.checked));
+                
+                const savedAnimations = localStorage.getItem('animations') !== 'false';
+                setAnimations(savedAnimations);
+            }
+            
+            // ========== 6. ALERT SOUND ==========
+            function initAlertSound() {
+                const alertSoundToggle = document.getElementById('alertSoundToggle');
+                if (!alertSoundToggle) return;
+                
+                function setAlertSound(enabled) {
+                    if (typeof window.alertSoundEnabled !== 'undefined') {
+                        window.alertSoundEnabled = enabled;
+                    }
+                    localStorage.setItem('alertSoundEnabled', enabled);
+                    if (alertSoundToggle) alertSoundToggle.checked = enabled;
+                    
+                    // Update toggle visual
+                    const slider = alertSoundToggle.parentElement?.querySelector('span:first-of-type');
+                    const knob = alertSoundToggle.parentElement?.querySelector('span:last-of-type');
+                    if (slider && knob) {
+                        if (enabled) {
+                            slider.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                            knob.style.transform = 'translateX(24px)';
+                        } else {
+                            slider.style.background = 'linear-gradient(135deg, #cbd5e1, #94a3b8)';
+                            knob.style.transform = 'translateX(0)';
+                        }
+                    }
+                }
+                
+                alertSoundToggle.removeEventListener('change', () => {});
+                alertSoundToggle.addEventListener('change', (e) => setAlertSound(e.target.checked));
+                
+                const savedSound = localStorage.getItem('alertSoundEnabled') !== 'false';
+                setAlertSound(savedSound);
+            }
+            
+            // ========== 7. AUTO REFRESH ==========
+            function initAutoRefresh() {
+                const autoRefreshToggle = document.getElementById('autoRefreshToggle');
+                if (!autoRefreshToggle) return;
+                
+                function setAutoRefresh(enabled) {
+                    localStorage.setItem('autoRefresh', enabled);
+                    if (autoRefreshToggle) autoRefreshToggle.checked = enabled;
+                    
+                    // Update toggle visual
+                    const slider = autoRefreshToggle.parentElement?.querySelector('span:first-of-type');
+                    const knob = autoRefreshToggle.parentElement?.querySelector('span:last-of-type');
+                    if (slider && knob) {
+                        if (enabled) {
+                            slider.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                            knob.style.transform = 'translateX(24px)';
+                        } else {
+                            slider.style.background = 'linear-gradient(135deg, #cbd5e1, #94a3b8)';
+                            knob.style.transform = 'translateX(0)';
+                        }
+                    }
+                    
+                    if (typeof mqttSimInterval !== 'undefined') {
+                        if (!enabled && mqttSimInterval) {
+                            clearInterval(mqttSimInterval);
+                            window.mqttSimInterval = null;
+                        } else if (enabled && !window.mqttSimInterval && typeof generateRandomVitals === 'function') {
+                            window.mqttSimInterval = setInterval(() => {
+                                const newVitals = generateRandomVitals();
+                                if (typeof updateUI === 'function') updateUI(newVitals);
+                            }, 5000);
+                        }
+                    }
+                }
+                
+                autoRefreshToggle.removeEventListener('change', () => {});
+                autoRefreshToggle.addEventListener('change', (e) => setAutoRefresh(e.target.checked));
+                
+                const savedRefresh = localStorage.getItem('autoRefresh') !== 'false';
+                setAutoRefresh(savedRefresh);
+            }
+            
+            // ========== 8. EXPORT DATA ==========
+            function initExportData() {
+                const exportBtn = document.getElementById('exportDataBtn');
+                if (!exportBtn) return;
+                
+                exportBtn.removeEventListener('click', () => {});
+                exportBtn.addEventListener('click', () => {
+                    if (typeof exportHistoryToCSV === 'function') {
+                        exportHistoryToCSV();
+                        showNotification('📊 Medical history exported successfully!');
+                    } else {
+                        showNotification('Export function not available', 'error');
+                    }
+                });
+            }
+            
+            // ========== 9. CLEAR CACHE ==========
+            function initClearCache() {
+                const clearBtn = document.getElementById('clearCacheBtn');
+                if (!clearBtn) return;
+                
+                clearBtn.removeEventListener('click', () => {});
+                clearBtn.addEventListener('click', () => {
+                    if (confirm('⚠️ Clear all cached data? This will reset your preferences.')) {
+                        const keysToKeep = ['theme', 'fontSize', 'compactView', 'animations', 'alertSoundEnabled', 'autoRefresh'];
+                        const tempStorage = {};
+                        keysToKeep.forEach(key => {
+                            const value = localStorage.getItem(key);
+                            if (value !== null) tempStorage[key] = value;
+                        });
+                        localStorage.clear();
+                        Object.keys(tempStorage).forEach(key => {
+                            localStorage.setItem(key, tempStorage[key]);
+                        });
+                        showNotification('🗑️ Cache cleared! Page will reload.');
+                        setTimeout(() => location.reload(), 1500);
+                    }
+                });
+            }
+            
+            // ========== 10. CHANGE PASSWORD ==========
+            function initChangePassword() {
+                const changePwdBtn = document.getElementById('changePasswordBtn');
+                if (!changePwdBtn) return;
+                
+                changePwdBtn.removeEventListener('click', () => {});
+                changePwdBtn.addEventListener('click', () => {
+                    if (typeof showPage === 'function') {
+                        showPage('profile');
+                        setTimeout(() => {
+                            const editBtn = document.getElementById('editProfileBtn');
+                            if (editBtn) editBtn.click();
+                            const pwdBtn = document.getElementById('changePasswordBtn');
+                            if (pwdBtn && pwdBtn.style.display !== 'none') {
+                                pwdBtn.click();
+                            }
+                        }, 300);
+                    }
+                    showNotification('🔑 Redirecting to profile page...');
+                });
+            }
+            
+            // ========== 11. SAVE ALL SETTINGS (THE MOST IMPORTANT!) ==========
+            function initSaveAllSettings() {
+                const saveBtn = document.getElementById('saveAllSettingsBtn');
+                if (!saveBtn) return;
+                
+                saveBtn.removeEventListener('click', () => {});
+                saveBtn.addEventListener('click', () => {
+                    // Save Font Size
+                    const fontSizeSelect = document.getElementById('fontSizeSelect');
+                    if (fontSizeSelect) {
+                        const size = fontSizeSelect.value;
+                        document.body.classList.remove('font-small', 'font-medium', 'font-large');
+                        document.body.classList.add(`font-${size}`);
+                        localStorage.setItem('fontSize', size);
+                    }
+                    
+                    // Save Compact View
+                    const compactToggle = document.getElementById('compactViewToggle');
+                    if (compactToggle) {
+                        if (compactToggle.checked) {
+                            document.body.classList.add('compact-view');
+                        } else {
+                            document.body.classList.remove('compact-view');
+                        }
+                        localStorage.setItem('compactView', compactToggle.checked);
+                    }
+                    
+                    // Save Animations
+                    const animationsToggle = document.getElementById('animationsToggle');
+                    if (animationsToggle) {
+                        if (!animationsToggle.checked) {
+                            document.body.classList.add('disable-animations');
+                        } else {
+                            document.body.classList.remove('disable-animations');
+                        }
+                        localStorage.setItem('animations', animationsToggle.checked);
+                    }
+                    
+                    // Save Alert Sound
+                    const alertSoundToggle = document.getElementById('alertSoundToggle');
+                    if (alertSoundToggle) {
+                        if (typeof window.alertSoundEnabled !== 'undefined') {
+                            window.alertSoundEnabled = alertSoundToggle.checked;
+                        }
+                        localStorage.setItem('alertSoundEnabled', alertSoundToggle.checked);
+                    }
+                    
+                    // Save Auto Refresh
+                    const autoRefreshToggle = document.getElementById('autoRefreshToggle');
+                    if (autoRefreshToggle) {
+                        localStorage.setItem('autoRefresh', autoRefreshToggle.checked);
+                        if (typeof mqttSimInterval !== 'undefined') {
+                            if (!autoRefreshToggle.checked && window.mqttSimInterval) {
+                                clearInterval(window.mqttSimInterval);
+                                window.mqttSimInterval = null;
+                            } else if (autoRefreshToggle.checked && !window.mqttSimInterval && typeof generateRandomVitals === 'function') {
+                                window.mqttSimInterval = setInterval(() => {
+                                    const newVitals = generateRandomVitals();
+                                    if (typeof updateUI === 'function') updateUI(newVitals);
+                                }, 5000);
+                            }
+                        }
+                    }
+                    
+                    showNotification('✨ All settings saved successfully!');
+                });
+            }
+            
+            // ========== INITIALIZE EVERYTHING ==========
+            function initSettingsPage() {
+                setTimeout(function() {
+                    initSettingsTabs();
+                    initThemeOptions();
+                    initFontSize();
+                    initCompactView();
+                    initAnimations();
+                    initAlertSound();
+                    initAutoRefresh();
+                    initExportData();
+                    initClearCache();
+                    initChangePassword();
+                    initSaveAllSettings();
+                    console.log('✅ Settings page fully initialized - Save button works!');
+                }, 100);
+            }
+            
+            // Run when page loads
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initSettingsPage);
+            } else {
+                initSettingsPage();
+            }
+            
+            // Re-initialize when navigating to settings page
+            if (typeof showPage !== 'undefined') {
+                const originalShowPage = showPage;
+                window.showPage = function(pageId) {
+                    originalShowPage(pageId);
+                    if (pageId === 'settings') {
+                        initSettingsPage();
+                    }
+                };
+            }
+        })();
             
     </script>
 </body>
