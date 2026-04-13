@@ -1237,7 +1237,130 @@
         </div>
     </div>
 </div>                   
-            <div class="page-section" id="supportPage"><h2>Support</h2><div class="stat-card"><p>Email: support@helios.com</p></div></div>
+            <div class="page-section" id="supportPage">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #0284c7, #0ea5e9, #8b5cf6); -webkit-background-clip: text; background-clip: text; color: transparent;">
+                <i class="fas fa-headset"></i> Support Center
+            </h2>
+            <p style="color: var(--text-secondary);">We're here to help you</p>
+        </div>
+    </div>
+
+    <!-- Contact Options - Email Only -->
+    <div class="stats-grid" style="margin-bottom: 2rem;">
+        <div class="stat-card" style="text-align: center; cursor: pointer;" onclick="window.location.href='mailto:support@helios.com'">
+            <i class="fas fa-envelope" style="font-size: 2.5rem; color: #3b82f6;"></i>
+            <div class="stat-title" style="margin-top: 0.75rem;">Email Support</div>
+            <div class="stat-value" style="font-size: 1rem;">support@helios.com</div>
+            <div class="stat-sub">Response within 24 hours</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="vital-card" style="margin-bottom: 1.5rem; padding: 1.5rem;">
+        <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-bolt" style="color: #f59e0b;"></i> Quick Actions
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <button id="openGuideBtn" class="export-btn" style="margin: 0; background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                <i class="fas fa-book-open"></i> User Guide
+            </button>
+            <button id="openFaqBtn" class="export-btn" style="margin: 0; background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                <i class="fas fa-question-circle"></i> FAQ
+            </button>
+            <button id="reportBugBtn" class="export-btn" style="margin: 0; background: linear-gradient(135deg, #ef4444, #dc2626);">
+                <i class="fas fa-bug"></i> Report Issue
+            </button>
+            <button id="requestFeatureBtn" class="export-btn" style="margin: 0; background: linear-gradient(135deg, #10b981, #059669);">
+                <i class="fas fa-star"></i> Request Feature
+            </button>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="vital-card" style="margin-bottom: 1.5rem; padding: 1.5rem;">
+        <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-question-circle" style="color: #8b5cf6;"></i> Frequently Asked Questions
+        </h3>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div class="faq-item" style="border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+                <div class="faq-question" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 600;">
+                    <span><i class="fas fa-chart-line"></i> How accurate are the vital signs?</span>
+                    <i class="fas fa-chevron-down" style="transition: transform 0.3s;"></i>
+                </div>
+                <div class="faq-answer" style="display: none; padding-top: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;">
+                    Our IoT devices are calibrated to medical-grade standards with ±2% accuracy for heart rate and ±1% for SpO₂. Data is validated by our AI model.
+                </div>
+            </div>
+            <div class="faq-item" style="border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+                <div class="faq-question" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 600;">
+                    <span><i class="fas fa-shield-alt"></i> Is my data secure?</span>
+                    <i class="fas fa-chevron-down" style="transition: transform 0.3s;"></i>
+                </div>
+                <div class="faq-answer" style="display: none; padding-top: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;">
+                    Yes! All data is encrypted in transit and at rest. We comply with HIPAA and GDPR standards for medical data protection.
+                </div>
+            </div>
+            <div class="faq-item" style="border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+                <div class="faq-question" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 600;">
+                    <span><i class="fas fa-sync-alt"></i> How often is data updated?</span>
+                    <i class="fas fa-chevron-down" style="transition: transform 0.3s;"></i>
+                </div>
+                <div class="faq-answer" style="display: none; padding-top: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;">
+                    Real-time vitals update every 5 seconds. Historical data is stored and can be accessed anytime.
+                </div>
+            </div>
+            <div class="faq-item" style="border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+                <div class="faq-question" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 600;">
+                    <span><i class="fas fa-download"></i> Can I export my medical data?</span>
+                    <i class="fas fa-chevron-down" style="transition: transform 0.3s;"></i>
+                </div>
+                <div class="faq-answer" style="display: none; padding-top: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;">
+                    Absolutely! You can export your medical history as CSV from the History page or Settings page.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 600;">
+                    <span><i class="fas fa-user-md"></i> Can I share my data with my doctor?</span>
+                    <i class="fas fa-chevron-down" style="transition: transform 0.3s;"></i>
+                </div>
+                <div class="faq-answer" style="display: none; padding-top: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;">
+                    Yes! You can generate a shareable report PDF or CSV and send it directly to your healthcare provider.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Form -->
+    <div class="vital-card" style="padding: 1.5rem;">
+        <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-paper-plane" style="color: #10b981;"></i> Send us a message
+        </h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <input type="text" id="supportName" placeholder="Your Name" style="padding: 0.8rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);">
+            <input type="email" id="supportEmail" placeholder="Your Email" style="padding: 0.8rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);">
+        </div>
+        <select id="supportSubject" style="width: 100%; margin-top: 1rem; padding: 0.8rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);">
+            <option value="general">General Inquiry</option>
+            <option value="technical">Technical Issue</option>
+            <option value="billing">Billing Question</option>
+            <option value="feature">Feature Request</option>
+        </select>
+        <textarea id="supportMessage" rows="4" placeholder="Describe your issue or question..." style="width: 100%; margin-top: 1rem; padding: 0.8rem; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); resize: vertical;"></textarea>
+        <button id="sendSupportBtn" class="export-btn" style="margin-top: 1rem; width: 100%; background: linear-gradient(135deg, #10b981, #059669);">
+            <i class="fas fa-paper-plane"></i> Send Message
+        </button>
+    </div>
+
+    <!-- Status Badge -->
+    <div style="margin-top: 1.5rem; text-align: center;">
+        <span style="display: inline-flex; align-items: center; gap: 8px; padding: 0.5rem 1rem; background: rgba(16,185,129,0.1); border-radius: 50px;">
+            <i class="fas fa-circle" style="font-size: 0.6rem; color: #10b981;"></i>
+            <span style="font-size: 0.75rem;">All systems operational</span>
+        </span>
+    </div>
+</div>
         </main>
     </div>
 
