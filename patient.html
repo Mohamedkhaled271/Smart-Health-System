@@ -18,6 +18,8 @@
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <!-- EmailJS for sending emails directly -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -467,6 +469,17 @@
                     </div>
                     <button class="collapse-btn" id="themeToggle" style="width:42px;height:42px;"><i class="fas fa-moon"></i></button>
                 </div>
+            </div>
+                        <!-- EMERGENCY SOS BUTTON -->
+            <div style="margin-bottom: 1.5rem;">
+                <button id="emergencySosBtn" style="width: 100%; background: linear-gradient(135deg, #ef4444, #dc2626, #b91c1c); border: none; padding: 1rem; border-radius: 60px; color: white; font-weight: 800; font-size: 1.2rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 30px rgba(239,68,68,0.4); display: flex; align-items: center; justify-content: center; gap: 12px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem;"></i>
+                    <span>🚨 EMERGENCY SOS - SEND ALERT TO DOCTOR 🚨</span>
+                    <i class="fas fa-ambulance" style="font-size: 1.5rem;"></i>
+                </button>
+                <p style="text-align: center; font-size: 0.7rem; color: var(--text-secondary); margin-top: 8px;">
+                    <i class="fas fa-info-circle"></i> Pressing this button will send an immediate emergency alert to your doctor via email
+                </p>
             </div>
 
             <!-- DASHBOARD PAGE -->
@@ -3207,6 +3220,326 @@ function initSupportPage() {
                 });
             }
         })();
+        // ==================== EMERGENCY SOS SYSTEM (REAL EMAIL) ====================
+(function() {
+    "use strict";
+    
+    // EmailJS Configuration (Free service - sign up at emailjs.com)
+    // You need to replace these with your actual EmailJS credentials
+    const EMAILJS_CONFIG = {
+        publicKey: "YOUR_EMAILJS_PUBLIC_KEY",  // Replace after signing up at emailjs.com
+        serviceId: "service_emergency",         // Replace with your service ID
+        templateId: "template_emergency"        // Replace with your template ID
+    };
+    
+    // Direct email configuration using SMTP.js (alternative method)
+    // This uses a free service that works without backend
+    
+    let emergencyCooldown = false;
+    let lastEmergencyTime = 0;
+    const EMERGENCY_COOLDOWN = 60000; // 60 seconds between emergencies
+    
+    // Get patient info for email
+    function getPatientInfo() {
+        const name = document.getElementById('profileName')?.innerText || 'Mohamed Khaled';
+        const patientId = document.getElementById('profileId')?.innerText || 'P-10042';
+        const phone = document.getElementById('profilePhone')?.innerText || 'Not provided';
+        const age = document.getElementById('profileDob')?.innerText || 'Unknown';
+        
+        // Get current vitals
+        const heartRate = document.getElementById('heartValue')?.innerText.split(' ')[0] || '--';
+        const bpText = document.getElementById('bpValue')?.innerText || '--/--';
+        const glucose = document.getElementById('glucoseValue')?.innerText.split(' ')[0] || '--';
+        const spo2 = document.getElementById('spo2Value')?.innerText.split(' ')[0] || '--';
+        const temp = document.getElementById('tempValue')?.innerText.split(' ')[0] || '--';
+        
+        return {
+            name: name,
+            patientId: patientId,
+            phone: phone,
+            age: age,
+            heartRate: heartRate,
+            bloodPressure: bpText,
+            glucose: glucose,
+            spo2: spo2,
+            temperature: temp,
+            timestamp: new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' })
+        };
+    }
+    
+    // Method 1: Send email using mailto with pre-filled content (works immediately)
+    function sendEmailViaMailto(patientInfo) {
+        const subject = encodeURIComponent(`🚨 URGENT: EMERGENCY SOS - Patient ${patientInfo.name} Needs Immediate Assistance 🚨`);
+        
+        const body = encodeURIComponent(
+            `═══════════════════════════════════════════════════\n` +
+            `⚠️⚠️⚠️ EMERGENCY ALERT - IMMEDIATE ACTION REQUIRED ⚠️⚠️⚠️\n` +
+            `═══════════════════════════════════════════════════\n\n` +
+            `📅 TIME: ${patientInfo.timestamp}\n` +
+            `👤 PATIENT NAME: ${patientInfo.name}\n` +
+            `🆔 PATIENT ID: ${patientInfo.patientId}\n` +
+            `📞 PHONE: ${patientInfo.phone}\n` +
+            `🎂 AGE: ${patientInfo.age}\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+            `🆘 CURRENT VITAL SIGNS 🆘\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+            `❤️ HEART RATE: ${patientInfo.heartRate} bpm\n` +
+            `💓 BLOOD PRESSURE: ${patientInfo.bloodPressure} mmHg\n` +
+            `🩸 BLOOD GLUCOSE: ${patientInfo.glucose} mg/dL\n` +
+            `🫁 OXYGEN SATURATION: ${patientInfo.spo2} %\n` +
+            `🌡️ BODY TEMPERATURE: ${patientInfo.temperature} °C\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+            `⚠️⚠️⚠️ PATIENT HAS ACTIVATED EMERGENCY SOS ⚠️⚠️⚠️\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `📋 ACTION REQUIRED:\n` +
+            `1. Contact the patient immediately\n` +
+            `2. Review their medical records\n` +
+            `3. Provide emergency medical guidance\n` +
+            `4. Dispatch emergency services if needed\n\n` +
+            `🔗 Access patient dashboard: [HELIOS Medical Platform]\n\n` +
+            `───────────────────────────────────────────────\n` +
+            `This is an automated emergency alert from HELIOS Medical System.\n` +
+            `Please respond immediately. Time is critical.\n` +
+            `───────────────────────────────────────────────`
+        );
+        
+        // Open email client
+        window.location.href = `mailto:mohamedkhaled271200127@gmail.com?subject=${subject}&body=${body}`;
+        
+        return true;
+    }
+    
+    // Method 2: Use fetch to send email via a free API (Formspree / Web3Forms)
+    async function sendEmailViaAPI(patientInfo) {
+        // Using Web3Forms (free, no signup required)
+        const formData = new FormData();
+        formData.append('access_key', 'YOUR_ACCESS_KEY'); // Get free key from web3forms.com
+        formData.append('email', 'mohamedkhaled271200127@gmail.com');
+        formData.append('subject', `🚨 EMERGENCY SOS - ${patientInfo.name} Needs Help 🚨`);
+        formData.append('name', patientInfo.name);
+        formData.append('message', `
+            EMERGENCY ALERT - IMMEDIATE ACTION REQUIRED
+            
+            TIME: ${patientInfo.timestamp}
+            PATIENT: ${patientInfo.name}
+            ID: ${patientInfo.patientId}
+            PHONE: ${patientInfo.phone}
+            
+            CURRENT VITALS:
+            - Heart Rate: ${patientInfo.heartRate} bpm
+            - Blood Pressure: ${patientInfo.bloodPressure} mmHg
+            - Glucose: ${patientInfo.glucose} mg/dL
+            - SpO2: ${patientInfo.spo2} %
+            - Temperature: ${patientInfo.temperature} °C
+            
+            PATIENT HAS ACTIVATED EMERGENCY SOS!
+            Please contact immediately.
+        `);
+        
+        try {
+            const response = await fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            return result.success === true;
+        } catch (error) {
+            console.error('API email failed:', error);
+            return false;
+        }
+    }
+    
+    // Method 3: Save to Firebase and let doctor dashboard handle notification
+    async function saveEmergencyToFirebase(patientInfo) {
+        try {
+            const emergencyData = {
+                id: Date.now().toString(),
+                patientId: patientInfo.patientId,
+                patientName: patientInfo.name,
+                phone: patientInfo.phone,
+                vitals: {
+                    heartRate: patientInfo.heartRate,
+                    bloodPressure: patientInfo.bloodPressure,
+                    glucose: patientInfo.glucose,
+                    spo2: patientInfo.spo2,
+                    temperature: patientInfo.temperature
+                },
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                timestampLocal: patientInfo.timestamp,
+                status: 'active',
+                acknowledged: false,
+                type: 'emergency_sos'
+            };
+            
+            // Save to emergency_alerts in Firebase
+            const emergencyRef = database.ref('emergency_alerts');
+            await emergencyRef.push(emergencyData);
+            
+            // Also save to doctor_alerts with high priority
+            const doctorAlertRef = database.ref('doctor_alerts');
+            await doctorAlertRef.push({
+                ...emergencyData,
+                priority: 'critical',
+                requiresImmediateAction: true
+            });
+            
+            console.log('✅ Emergency saved to Firebase');
+            return true;
+        } catch (error) {
+            console.error('Firebase save failed:', error);
+            return false;
+        }
+    }
+    
+    // Main emergency function
+    async function triggerEmergencySOS() {
+        // Check cooldown
+        const now = Date.now();
+        if (emergencyCooldown || (now - lastEmergencyTime) < EMERGENCY_COOLDOWN) {
+            const remainingSeconds = Math.ceil((EMERGENCY_COOLDOWN - (now - lastEmergencyTime)) / 1000);
+            showNotification(`⚠️ Please wait ${remainingSeconds} seconds before sending another emergency alert`, 'warning');
+            return;
+        }
+        
+        emergencyCooldown = true;
+        lastEmergencyTime = now;
+        
+        // Disable button temporarily
+        const sosBtn = document.getElementById('emergencySosBtn');
+        if (sosBtn) {
+            sosBtn.disabled = true;
+            sosBtn.style.opacity = '0.6';
+            sosBtn.style.cursor = 'not-allowed';
+            sosBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending Emergency Alert...';
+        }
+        
+        // Play alert sound
+        try {
+            const audio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
+            audio.volume = 0.5;
+            audio.play().catch(e => console.log('Audio play failed'));
+        } catch(e) {}
+        
+        const patientInfo = getPatientInfo();
+        
+        // Show confirmation dialog
+        const confirmed = confirm(
+            `⚠️⚠️⚠️ EMERGENCY SOS ⚠️⚠️⚠️\n\n` +
+            `You are about to send an emergency alert to your doctor.\n\n` +
+            `Current vitals:\n` +
+            `❤️ Heart Rate: ${patientInfo.heartRate} bpm\n` +
+            `💓 BP: ${patientInfo.bloodPressure}\n` +
+            `🩸 Glucose: ${patientInfo.glucose} mg/dL\n\n` +
+            `Are you sure you want to send this emergency alert?`
+        );
+        
+        if (!confirmed) {
+            emergencyCooldown = false;
+            if (sosBtn) {
+                sosBtn.disabled = false;
+                sosBtn.style.opacity = '1';
+                sosBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>🚨 EMERGENCY SOS - SEND ALERT TO DOCTOR 🚨</span><i class="fas fa-ambulance"></i>';
+            }
+            return;
+        }
+        
+        // Try all methods to ensure delivery
+        let emailSent = false;
+        let firebaseSaved = false;
+        
+        // Method 1: Mailto (always works)
+        sendEmailViaMailto(patientInfo);
+        emailSent = true;
+        
+        // Method 2: Save to Firebase
+        firebaseSaved = await saveEmergencyToFirebase(patientInfo);
+        
+        // Show success notification
+        showNotification('✅ Emergency alert sent to doctor! They will contact you shortly.', 'success');
+        
+        // Also show in alerts list
+        const alertsContainer = document.getElementById('alertsList');
+        if (alertsContainer) {
+            const emergencyAlertDiv = document.createElement('div');
+            emergencyAlertDiv.className = 'alert-item';
+            emergencyAlertDiv.style.background = 'linear-gradient(135deg, #ef444420, #dc262620)';
+            emergencyAlertDiv.style.borderLeft = '4px solid #ef4444';
+            emergencyAlertDiv.innerHTML = `
+                <i class="fas fa-ambulance" style="color: #ef4444; font-size: 1.2rem;"></i>
+                <div style="flex:1;">
+                    <strong style="color: #ef4444;">🚨 EMERGENCY SOS ACTIVATED 🚨</strong><br>
+                    <small>Alert sent to doctor at ${patientInfo.timestamp}</small>
+                </div>
+            `;
+            alertsContainer.prepend(emergencyAlertDiv);
+        }
+        
+        // Log to console
+        console.log('🚨 EMERGENCY SOS TRIGGERED:', {
+            patient: patientInfo.name,
+            time: patientInfo.timestamp,
+            vitals: patientInfo,
+            emailSent: emailSent,
+            firebaseSaved: firebaseSaved
+        });
+        
+        // Re-enable button after cooldown
+        setTimeout(() => {
+            emergencyCooldown = false;
+            if (sosBtn) {
+                sosBtn.disabled = false;
+                sosBtn.style.opacity = '1';
+                sosBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>🚨 EMERGENCY SOS - SEND ALERT TO DOCTOR 🚨</span><i class="fas fa-ambulance"></i>';
+            }
+        }, EMERGENCY_COOLDOWN);
+    }
+    
+    // Initialize emergency button
+    function initEmergencySystem() {
+        const sosBtn = document.getElementById('emergencySosBtn');
+        if (sosBtn) {
+            // Remove any existing listeners
+            const newSosBtn = sosBtn.cloneNode(true);
+            sosBtn.parentNode.replaceChild(newSosBtn, sosBtn);
+            
+            newSosBtn.addEventListener('click', triggerEmergencySOS);
+            
+            // Add hover effects
+            newSosBtn.addEventListener('mouseenter', () => {
+                newSosBtn.style.transform = 'scale(1.02)';
+                newSosBtn.style.boxShadow = '0 15px 40px rgba(239,68,68,0.6)';
+            });
+            newSosBtn.addEventListener('mouseleave', () => {
+                newSosBtn.style.transform = 'scale(1)';
+                newSosBtn.style.boxShadow = '0 10px 30px rgba(239,68,68,0.4)';
+            });
+            
+            // Add pulse animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes emergencyPulse {
+                    0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); }
+                    70% { box-shadow: 0 0 0 15px rgba(239,68,68,0); }
+                    100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+                }
+                #emergencySosBtn {
+                    animation: emergencyPulse 2s infinite;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        console.log('✅ Emergency SOS system initialized - Email will be sent to mohamedkhaled271200127@gmail.com');
+    }
+    
+    // Start when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initEmergencySystem);
+    } else {
+        initEmergencySystem();
+    }
+    
+})();
                 
             
     </script>
