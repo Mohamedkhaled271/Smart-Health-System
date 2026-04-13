@@ -3,30 +3,30 @@
 // ====================================================
 (function() {
     "use strict";
-        // ==================== AUTH GUARD ====================
-    if (typeof firebase !== 'undefined') {
-        firebase.auth().onAuthStateChanged((user) => {
-            // منع إعادة التوجيه أثناء تسجيل الخروج
-            if (window.__logoutInProgress) return;
-            
-            if (!user) {
-                window.location.href = 'index.html';
-                return;
+        // ==================== AUTH GUARD (DISABLED FOR LOGOUT) ====================
+let authGuardEnabled = true;
+
+if (typeof firebase !== 'undefined') {
+    firebase.auth().onAuthStateChanged((user) => {
+        // ✅ تعطيل Auth Guard مؤقتاً أثناء تسجيل الخروج
+        if (!authGuardEnabled) return;
+        
+        if (!user) {
+            window.location.href = 'index.html';
+            return;
+        }
+        firebase.database().ref(`users/${user.uid}/role`).once('value').then((snapshot) => {
+            const role = snapshot.val();
+            if (role !== 'patient') {
+                if (role === 'doctor') window.location.href = 'doctor.html';
+                else if (role === 'admin') window.location.href = 'admin.html';
+                else window.location.href = 'index.html';
             }
-            firebase.database().ref(`users/${user.uid}/role`).once('value').then((snapshot) => {
-                const role = snapshot.val();
-                if (role !== 'patient') {
-                    if (role === 'doctor') window.location.href = 'doctor.html';
-                    else if (role === 'admin') window.location.href = 'admin.html';
-                    else window.location.href = 'index.html';
-                }
-            }).catch(() => {
-                window.location.href = 'index.html';
-            });
+        }).catch(() => {
+            window.location.href = 'index.html';
         });
-    } else {
-        console.warn('Firebase not loaded, skipping auth guard');
-    }
+    });
+}
 
 
     // ==================== GLOBAL VARIABLES ====================
