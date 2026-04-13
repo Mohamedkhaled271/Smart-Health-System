@@ -451,9 +451,9 @@
                 <a href="javascript:void(0)" class="menu-item" data-page="history"><i class="fas fa-history"></i><span>History</span></a>
                 
                 <a href="javascript:void(0)" class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
-            </div>
-            <div class="sidebar-footer">
+                        <div class="sidebar-footer">
                 <a href="javascript:void(0)" class="menu-item" data-page="support"><i class="fas fa-headset"></i><span>Support</span></a>
+                <a href="javascript:void(0)" class="menu-item" id="logoutSidebarBtn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
             </div>
         </aside>
 
@@ -2959,6 +2959,31 @@ setTimeout(() => {
                         initSettingsPage();
                     }
                 };
+            }
+        })();
+                // ==================== LOGOUT BUTTON IN SIDEBAR ====================
+        (function() {
+            const logoutBtn = document.getElementById('logoutSidebarBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to logout?')) {
+                        try {
+                            if (typeof firebase !== 'undefined' && firebase.auth) {
+                                await firebase.auth().signOut();
+                                showNotification('Logged out successfully');
+                                window.location.href = 'index.html';
+                            } else {
+                                // For testing without Firebase
+                                showNotification('Logged out (demo mode)');
+                                // window.location.href = 'index.html';
+                            }
+                        } catch (error) {
+                            console.error('Logout error:', error);
+                            showNotification('Logout failed', 'error');
+                        }
+                    }
+                });
             }
         })();
             
