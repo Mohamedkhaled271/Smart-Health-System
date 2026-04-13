@@ -449,7 +449,6 @@
                 <a href="javascript:void(0)" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
                 <a href="javascript:void(0)" class="menu-item" data-page="profile"><i class="fas fa-user-circle"></i><span>Profile</span></a>
                 <a href="javascript:void(0)" class="menu-item" data-page="history"><i class="fas fa-history"></i><span>History</span></a>
-                <a href="javascript:void(0)" class="menu-item" data-page="aiPredictions"><i class="fas fa-brain"></i><span>AI Predictions</span></a>
                 <a href="javascript:void(0)" class="menu-item" data-page="appointments"><i class="fas fa-calendar-check"></i><span>Appointments</span></a>
                 <a href="javascript:void(0)" class="menu-item" data-page="reports"><i class="fas fa-file-alt"></i><span>Reports</span></a>
                 <a href="javascript:void(0)" class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
@@ -842,235 +841,412 @@
                     </div>
                 </div>
             </div>
+                    // ==================== UPDATED MEDICAL HISTORY FROM FIREBASE (ESP32 + AI MODEL) ====================
+    
+let allHistoryData = [];
+let glucoseChart = null;
+let bpChart = null;
+
+// Helper function to format date with AM/PM in English
+function formatDateTimeWithAMPM(timestamp) {
+    const date = new Date(timestamp);
+    const options = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    return date.toLocaleString('en-US', options);
+}
+
+// Helper function to format date only
+function formatDateOnly(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+}
+
+// Load all readings from Firebase (ESP32 + AI Model)
+async function loadMedicalHistory() {
+    // Try to get patient ID from Care Sync first
+    let patientId = careSyncPatientId;
+    
+    if (!patientId) {
+        try {
+            const snapshot = await database.ref('patients').once('value');
+            const patients = snapshot.val();
+            if (patients) {
+                patientId = Object.keys(patients)[0];
+            }
+        } catch(e) { 
+            console.log('Waiting for patient ID...'); 
+        }
+    }
+    
+    if (!patientId) {
+        console.log('No patient found, retrying in 3 seconds...');
+        setTimeout(loadMedicalHistory, 3000);
+        return;
+    }
+    
+    try {
+        // First: Get readings from patients/{patientId}/readings (AI Model Data)
+        const readingsRef = database.ref(`patients/${patientId}/readings`);
+        const snapshot = await readingsRef.once('value');
+        const readings = snapshot.val();
+        
+        // Second: Get ESP32 real-time vitals data
+        const esp32Ref = database.ref('/HELIOS_DATA_LIVE/Vitals');
+        const esp32Snapshot = await esp32Ref.once('value');
+        const esp32Data = esp32Snapshot.val();
+        
+        let combinedData = [];
+        
+        // Add AI Model readings
+        if (readings) {
+            Object.entries(readings).forEach(([timestamp, data]) => {
+                combinedData.push({
+                    timestamp: parseInt(timestamp),
+                    date: new Date(parseInt(timestamp)),
+                    source: 'AI Model',
+                    vitals: data.vitals || {},
+                    clinical: data.clinical || {}
+                });
+            });
+        }
+        
+        // Add ESP32 real-time data if available
+        if (esp32Data && Object.keys(esp32Data).length > 0) {
+            const esp32Timestamp = Date.now();
+            combinedData.push({
+                timestamp: esp32Timestamp,
+                date: new Date(esp32Timestamp),
+                source: 'ESP32',
+                vitals: {
+                    glucose: null,
+                    systolic_bp: null,
+                    diastolic_bp: null,
+                    heart_rate: esp32Data.HeartRate || null,
+                    spo2: esp32Data.SpO2 || null,
+                    body_temp: esp32Data.BodyTemp || null,
+                    room_temp: esp32Data.RoomTemp || null,
+                    humidity: esp32Data.Humidity || null
+                }
+            });
+        }
+        
+        // Also check for historical ESP32 data if there's a history node
+        const esp32HistoryRef = database.ref('/HELIOS_DATA_HISTORY');
+        const esp32HistorySnapshot = await esp32HistoryRef.once('value');
+        const esp32History = esp32HistorySnapshot.val();
+        
+        if (esp32History) {
+            Object.entries(esp32History).forEach(([timestamp, data]) => {
+                if (data && data.Vitals) {
+                    combinedData.push({
+                        timestamp: parseInt(timestamp),
+                        date: new Date(parseInt(timestamp)),
+                        source: 'ESP32 History',
+                        vitals: {
+                            glucose: null,
+                            systolic_bp: null,
+                            diastolic_bp: null,
+                            heart_rate: data.Vitals.HeartRate || null,
+                            spo2: data.Vitals.SpO2 || null,
+                            body_temp: data.Vitals.BodyTemp || null
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Sort by timestamp (newest first)
+        allHistoryData = combinedData.sort((a, b) => b.timestamp - a.timestamp);
+        
+        updateHistoryUI();
+        updateHistoryCharts();
+        console.log(`✅ Loaded ${allHistoryData.length} medical records from Firebase (${allHistoryData.filter(d => d.source === 'AI Model').length} AI + ${allHistoryData.filter(d => d.source !== 'AI Model').length} ESP32)`);
+        
+    } catch (error) {
+        console.error('Error loading history:', error);
+        document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">Error loading history</td></tr>';
+    }
+}
+
+// Update UI with statistics and table
+function updateHistoryUI() {
+    const total = allHistoryData.length;
+    document.getElementById('totalReadings').innerText = total;
+    
+    // Calculate averages from AI Model data only (since ESP32 doesn't have glucose/BP)
+    const aiData = allHistoryData.filter(d => d.source === 'AI Model');
+    
+    let glucoseSum = 0, glucoseCount = 0;
+    let sbpSum = 0, dbpSum = 0, bpCount = 0;
+    let hrSum = 0, hrCount = 0;
+    
+    aiData.forEach(record => {
+        if (record.vitals.glucose && record.vitals.glucose > 0) {
+            glucoseSum += record.vitals.glucose;
+            glucoseCount++;
+        }
+        if (record.vitals.systolic_bp && record.vitals.diastolic_bp) {
+            sbpSum += record.vitals.systolic_bp;
+            dbpSum += record.vitals.diastolic_bp;
+            bpCount++;
+        }
+        if (record.vitals.heart_rate && record.vitals.heart_rate > 0) {
+            hrSum += record.vitals.heart_rate;
+            hrCount++;
+        }
+    });
+    
+    // Also include ESP32 heart rate data
+    const esp32Data = allHistoryData.filter(d => d.source !== 'AI Model' && d.vitals.heart_rate);
+    esp32Data.forEach(record => {
+        if (record.vitals.heart_rate && record.vitals.heart_rate > 0) {
+            hrSum += record.vitals.heart_rate;
+            hrCount++;
+        }
+    });
+    
+    document.getElementById('avgGlucose').innerHTML = glucoseCount > 0 ? Math.round(glucoseSum / glucoseCount) : '--';
+    document.getElementById('avgBP').innerHTML = bpCount > 0 ? `${Math.round(sbpSum / bpCount)}/${Math.round(dbpSum / bpCount)}` : '--/--';
+    document.getElementById('avgHeartRate').innerHTML = hrCount > 0 ? Math.round(hrSum / hrCount) : '--';
+    
+    renderHistoryTable();
+}
+
+// Render table with filters and AM/PM format
+function renderHistoryTable() {
+    const searchTerm = document.getElementById('historySearch')?.value.toLowerCase() || '';
+    const filterType = document.getElementById('historyFilter')?.value || 'all';
+    const startDate = document.getElementById('historyStartDate')?.value;
+    const endDate = document.getElementById('historyEndDate')?.value;
+    
+    let filtered = [...allHistoryData];
+    
+    // Apply search
+    if (searchTerm) {
+        filtered = filtered.filter(record => 
+            formatDateTimeWithAMPM(record.timestamp).toLowerCase().includes(searchTerm) ||
+            (record.vitals.glucose && record.vitals.glucose.toString().includes(searchTerm)) ||
+            (record.vitals.systolic_bp && record.vitals.systolic_bp.toString().includes(searchTerm)) ||
+            (record.vitals.heart_rate && record.vitals.heart_rate.toString().includes(searchTerm))
+        );
+    }
+    
+    // Apply filter type
+    if (filterType !== 'all') {
+        filtered = filtered.filter(record => {
+            if (filterType === 'glucose') return record.vitals.glucose && record.vitals.glucose > 0;
+            if (filterType === 'bp') return record.vitals.systolic_bp && record.vitals.systolic_bp > 0;
+            if (filterType === 'heart') return record.vitals.heart_rate && record.vitals.heart_rate > 0;
+            return true;
+        });
+    }
+    
+    // Apply date filter
+    if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        filtered = filtered.filter(record => record.date >= start);
+    }
+    if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        filtered = filtered.filter(record => record.date <= end);
+    }
+    
+    const tbody = document.getElementById('historyTableBody');
+    
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No records found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = filtered.map(record => {
+        const glucose = record.vitals.glucose || '--';
+        const sbp = record.vitals.systolic_bp || '--';
+        const dbp = record.vitals.diastolic_bp || '--';
+        const hr = record.vitals.heart_rate || '--';
+        const spo2 = record.vitals.spo2 || '--';
+        
+        // Determine status based on values
+        let status = '', statusColor = '';
+        if (glucose !== '--' && glucose > 0) {
+            if (glucose >= 200) { status = '⚠️ High Glucose'; statusColor = '#ef4444'; }
+            else if (glucose >= 126) { status = '⚠️ Elevated Glucose'; statusColor = '#f59e0b'; }
+            else if (glucose < 70) { status = '⚠️ Low Glucose'; statusColor = '#ef4444'; }
+            else if (sbp !== '--' && sbp >= 140) { status = '⚠️ High BP'; statusColor = '#f59e0b'; }
+            else { status = '✅ Normal'; statusColor = '#10b981'; }
+        } else if (sbp !== '--' && sbp >= 140) {
+            status = '⚠️ High BP';
+            statusColor = '#f59e0b';
+        } else if (hr !== '--' && (hr > 100 || hr < 60)) {
+            status = '⚠️ Abnormal HR';
+            statusColor = '#f59e0b';
+        } else {
+            status = '✅ Normal';
+            statusColor = '#10b981';
+        }
+        
+        // Add source badge
+        const sourceBadge = record.source === 'AI Model' ? 
+            '<span style="background: #8b5cf620; color: #8b5cf6; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; margin-left: 8px;">🤖 AI</span>' : 
+            '<span style="background: #10b98120; color: #10b981; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; margin-left: 8px;">📡 ESP32</span>';
+        
+        return `
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 1rem;">
+                    ${formatDateTimeWithAMPM(record.timestamp)}
+                    ${sourceBadge}
+                </td>
+                <td style="padding: 1rem; font-weight: 600;">${glucose !== '--' ? glucose + ' mg/dL' : '--'}</td>
+                <td style="padding: 1rem; font-weight: 600;">${sbp !== '--' ? sbp + '/' + dbp + ' mmHg' : '--'}</td>
+                <td style="padding: 1rem; font-weight: 600;">${hr !== '--' ? hr + ' bpm' : '--'}</td>
+                <td style="padding: 1rem; font-weight: 600;">${spo2 !== '--' ? spo2 + ' %' : '--'}</td>
+                <td style="padding: 1rem;"><span style="background: ${statusColor}20; color: ${statusColor}; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">${status}</span></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Initialize and update charts
+function initHistoryCharts() {
+    const glucoseCtx = document.getElementById('glucoseHistoryChart')?.getContext('2d');
+    const bpCtx = document.getElementById('bpHistoryChart')?.getContext('2d');
+    
+    if (glucoseCtx) {
+        glucoseChart = new Chart(glucoseCtx, {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'Glucose (mg/dL) - AI Model', data: [], borderColor: '#ef4444', backgroundColor: '#ef444420', tension: 0.3, fill: true }] },
+            options: { responsive: true, maintainAspectRatio: true, scales: { y: { min: 0, max: 300, title: { display: true, text: 'mg/dL' } } } }
+        });
+    }
+    
+    if (bpCtx) {
+        bpChart = new Chart(bpCtx, {
+            type: 'line',
+            data: { labels: [], datasets: [
+                { label: 'Systolic BP - AI Model', data: [], borderColor: '#3b82f6', tension: 0.3 },
+                { label: 'Diastolic BP - AI Model', data: [], borderColor: '#10b981', tension: 0.3 }
+            ] },
+            options: { responsive: true, maintainAspectRatio: true, scales: { y: { min: 40, max: 200, title: { display: true, text: 'mmHg' } } } }
+        });
+    }
+}
+
+function updateHistoryCharts() {
+    if (!glucoseChart && !bpChart) return;
+    
+    // Get AI Model data only for charts, sorted oldest to newest
+    const aiData = allHistoryData.filter(d => d.source === 'AI Model').reverse().slice(-30);
+    
+    const labels = aiData.map(r => formatDateOnly(r.timestamp));
+    const glucoseData = aiData.map(r => r.vitals.glucose || null);
+    const sbpData = aiData.map(r => r.vitals.systolic_bp || null);
+    const dbpData = aiData.map(r => r.vitals.diastolic_bp || null);
+    
+    if (glucoseChart) {
+        glucoseChart.data.labels = labels;
+        glucoseChart.data.datasets[0].data = glucoseData;
+        glucoseChart.update();
+    }
+    
+    if (bpChart) {
+        bpChart.data.labels = labels;
+        bpChart.data.datasets[0].data = sbpData;
+        bpChart.data.datasets[1].data = dbpData;
+        bpChart.update();
+    }
+}
+
+// Export to Excel/CSV with proper format
+function exportHistoryToCSV() {
+    if (allHistoryData.length === 0) {
+        alert('No data to export');
+        return;
+    }
+    
+    const headers = ['Date & Time (AM/PM)', 'Source', 'Glucose (mg/dL)', 'Systolic BP', 'Diastolic BP', 'Heart Rate (bpm)', 'SpO₂ (%)', 'Body Temp (°C)', 'Status'];
+    const rows = allHistoryData.map(record => {
+        const glucose = record.vitals.glucose || '';
+        const sbp = record.vitals.systolic_bp || '';
+        const dbp = record.vitals.diastolic_bp || '';
+        const hr = record.vitals.heart_rate || '';
+        const spo2 = record.vitals.spo2 || '';
+        const temp = record.vitals.body_temp || record.vitals.BodyTemp || '';
+        
+        let status = '';
+        if (glucose >= 200) status = 'High Glucose';
+        else if (glucose >= 126) status = 'Elevated Glucose';
+        else if (glucose < 70 && glucose > 0) status = 'Low Glucose';
+        else if (sbp >= 140) status = 'High BP';
+        else if (hr > 100) status = 'High Heart Rate';
+        else if (hr < 60 && hr > 0) status = 'Low Heart Rate';
+        else status = 'Normal';
+        
+        return [
+            formatDateTimeWithAMPM(record.timestamp),
+            record.source,
+            glucose,
+            sbp,
+            dbp,
+            hr,
+            spo2,
+            temp,
+            status
+        ];
+    });
+    
+    // Add BOM for UTF-8 to support Arabic/English properly
+    const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `medical_history_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showNotification('History exported successfully!');
+}
+
+// Setup event listeners
+function setupHistoryListeners() {
+    document.getElementById('historySearch')?.addEventListener('input', () => renderHistoryTable());
+    document.getElementById('historyFilter')?.addEventListener('change', () => renderHistoryTable());
+    document.getElementById('applyHistoryFilter')?.addEventListener('click', () => renderHistoryTable());
+    document.getElementById('exportHistoryBtn')?.addEventListener('click', exportHistoryToCSV);
+    document.getElementById('refreshHistoryBtn')?.addEventListener('click', () => {
+        loadMedicalHistory();
+        showNotification('Refreshing medical history...');
+    });
+}
+
+// Initialize history system
+setTimeout(() => {
+    initHistoryCharts();
+    setupHistoryListeners();
+    loadMedicalHistory();
+}, 4000);
+
+// Show notification function
+function showNotification(msg) {
+    const notif = document.createElement('div');
+    notif.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#10b981; color:white; padding:12px 24px; border-radius:50px; z-index:10000; font-family:Inter; box-shadow:0 4px 15px rgba(0,0,0,0.2);';
+    notif.innerText = msg;
+    document.body.appendChild(notif);
+    setTimeout(() => notif.remove(), 3000);
+}
             
-
-            <!-- Other Pages -->
-            <div class="page-section" id="profilePage">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-        <div>
-            <h2 style="font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #0284c7, #0ea5e9); -webkit-background-clip: text; background-clip: text; color: transparent;">
-                <i class="fas fa-user-circle"></i> My Profile
-            </h2>
-            <p style="color: var(--text-secondary);">Manage your personal information and medical details</p>
-        </div>
-        <button class="export-btn" id="editProfileBtn" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); padding: 0.7rem 1.8rem;">
-            <i class="fas fa-edit"></i> Edit Profile
-        </button>
-    </div>
-
-    <!-- Profile Main Card -->
-    <div class="vital-card" style="padding: 2rem;">
-        <div style="display: flex; flex-wrap: wrap; gap: 2rem; align-items: flex-start;">
-            <div style="text-align: center; min-width: 200px;">
-                <div style="width: 150px; height: 150px; background: linear-gradient(135deg, #0284c7, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; box-shadow: 0 10px 30px rgba(2,132,199,0.3);">
-                    <i class="fas fa-user-md" style="font-size: 4rem; color: white;"></i>
-                </div>
-                <h3 id="profileName" style="font-size: 1.5rem; font-weight: 700;">Mohamed Khaled</h3>
-                <p style="color: var(--text-secondary);"><i class="fas fa-id-card"></i> Patient ID: <span id="profileId">P-10042</span></p>
-                <div style="margin-top: 1rem;">
-                    <span style="background: rgba(16,185,129,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">
-                        <i class="fas fa-check-circle" style="color: #10b981;"></i> Verified
-                    </span>
-                </div>
-            </div>
-
-            <div style="flex: 1;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    <div>
-                        <div style="margin-bottom: 1rem;">
-                            <label style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Full Name</label>
-                            <p style="font-size: 1rem; font-weight: 600; margin-top: 5px;" id="profileFullName">Mohamed Khaled</p>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <label style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Email Address</label>
-                            <p style="font-size: 1rem; font-weight: 600; margin-top: 5px;" id="profileEmail">mohamed.khaled@example.com</p>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <label style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Phone Number</label>
-                            <p style="font-size: 1rem; font-weight: 600; margin-top: 5px;" id="profilePhone">01153493110</p>
-                        </div>
-                    </div>
-                    <div>
-                        <div style="margin-bottom: 1rem;">
-                            <label style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Date of Birth</label>
-                            <p style="font-size: 1rem; font-weight: 600; margin-top: 5px;" id="profileDob">15 March 1985</p>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <label style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Gender</label>
-                            <p style="font-size: 1rem; font-weight: 600; margin-top: 5px;" id="profileGender">Male</p>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <label style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Blood Type</label>
-                            <p style="font-size: 1rem; font-weight: 600; margin-top: 5px;" id="profileBloodType">A+</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Vital Stats Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
-        <div class="stat-card" style="text-align: center;">
-            <i class="fas fa-weight-scale" style="font-size: 2rem; color: #10b981;"></i>
-            <div class="stat-title" style="margin-top: 0.5rem;">Weight</div>
-            <div class="stat-value" style="font-size: 1.3rem;" id="profileWeight">75 kg</div>
-        </div>
-        <div class="stat-card" style="text-align: center;">
-            <i class="fas fa-ruler" style="font-size: 2rem; color: #3b82f6;"></i>
-            <div class="stat-title" style="margin-top: 0.5rem;">Height</div>
-            <div class="stat-value" style="font-size: 1.3rem;" id="profileHeight">178 cm</div>
-        </div>
-        <div class="stat-card" style="text-align: center;">
-            <i class="fas fa-calculator" style="font-size: 2rem; color: #f59e0b;"></i>
-            <div class="stat-title" style="margin-top: 0.5rem;">BMI</div>
-            <div class="stat-value" style="font-size: 1.3rem;" id="profileBMI">23.7</div>
-            <div class="stat-sub" id="bmiStatus">Normal</div>
-        </div>
-        <div class="stat-card" style="text-align: center;">
-            <i class="fas fa-tint" style="font-size: 2rem; color: #ef4444;"></i>
-            <div class="stat-title" style="margin-top: 0.5rem;">Blood Glucose</div>
-            <div class="stat-value" style="font-size: 1.3rem;" id="profileGlucose">95 mg/dL</div>
-        </div>
-        <div class="stat-card" style="text-align: center;">
-            <i class="fas fa-heartbeat" style="font-size: 2rem; color: #ec4899;"></i>
-            <div class="stat-title" style="margin-top: 0.5rem;">Blood Pressure</div>
-            <div class="stat-value" style="font-size: 1.3rem;" id="profileBP">118/76</div>
-        </div>
-    </div>
-
-    <!-- Medical Information -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
-        <div class="vital-card">
-            <h3 style="margin-bottom: 1rem;"><i class="fas fa-stethoscope"></i> Medical History</h3>
-            <div style="margin-bottom: 0.8rem;">
-                <span style="color: var(--text-secondary);">Chronic Diseases:</span>
-                <p id="profileChronic" style="font-weight: 500;">None</p>
-            </div>
-            <div style="margin-bottom: 0.8rem;">
-                <span style="color: var(--text-secondary);">Allergies:</span>
-                <p id="profileAllergies" style="font-weight: 500;">None</p>
-            </div>
-            <div>
-                <span style="color: var(--text-secondary);">Current Medications:</span>
-                <p id="profileMedications" style="font-weight: 500;">None</p>
-            </div>
-        </div>
-
-        <div class="vital-card">
-            <h3 style="margin-bottom: 1rem;"><i class="fas fa-map-marker-alt"></i> Contact & Emergency</h3>
-            <div style="margin-bottom: 0.8rem;">
-                <span style="color: var(--text-secondary);">Address:</span>
-                <p id="profileAddress" style="font-weight: 500;">15 Mohamed Mahmoud St., Cairo, Egypt</p>
-            </div>
-            <div style="margin-bottom: 0.8rem;">
-                <span style="color: var(--text-secondary);">Emergency Contact:</span>
-                <p id="profileEmergency" style="font-weight: 500;">Ahmed Khaled - +20 122 345 6789</p>
-            </div>
-            <div>
-                <span style="color: var(--text-secondary);">Primary Physician:</span>
-                <p id="profilePhysician" style="font-weight: 500;">Dr. Youssef Ali</p>
-            </div>
-        </div>
-    </div>
-</div>
-                    <div class="page-section" id="historyPage">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-        <div>
-            <h2 style="font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #0284c7, #0ea5e9); -webkit-background-clip: text; background-clip: text; color: transparent;">
-                <i class="fas fa-history"></i> Medical History
-            </h2>
-            <p style="color: var(--text-secondary);">Complete patient medical records from ESP32 + AI Model</p>
-        </div>
-        <div style="display: flex; gap: 1rem;">
-            <button class="export-btn" id="exportHistoryBtn" style="background: linear-gradient(135deg, #10b981, #059669); padding: 0.7rem 1.5rem;">
-                <i class="fas fa-download"></i> Export CSV
-            </button>
-            <button class="export-btn" id="refreshHistoryBtn" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); padding: 0.7rem 1.5rem;">
-                <i class="fas fa-sync-alt"></i> Refresh
-            </button>
-        </div>
-    </div>
-
-    <!-- Summary Statistics -->
-    <div class="stats-grid" style="margin-bottom: 2rem;">
-        <div class="stat-card">
-            <div class="stat-title">Total Readings</div>
-            <div class="stat-value" id="totalReadings">0</div>
-            <div class="stat-sub">From ESP32 + AI</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title">Avg Glucose</div>
-            <div class="stat-value" id="avgGlucose">--</div>
-            <div class="stat-sub">mg/dL (AI Model)</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title">Avg BP</div>
-            <div class="stat-value" id="avgBP">--/--</div>
-            <div class="stat-sub">mmHg (AI Model)</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title">Avg Heart Rate</div>
-            <div class="stat-value" id="avgHeartRate">--</div>
-            <div class="stat-sub">bpm (ESP32)</div>
-        </div>
-    </div>
-
-    <!-- Search & Filter -->
-    <div class="vital-card" style="margin-bottom: 1.5rem; padding: 1rem;">
-        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <div style="position: relative;">
-                    <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
-                    <input type="text" id="historySearch" placeholder="Search by date or value..." style="padding: 0.7rem 1rem 0.7rem 2.5rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); width: 250px; color: var(--text-primary);">
-                </div>
-                <select id="historyFilter" style="padding: 0.7rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);">
-                    <option value="all">All Records</option>
-                    <option value="glucose">Glucose Only</option>
-                    <option value="bp">Blood Pressure Only</option>
-                    <option value="heart">Heart Rate Only</option>
-                </select>
-                <input type="date" id="historyStartDate" style="padding: 0.7rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);">
-                <span style="color: var(--text-primary);">to</span>
-                <input type="date" id="historyEndDate" style="padding: 0.7rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);">
-                <button id="applyHistoryFilter" class="export-btn" style="padding: 0.7rem 1.5rem; margin: 0;">Apply</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- History Table -->
-    <div class="vital-card" style="padding: 0; overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr style="background: linear-gradient(135deg, rgba(2,132,199,0.1), rgba(139,92,246,0.1));">
-                    <th style="padding: 1rem; text-align: left; color: var(--text-primary);">Date & Time</th>
-                    <th style="padding: 1rem; text-align: left; color: var(--text-primary);">Glucose (mg/dL)</th>
-                    <th style="padding: 1rem; text-align: left; color: var(--text-primary);">Blood Pressure (mmHg)</th>
-                    <th style="padding: 1rem; text-align: left; color: var(--text-primary);">Heart Rate (bpm)</th>
-                    <th style="padding: 1rem; text-align: left; color: var(--text-primary);">SpO₂ (%)</th>
-                    <th style="padding: 1rem; text-align: left; color: var(--text-primary);">Status</th>
-                </tr>
-            </thead>
-            <tbody id="historyTableBody">
-                <tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-primary);">Loading medical history from Firebase...</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Charts -->
-    <div class="charts-row" style="margin-top: 1.5rem;">
-        <div class="chart-card">
-            <h4 style="color: var(--text-primary);"><i class="fas fa-chart-line"></i> Glucose Trend (AI Model)</h4>
-            <canvas id="glucoseHistoryChart" style="height: 250px;"></canvas>
-        </div>
-        <div class="chart-card">
-            <h4 style="color: var(--text-primary);"><i class="fas fa-chart-line"></i> Blood Pressure Trend (AI Model)</h4>
-            <canvas id="bpHistoryChart" style="height: 250px;"></canvas>
-        </div>
-    </div>
-</div>
-                    
-          
+                 
             <div class="page-section" id="appointmentsPage"><h2>Appointments</h2><div class="stat-card"><p>Upcoming appointments</p></div></div>
             <div class="page-section" id="reportsPage"><h2>Health Reports</h2><div class="stat-card"><p>Submit or view reports</p></div></div>
             <div class="page-section" id="settingsPage"><h2>Settings</h2><div class="stat-card"><button class="export-btn" id="saveSettingsBtn">Save Preferences</button></div></div>
@@ -1739,768 +1915,7 @@ function startLabResultsSync() {
 // تشغيل المزامنة بعد تحميل الصفحة
 setTimeout(() => {
     startLabResultsSync();
-}, 5000);
-            // ==================== MEDICAL HISTORY FROM FIREBASE (ESP32 + AI) ====================
-    
-    let allHistoryData = [];
-    let glucoseChart = null;
-    let bpChart = null;
-    
-    // Load all readings from Firebase
-    async function loadMedicalHistory() {
-        if (!careSyncPatientId) {
-            console.log('Waiting for patient ID...');
-            setTimeout(loadMedicalHistory, 2000);
-            return;
-        }
-        
-        try {
-            const readingsRef = database.ref(`patients/${careSyncPatientId}/readings`);
-            const snapshot = await readingsRef.once('value');
-            const readings = snapshot.val();
-            
-            if (readings) {
-                // Convert to array and sort by timestamp (newest first)
-                allHistoryData = Object.entries(readings).map(([timestamp, data]) => ({
-                    timestamp: parseInt(timestamp),
-                    date: new Date(parseInt(timestamp)),
-                    vitals: data.vitals || {},
-                    clinical: data.clinical || {}
-                })).sort((a, b) => b.timestamp - a.timestamp);
-                
-                updateHistoryUI();
-                updateHistoryCharts();
-                console.log(`✅ Loaded ${allHistoryData.length} medical records from Firebase`);
-            } else {
-                document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No medical history found in Firebase</td></tr>';
-            }
-        } catch (error) {
-            console.error('Error loading history:', error);
-            document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">Error loading history</td></tr>';
-        }
-    }
-    
-    // Update UI with statistics and table
-    function updateHistoryUI() {
-        const total = allHistoryData.length;
-        document.getElementById('totalReadings').innerText = total;
-        
-        // Calculate averages
-        let glucoseSum = 0, glucoseCount = 0;
-        let sbpSum = 0, dbpSum = 0, bpCount = 0;
-        let hrSum = 0, hrCount = 0;
-        
-        allHistoryData.forEach(record => {
-            if (record.vitals.glucose && record.vitals.glucose > 0) {
-                glucoseSum += record.vitals.glucose;
-                glucoseCount++;
-            }
-            if (record.vitals.systolic_bp && record.vitals.diastolic_bp) {
-                sbpSum += record.vitals.systolic_bp;
-                dbpSum += record.vitals.diastolic_bp;
-                bpCount++;
-            }
-            if (record.vitals.heart_rate && record.vitals.heart_rate > 0) {
-                hrSum += record.vitals.heart_rate;
-                hrCount++;
-            }
-        });
-        
-        document.getElementById('avgGlucose').innerHTML = glucoseCount > 0 ? Math.round(glucoseSum / glucoseCount) : '--';
-        document.getElementById('avgBP').innerHTML = bpCount > 0 ? `${Math.round(sbpSum / bpCount)}/${Math.round(dbpSum / bpCount)}` : '--/--';
-        document.getElementById('avgHeartRate').innerHTML = hrCount > 0 ? Math.round(hrSum / hrCount) : '--';
-        
-        renderHistoryTable();
-    }
-    
-    // Render table with filters
-    function renderHistoryTable() {
-        const searchTerm = document.getElementById('historySearch')?.value.toLowerCase() || '';
-        const filterType = document.getElementById('historyFilter')?.value || 'all';
-        const startDate = document.getElementById('historyStartDate')?.value;
-        const endDate = document.getElementById('historyEndDate')?.value;
-        
-        let filtered = [...allHistoryData];
-        
-        // Apply search
-        if (searchTerm) {
-            filtered = filtered.filter(record => 
-                record.date.toLocaleString().toLowerCase().includes(searchTerm) ||
-                (record.vitals.glucose && record.vitals.glucose.toString().includes(searchTerm)) ||
-                (record.vitals.systolic_bp && record.vitals.systolic_bp.toString().includes(searchTerm))
-            );
-        }
-        
-        // Apply filter type
-        if (filterType !== 'all') {
-            filtered = filtered.filter(record => {
-                if (filterType === 'glucose') return record.vitals.glucose && record.vitals.glucose > 0;
-                if (filterType === 'bp') return record.vitals.systolic_bp && record.vitals.systolic_bp > 0;
-                if (filterType === 'heart') return record.vitals.heart_rate && record.vitals.heart_rate > 0;
-                return true;
-            });
-        }
-        
-        // Apply date filter
-        if (startDate) {
-            const start = new Date(startDate);
-            filtered = filtered.filter(record => record.date >= start);
-        }
-        if (endDate) {
-            const end = new Date(endDate);
-            end.setHours(23, 59, 59);
-            filtered = filtered.filter(record => record.date <= end);
-        }
-        
-        const tbody = document.getElementById('historyTableBody');
-        
-        if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No records found</td></tr>';
-            return;
-        }
-        
-        tbody.innerHTML = filtered.map(record => {
-            const glucose = record.vitals.glucose || '--';
-            const sbp = record.vitals.systolic_bp || '--';
-            const dbp = record.vitals.diastolic_bp || '--';
-            const hr = record.vitals.heart_rate || '--';
-            const spo2 = record.vitals.spo2 || '--';
-            
-            // Determine status based on values
-            let status = '', statusColor = '';
-            if (glucose !== '--') {
-                if (glucose >= 200) { status = 'High Glucose'; statusColor = '#ef4444'; }
-                else if (glucose >= 126) { status = 'Elevated Glucose'; statusColor = '#f59e0b'; }
-                else if (glucose < 70 && glucose > 0) { status = 'Low Glucose'; statusColor = '#ef4444'; }
-                else if (sbp !== '--' && sbp >= 140) { status = 'High BP'; statusColor = '#f59e0b'; }
-                else { status = 'Normal'; statusColor = '#10b981'; }
-            } else if (sbp !== '--' && sbp >= 140) {
-                status = 'High BP';
-                statusColor = '#f59e0b';
-            } else {
-                status = 'Normal';
-                statusColor = '#10b981';
-            }
-            
-            return `
-                <tr style="border-bottom: 1px solid var(--border);">
-                    <td style="padding: 1rem;">${record.date.toLocaleDateString()} ${record.date.toLocaleTimeString()}</td>
-                    <td style="padding: 1rem; font-weight: 600;">${glucose !== '--' ? glucose + ' mg/dL' : '--'}</td>
-                    <td style="padding: 1rem; font-weight: 600;">${sbp !== '--' ? sbp + '/' + dbp + ' mmHg' : '--'}</td>
-                    <td style="padding: 1rem; font-weight: 600;">${hr !== '--' ? hr + ' bpm' : '--'}</td>
-                    <td style="padding: 1rem; font-weight: 600;">${spo2 !== '--' ? spo2 + ' %' : '--'}</td>
-                    <td style="padding: 1rem;"><span style="background: ${statusColor}20; color: ${statusColor}; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">${status}</span></td>
-                </tr>
-            `;
-        }).join('');
-    }
-    
-    // Initialize and update charts
-    function initHistoryCharts() {
-        const glucoseCtx = document.getElementById('glucoseHistoryChart')?.getContext('2d');
-        const bpCtx = document.getElementById('bpHistoryChart')?.getContext('2d');
-        
-        if (glucoseCtx) {
-            glucoseChart = new Chart(glucoseCtx, {
-                type: 'line',
-                data: { labels: [], datasets: [{ label: 'Glucose (mg/dL) - AI Model', data: [], borderColor: '#ef4444', backgroundColor: '#ef444420', tension: 0.3, fill: true }] },
-                options: { responsive: true, maintainAspectRatio: true, scales: { y: { min: 0, max: 300, title: { display: true, text: 'mg/dL' } } } }
-            });
-        }
-        
-        if (bpCtx) {
-            bpChart = new Chart(bpCtx, {
-                type: 'line',
-                data: { labels: [], datasets: [
-                    { label: 'Systolic BP - AI Model', data: [], borderColor: '#3b82f6', tension: 0.3 },
-                    { label: 'Diastolic BP - AI Model', data: [], borderColor: '#10b981', tension: 0.3 }
-                ] },
-                options: { responsive: true, maintainAspectRatio: true, scales: { y: { min: 40, max: 200, title: { display: true, text: 'mmHg' } } } }
-            });
-        }
-    }
-    
-    function updateHistoryCharts() {
-        if (!glucoseChart && !bpChart) return;
-        
-        // Get last 30 readings for charts (oldest to newest)
-        const last30 = [...allHistoryData].reverse().slice(-30);
-        
-        const labels = last30.map(r => r.date.toLocaleDateString());
-        const glucoseData = last30.map(r => r.vitals.glucose || null);
-        const sbpData = last30.map(r => r.vitals.systolic_bp || null);
-        const dbpData = last30.map(r => r.vitals.diastolic_bp || null);
-        
-        if (glucoseChart) {
-            glucoseChart.data.labels = labels;
-            glucoseChart.data.datasets[0].data = glucoseData;
-            glucoseChart.update();
-        }
-        
-        if (bpChart) {
-            bpChart.data.labels = labels;
-            bpChart.data.datasets[0].data = sbpData;
-            bpChart.data.datasets[1].data = dbpData;
-            bpChart.update();
-        }
-    }
-    
-    // Export to CSV
-    function exportHistoryToCSV() {
-        if (allHistoryData.length === 0) {
-            alert('No data to export');
-            return;
-        }
-        
-        const headers = ['Date', 'Time', 'Glucose (mg/dL)', 'Systolic BP', 'Diastolic BP', 'Heart Rate (bpm)', 'SpO₂ (%)', 'Status'];
-        const rows = allHistoryData.map(record => {
-            const glucose = record.vitals.glucose || '';
-            const sbp = record.vitals.systolic_bp || '';
-            const dbp = record.vitals.diastolic_bp || '';
-            const hr = record.vitals.heart_rate || '';
-            const spo2 = record.vitals.spo2 || '';
-            
-            let status = '';
-            if (glucose >= 200) status = 'High Glucose';
-            else if (glucose >= 126) status = 'Elevated Glucose';
-            else if (glucose < 70 && glucose > 0) status = 'Low Glucose';
-            else if (sbp >= 140) status = 'High BP';
-            else status = 'Normal';
-            
-            return [record.date.toLocaleDateString(), record.date.toLocaleTimeString(), glucose, sbp, dbp, hr, spo2, status];
-        });
-        
-        const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `medical_history_${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-        showNotification('History exported successfully!');
-    }
-    
-    // Setup event listeners
-    function setupHistoryListeners() {
-        document.getElementById('historySearch')?.addEventListener('input', () => renderHistoryTable());
-        document.getElementById('historyFilter')?.addEventListener('change', () => renderHistoryTable());
-        document.getElementById('applyHistoryFilter')?.addEventListener('click', () => renderHistoryTable());
-        document.getElementById('exportHistoryBtn')?.addEventListener('click', exportHistoryToCSV);
-        document.getElementById('refreshHistoryBtn')?.addEventListener('click', () => {
-            loadMedicalHistory();
-            showNotification('Refreshing medical history...');
-        });
-    }
-    
-    // Initialize history system
-    setTimeout(() => {
-        initHistoryCharts();
-        setupHistoryListeners();
-        loadMedicalHistory();
-    }, 4000);
-    
-    // Show notification function
-    function showNotification(msg) {
-        const notif = document.createElement('div');
-        notif.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#10b981; color:white; padding:12px 24px; border-radius:50px; z-index:10000;';
-        notif.innerText = msg;
-        document.body.appendChild(notif);
-        setTimeout(() => notif.remove(), 3000);
-    }
+}, 5000);  
     </script>
-                <!-- ==================== AI PREDICTIONS PAGE ==================== -->
-<div class="page-section" id="aiPredictionsPage">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-        <div>
-            <h2 style="font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #8b5cf6, #c084fc); -webkit-background-clip: text; background-clip: text; color: transparent;">
-                <i class="fas fa-brain"></i> AI Health Predictions
-            </h2>
-            <p style="color: var(--text-secondary);">Real-time risk assessment & emergency alerts</p>
-        </div>
-        <div style="display: flex; gap: 10px;">
-            <span id="aiModelVersion" style="background: rgba(139,92,246,0.2); padding: 5px 12px; border-radius: 20px; font-size: 0.7rem;">🤖 HELIOS-AI v3.0</span>
-            <span id="predictionConfidence" style="background: rgba(16,185,129,0.2); padding: 5px 12px; border-radius: 20px; font-size: 0.7rem;">Confidence: --%</span>
-        </div>
-    </div>
-
-    <!-- Risk Cards -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-title"><i class="fas fa-tint"></i> DIABETES RISK</div>
-            <div class="stat-value" id="diabetesRisk">--</div>
-            <div class="stat-sub" id="diabetesRiskLevel">Analyzing...</div>
-            <div class="risk-bar" style="height: 8px; background: #e2e8f0; border-radius: 4px; margin-top: 10px; overflow: hidden;">
-                <div id="diabetesRiskBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #ef4444); transition: width 0.5s;"></div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title"><i class="fas fa-heartbeat"></i> HEART RISK</div>
-            <div class="stat-value" id="heartRisk">--</div>
-            <div class="stat-sub" id="heartRiskLevel">Analyzing...</div>
-            <div class="risk-bar" style="height: 8px; background: #e2e8f0; border-radius: 4px; margin-top: 10px; overflow: hidden;">
-                <div id="heartRiskBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #ef4444); transition: width 0.5s;"></div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title"><i class="fas fa-tachometer-alt"></i> HYPERTENSION RISK</div>
-            <div class="stat-value" id="hypertensionRisk">--</div>
-            <div class="stat-sub" id="hypertensionRiskLevel">Analyzing...</div>
-            <div class="risk-bar" style="height: 8px; background: #e2e8f0; border-radius: 4px; margin-top: 10px; overflow: hidden;">
-                <div id="hypertensionRiskBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #ef4444); transition: width 0.5s;"></div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title"><i class="fas fa-brain"></i> STROKE RISK</div>
-            <div class="stat-value" id="strokeRisk">--</div>
-            <div class="stat-sub" id="strokeRiskLevel">Analyzing...</div>
-            <div class="risk-bar" style="height: 8px; background: #e2e8f0; border-radius: 4px; margin-top: 10px; overflow: hidden;">
-                <div id="strokeRiskBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #ef4444); transition: width 0.5s;"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Emergency & Trend -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-title"><i class="fas fa-ambulance"></i> EMERGENCY STATUS</div>
-            <div class="stat-value" id="emergencyStatus" style="font-size: 1.2rem;">🟢 NORMAL</div>
-            <div class="stat-sub" id="emergencyMessage">All vitals normal</div>
-            <button id="manualEmergencyBtn" class="export-btn" style="background: #ef4444; margin-top: 10px; padding: 0.5rem 1rem;">
-                <i class="fas fa-exclamation-triangle"></i> MANUAL EMERGENCY
-            </button>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title"><i class="fas fa-chart-line"></i> 30-DAY TREND</div>
-            <div class="stat-value" id="healthTrend">--</div>
-            <div class="stat-sub" id="trendDirection">Predicting...</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title"><i class="fas fa-envelope"></i> ALERT LOG</div>
-            <div class="stat-value" id="alertCount" style="font-size: 1.2rem;">0</div>
-            <div class="stat-sub">Last: <span id="lastAlertTime">Never</span></div>
-        </div>
-    </div>
-
-    <!-- AI Recommendations -->
-    <div class="vital-card">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1rem;">
-            <i class="fas fa-robot" style="font-size: 1.5rem; color: #8b5cf6;"></i>
-            <h3>🤖 AI Clinical Recommendations</h3>
-        </div>
-        <div id="aiRecommendations" style="font-size: 0.9rem; line-height: 1.6;">
-            <p>Loading AI predictions...</p>
-        </div>
-    </div>
-
-    <!-- Emergency Protocol Info -->
-    <div class="vital-card" style="margin-top: 1rem; background: rgba(239,68,68,0.05);">
-        <p style="font-size: 0.75rem;">🚨 Emergency alerts will be sent to: <strong>mohamedkhaled271200127@gmail.com</strong> and saved to Firebase when risks exceed 80% or vitals are critical.</p>
-    </div>
-</div>
-
-<script>
-// ==================== AI PREDICTION ENGINE ====================
-
-const EMERGENCY_EMAIL = 'mohamedkhaled271200127@gmail.com';
-
-let lastEmergencyAlert = 0;
-const EMERGENCY_COOLDOWN = 300000;
-let alertCount = 0;
-
-// Send emergency email
-function sendEmergencyEmail(patientData, riskData, emergencyType) {
-    const now = Date.now();
-    if (now - lastEmergencyAlert < EMERGENCY_COOLDOWN) {
-        console.log('Cooldown active, skipping email');
-        return false;
-    }
-    lastEmergencyAlert = now;
-    alertCount++;
-    document.getElementById('alertCount').innerHTML = alertCount;
-    document.getElementById('lastAlertTime').innerHTML = new Date().toLocaleTimeString();
-    
-    const subject = `🚨 EMERGENCY ALERT: ${patientData.name} - ${emergencyType}`;
-    const body = `
-PATIENT INFORMATION:
-Name: ${patientData.name}
-Age: ${patientData.age || 'N/A'}
-Phone: ${patientData.phone || '01153493110'}
-Location: ${patientData.address || 'Cairo, Egypt'}
-Time: ${new Date().toLocaleString()}
-
-CRITICAL VITALS:
-- Glucose: ${riskData.glucose || 'N/A'} mg/dL
-- Blood Pressure: ${riskData.bloodPressure || 'N/A'} mmHg
-- Heart Rate: ${riskData.heartRate || 'N/A'} bpm
-
-AI RISK ASSESSMENT:
-- Diabetes Risk: ${riskData.diabetesRisk}
-- Heart Risk: ${riskData.heartRisk}
-- Hypertension Risk: ${riskData.hypertensionRisk}
-- Stroke Risk: ${riskData.strokeRisk}
-
-RECOMMENDATIONS:
-${riskData.recommendations || 'Immediate medical attention required'}
-
-This is an automated alert from HELIOS Health Monitoring System.
-    `.trim();
-    
-    window.location.href = `mailto:${EMERGENCY_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    console.log('Emergency email triggered');
-    return true;
-}
-
-// Save emergency to Firebase
-async function saveEmergencyToFirebase(patientData, riskData, emergencyType) {
-    if (!careSyncPatientId) return;
-    
-    const emergencyRecord = {
-        patientId: careSyncPatientId,
-        patientName: patientData.name,
-        timestamp: Date.now(),
-        date: new Date().toISOString(),
-        emergencyType: emergencyType,
-        vitals: {
-            glucose: riskData.glucose,
-            bloodPressure: riskData.bloodPressure,
-            heartRate: riskData.heartRate
-        },
-        risks: {
-            diabetes: riskData.diabetesRisk,
-            heart: riskData.heartRisk,
-            hypertension: riskData.hypertensionRisk,
-            stroke: riskData.strokeRisk
-        },
-        recommendations: riskData.recommendations,
-        status: 'active'
-    };
-    
-    try {
-        await database.ref(`emergencies/${careSyncPatientId}/${Date.now()}`).set(emergencyRecord);
-        console.log('✅ Emergency saved to Firebase');
-    } catch (error) {
-        console.error('Error saving emergency:', error);
-    }
-}
-
-// Risk Calculation Functions
-function calculateDiabetesRisk(vitals, profile) {
-    let risk = 0;
-    const glucose = vitals.glucose || 0;
-    if (glucose >= 300) risk += 50;
-    else if (glucose >= 200) risk += 40;
-    else if (glucose >= 140) risk += 25;
-    else if (glucose >= 100) risk += 10;
-    
-    const bmi = profile.bmi || 0;
-    if (bmi >= 35) risk += 25;
-    else if (bmi >= 30) risk += 15;
-    else if (bmi >= 25) risk += 8;
-    
-    const age = profile.age || 0;
-    if (age >= 60) risk += 20;
-    else if (age >= 45) risk += 10;
-    
-    return Math.min(100, risk);
-}
-
-function calculateHeartRisk(vitals, profile) {
-    let risk = 0;
-    const sbp = vitals.sbp || 0;
-    const dbp = vitals.dbp || 0;
-    
-    if (sbp >= 180 || dbp >= 120) risk += 45;
-    else if (sbp >= 160 || dbp >= 100) risk += 30;
-    else if (sbp >= 140 || dbp >= 90) risk += 20;
-    else if (sbp >= 120) risk += 10;
-    
-    const glucose = vitals.glucose || 0;
-    if (glucose >= 200) risk += 25;
-    else if (glucose >= 140) risk += 15;
-    
-    const heartRate = vitals.heart_rate || 0;
-    if (heartRate > 120) risk += 15;
-    else if (heartRate > 100) risk += 10;
-    else if (heartRate < 50) risk += 10;
-    
-    const age = profile.age || 0;
-    if (age >= 55) risk += 15;
-    
-    const bmi = profile.bmi || 0;
-    if (bmi >= 30) risk += 10;
-    
-    return Math.min(100, risk);
-}
-
-function calculateHypertensionRisk(vitals, profile) {
-    let risk = 0;
-    const sbp = vitals.sbp || 0;
-    const dbp = vitals.dbp || 0;
-    
-    if (sbp >= 180 || dbp >= 120) risk += 50;
-    else if (sbp >= 160 || dbp >= 100) risk += 35;
-    else if (sbp >= 140 || dbp >= 90) risk += 20;
-    else if (sbp >= 120) risk += 10;
-    
-    const age = profile.age || 0;
-    if (age >= 60) risk += 20;
-    else if (age >= 45) risk += 10;
-    
-    const bmi = profile.bmi || 0;
-    if (bmi >= 30) risk += 20;
-    else if (bmi >= 25) risk += 10;
-    
-    return Math.min(100, risk);
-}
-
-function calculateStrokeRisk(vitals, profile) {
-    let risk = 0;
-    const sbp = vitals.sbp || 0;
-    if (sbp >= 180) risk += 45;
-    else if (sbp >= 160) risk += 30;
-    else if (sbp >= 140) risk += 15;
-    
-    const glucose = vitals.glucose || 0;
-    if (glucose >= 200) risk += 30;
-    else if (glucose >= 140) risk += 15;
-    
-    const age = profile.age || 0;
-    if (age >= 65) risk += 20;
-    else if (age >= 55) risk += 10;
-    
-    return Math.min(100, risk);
-}
-
-// Check for emergency conditions
-function checkEmergency(vitals, risks) {
-    const conditions = [];
-    let isEmergency = false;
-    
-    if (vitals.glucose >= 300) {
-        isEmergency = true;
-        conditions.push('Critical: Blood glucose > 300 mg/dL');
-    }
-    if (vitals.sbp >= 180 || vitals.dbp >= 120) {
-        isEmergency = true;
-        conditions.push('Critical: Hypertensive crisis');
-    }
-    if (vitals.heart_rate > 130) {
-        isEmergency = true;
-        conditions.push('Critical: Severe tachycardia > 130 bpm');
-    }
-    if (vitals.heart_rate < 45) {
-        isEmergency = true;
-        conditions.push('Critical: Severe bradycardia < 45 bpm');
-    }
-    if (risks.diabetesRisk >= 80 || risks.heartRisk >= 80 || risks.strokeRisk >= 80) {
-        isEmergency = true;
-        conditions.push('Warning: Critical risk level detected');
-    }
-    
-    return { isEmergency, conditions };
-}
-
-// Generate recommendations
-function getRecommendations(risks, vitals) {
-    const recs = [];
-    
-    if (risks.diabetesRisk >= 70) recs.push('🔴 Critical diabetes risk - Consult endocrinologist immediately');
-    else if (risks.diabetesRisk >= 50) recs.push('🟡 High diabetes risk - Monitor glucose and reduce sugar intake');
-    else if (risks.diabetesRisk >= 30) recs.push('🟢 Moderate diabetes risk - Maintain healthy diet');
-    
-    if (risks.heartRisk >= 70) recs.push('🔴 Critical cardiovascular risk - Cardiac evaluation needed');
-    else if (risks.heartRisk >= 50) recs.push('🟡 High heart risk - Start cardio exercise program');
-    
-    if (risks.hypertensionRisk >= 70) recs.push('🔴 Critical hypertension - Immediate BP medication review');
-    else if (risks.hypertensionRisk >= 50) recs.push('🟡 High BP risk - Monitor BP daily, reduce sodium');
-    
-    if (risks.strokeRisk >= 60) recs.push('⚠️ High stroke risk - Urgent neurological consultation');
-    
-    if (vitals.heart_rate > 100) recs.push('💓 Elevated heart rate - Practice deep breathing');
-    
-    if (recs.length === 0) recs.push('✅ Excellent health metrics! Continue healthy lifestyle.');
-    
-    return recs;
-}
-
-// Main AI prediction function
-async function updateAIPredictions() {
-    if (!careSyncPatientId) {
-        setTimeout(updateAIPredictions, 2000);
-        return;
-    }
-    
-    try {
-        const profileSnapshot = await database.ref(`patients/${careSyncPatientId}/staticProfile`).once('value');
-        const profile = profileSnapshot.val() || {};
-        
-        let age = 0;
-        if (profile.dob) {
-            const birthDate = new Date(profile.dob);
-            age = Math.floor((Date.now() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25));
-        }
-        
-        let bmi = 23.7;
-        if (profile.weight && profile.height) {
-            const heightM = profile.height / 100;
-            bmi = profile.weight / (heightM * heightM);
-        }
-        
-        const vitalsSnapshot = await database.ref(`patients/${careSyncPatientId}/lastVitals`).once('value');
-        const vitalsData = vitalsSnapshot.val() || {};
-        
-        const vitals = {
-            glucose: vitalsData.ai_model?.glucose || vitalsData.glucose || 0,
-            sbp: vitalsData.ai_model?.systolic_bp || vitalsData.sbp || 0,
-            dbp: vitalsData.ai_model?.diastolic_bp || vitalsData.dbp || 0,
-            heart_rate: vitalsData.esp32?.heart_rate || vitalsData.hr || 0
-        };
-        
-        const patientProfile = { age, bmi };
-        
-        const diabetesRisk = calculateDiabetesRisk(vitals, patientProfile);
-        const heartRisk = calculateHeartRisk(vitals, patientProfile);
-        const hypertensionRisk = calculateHypertensionRisk(vitals, patientProfile);
-        const strokeRisk = calculateStrokeRisk(vitals, patientProfile);
-        
-        // Update UI
-        document.getElementById('diabetesRisk').innerHTML = diabetesRisk + '%';
-        document.getElementById('diabetesRiskBar').style.width = diabetesRisk + '%';
-        document.getElementById('heartRisk').innerHTML = heartRisk + '%';
-        document.getElementById('heartRiskBar').style.width = heartRisk + '%';
-        document.getElementById('hypertensionRisk').innerHTML = hypertensionRisk + '%';
-        document.getElementById('hypertensionRiskBar').style.width = hypertensionRisk + '%';
-        document.getElementById('strokeRisk').innerHTML = strokeRisk + '%';
-        document.getElementById('strokeRiskBar').style.width = strokeRisk + '%';
-        
-        const setRiskText = (id, risk) => {
-            const el = document.getElementById(id);
-            if (risk >= 80) { el.innerHTML = '🔴 CRITICAL - Emergency needed'; el.style.color = '#ef4444'; }
-            else if (risk >= 60) { el.innerHTML = '🟠 HIGH - Consult doctor'; el.style.color = '#f97316'; }
-            else if (risk >= 40) { el.innerHTML = '🟡 MODERATE - Monitor closely'; el.style.color = '#f59e0b'; }
-            else if (risk >= 20) { el.innerHTML = '🟢 LOW - Maintain habits'; el.style.color = '#10b981'; }
-            else { el.innerHTML = '✅ VERY LOW - Excellent'; el.style.color = '#10b981'; }
-        };
-        
-        setRiskText('diabetesRiskLevel', diabetesRisk);
-        setRiskText('heartRiskLevel', heartRisk);
-        setRiskText('hypertensionRiskLevel', hypertensionRisk);
-        setRiskText('strokeRiskLevel', strokeRisk);
-        
-        const avgRisk = (diabetesRisk + heartRisk + hypertensionRisk + strokeRisk) / 4;
-        const confidence = Math.max(0, Math.min(100, Math.round(100 - avgRisk * 0.7)));
-        document.getElementById('predictionConfidence').innerHTML = `Confidence: ${confidence}%`;
-        
-        const trendScore = 100 - avgRisk;
-        let trendText = trendScore >= 70 ? 'Improving' : trendScore >= 50 ? 'Stable' : 'Declining';
-        document.getElementById('healthTrend').innerHTML = trendText;
-        document.getElementById('trendDirection').innerHTML = `${trendScore >= 70 ? '📈' : trendScore >= 50 ? '➡️' : '📉'} Score: ${Math.round(trendScore)}/100`;
-        
-        const recommendations = getRecommendations({ diabetesRisk, heartRisk, hypertensionRisk, strokeRisk }, vitals);
-        document.getElementById('aiRecommendations').innerHTML = recommendations.map(r => `<p style="margin: 8px 0;">${r}</p>`).join('');
-        
-        const emergency = checkEmergency(vitals, { diabetesRisk, heartRisk, hypertensionRisk, strokeRisk });
-        
-        const emergencyStatusEl = document.getElementById('emergencyStatus');
-        const emergencyMessageEl = document.getElementById('emergencyMessage');
-        
-        if (emergency.isEmergency) {
-            emergencyStatusEl.innerHTML = '🔴 EMERGENCY';
-            emergencyStatusEl.style.color = '#ef4444';
-            emergencyMessageEl.innerHTML = emergency.conditions.join(' • ');
-            
-            const patientData = {
-                name: profile.fullName || 'Mohamed Khaled',
-                age: age,
-                phone: profile.phone || '01153493110',
-                address: profile.address || 'Cairo, Egypt'
-            };
-            
-            const riskData = {
-                diabetesRisk: diabetesRisk + '%',
-                heartRisk: heartRisk + '%',
-                hypertensionRisk: hypertensionRisk + '%',
-                strokeRisk: strokeRisk + '%',
-                glucose: vitals.glucose,
-                bloodPressure: `${vitals.sbp}/${vitals.dbp}`,
-                heartRate: vitals.heart_rate,
-                recommendations: recommendations.join(' | ')
-            };
-            
-            sendEmergencyEmail(patientData, riskData, 'auto');
-            await saveEmergencyToFirebase(patientData, riskData, 'auto');
-            
-            const alertsContainer = document.getElementById('alertsList');
-            if (alertsContainer) {
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert-item';
-                alertDiv.style.background = 'rgba(239,68,68,0.2)';
-                alertDiv.innerHTML = `<i class="fas fa-ambulance" style="color:#ef4444;"></i><div><strong>🚨 EMERGENCY ALERT SENT</strong><br>${emergency.conditions[0]}</div>`;
-                alertsContainer.prepend(alertDiv);
-            }
-        } else {
-            emergencyStatusEl.innerHTML = '🟢 NORMAL';
-            emergencyStatusEl.style.color = '#10b981';
-            emergencyMessageEl.innerHTML = 'All vitals within normal range';
-        }
-        
-        console.log('✅ AI predictions updated');
-        
-    } catch (error) {
-        console.error('Error updating AI predictions:', error);
-    }
-}
-
-// Manual emergency button
-document.getElementById('manualEmergencyBtn')?.addEventListener('click', async () => {
-    if (!careSyncPatientId) {
-        alert('Loading patient data...');
-        return;
-    }
-    
-    const profileSnapshot = await database.ref(`patients/${careSyncPatientId}/staticProfile`).once('value');
-    const profile = profileSnapshot.val() || {};
-    const vitalsSnapshot = await database.ref(`patients/${careSyncPatientId}/lastVitals`).once('value');
-    const vitalsData = vitalsSnapshot.val() || {};
-    
-    let age = 0;
-    if (profile.dob) {
-        const birthDate = new Date(profile.dob);
-        age = Math.floor((Date.now() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25));
-    }
-    
-    const patientData = {
-        name: profile.fullName || 'Mohamed Khaled',
-        age: age,
-        phone: profile.phone || '01153493110',
-        address: profile.address || 'Cairo, Egypt'
-    };
-    
-    const riskData = {
-        diabetesRisk: document.getElementById('diabetesRisk').innerText,
-        heartRisk: document.getElementById('heartRisk').innerText,
-        hypertensionRisk: document.getElementById('hypertensionRisk').innerText,
-        strokeRisk: document.getElementById('strokeRisk').innerText,
-        glucose: vitalsData.ai_model?.glucose || vitalsData.glucose,
-        bloodPressure: `${vitalsData.ai_model?.systolic_bp || vitalsData.sbp}/${vitalsData.ai_model?.diastolic_bp || vitalsData.dbp}`,
-        heartRate: vitalsData.esp32?.heart_rate || vitalsData.hr,
-        recommendations: 'Manual emergency triggered by patient'
-    };
-    
-    sendEmergencyEmail(patientData, riskData, 'manual');
-    await saveEmergencyToFirebase(patientData, riskData, 'manual');
-    alert('🚨 Manual emergency alert sent to ' + EMERGENCY_EMAIL + ' and saved to Firebase!');
-});
-
-// Start AI predictions
-setTimeout(() => {
-    updateAIPredictions();
-}, 5000);
-
-setInterval(() => {
-    updateAIPredictions();
-}, 30000);
-</script>
 </body>
 </html>
