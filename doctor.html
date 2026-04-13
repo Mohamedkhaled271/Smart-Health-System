@@ -434,7 +434,7 @@
             lastUpdated: new Date().toISOString()
         };
         try {
-            await db.ref(`patients/${currentPatientId}/labResults`).set(labData);
+            await db.ref(`patients/${currentPatientId}/labResults`).update(labData);
             document.getElementById('labSyncMsg').innerHTML = '✅ Lab data saved to Firebase at ' + new Date().toLocaleTimeString();
             document.getElementById('lastWriteTime').innerHTML = new Date().toLocaleString();
             showToast('Lab results synced to Firebase');
@@ -446,23 +446,24 @@
 
     // ---------- SAVE CLINICAL NOTES ----------
     async function saveClinicalNotes() {
-        if (!currentPatientId) return;
-        const notesData = {
-            summary: document.getElementById('edit_summary').value,
-            recommendations: document.getElementById('edit_recommendations').value,
-            nextAppointment: document.getElementById('edit_next_appointment').value,
-            doctorName: document.getElementById('edit_doctor_name').value,
-            lastUpdated: new Date().toISOString()
-        };
-        try {
-            await db.ref(`patients/${currentPatientId}/doctorNotes`).set(notesData);
-            document.getElementById('notesSyncMsg').innerHTML = '✅ Clinical notes published at ' + new Date().toLocaleTimeString();
-            document.getElementById('lastNotesWriteTime').innerHTML = new Date().toLocaleString();
-            showToast('Doctor notes updated in Firebase');
-        } catch(err) {
-            document.getElementById('notesSyncMsg').innerHTML = '❌ Error: ' + err.message;
-        }
+    if (!currentPatientId) return;
+    const notesData = {
+        summary: document.getElementById('edit_summary').value,
+        recommendations: document.getElementById('edit_recommendations').value,
+        nextAppointment: document.getElementById('edit_next_appointment').value,
+        doctorName: document.getElementById('edit_doctor_name').value,
+        lastUpdated: new Date().toISOString()
+    };
+    try {
+        // ✅ استخدم update() بدلاً من set()
+        await db.ref(`patients/${currentPatientId}/doctorNotes`).update(notesData);
+        document.getElementById('notesSyncMsg').innerHTML = '✅ Clinical notes published at ' + new Date().toLocaleTimeString();
+        document.getElementById('lastNotesWriteTime').innerHTML = new Date().toLocaleString();
+        showToast('Doctor notes updated in Firebase');
+    } catch(err) {
+        document.getElementById('notesSyncMsg').innerHTML = '❌ Error: ' + err.message;
     }
+}
 
     // ---------- LOAD LAB DATA FROM FIREBASE (to populate edit forms + preview) ----------
     async function loadLabDataIntoForms() {
