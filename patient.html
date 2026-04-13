@@ -973,7 +973,7 @@
         </div>
     </div>
 </div>
-            <div class="page-section" id="historyPage">
+                    <div class="page-section" id="historyPage">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
         <div>
             <h2 style="font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #0284c7, #0ea5e9); -webkit-background-clip: text; background-clip: text; color: transparent;">
@@ -1021,17 +1021,17 @@
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <div style="position: relative;">
                     <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
-                    <input type="text" id="historySearch" placeholder="Search by date or value..." style="padding: 0.7rem 1rem 0.7rem 2.5rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); width: 250px;">
+                    <input type="text" id="historySearch" placeholder="Search by date or value..." style="padding: 0.7rem 1rem 0.7rem 2.5rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); width: 250px; color: var(--text-primary);">
                 </div>
-                <select id="historyFilter" style="padding: 0.7rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface);">
+                <select id="historyFilter" style="padding: 0.7rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);">
                     <option value="all">All Records</option>
                     <option value="glucose">Glucose Only</option>
                     <option value="bp">Blood Pressure Only</option>
                     <option value="heart">Heart Rate Only</option>
                 </select>
-                <input type="date" id="historyStartDate" style="padding: 0.7rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface);">
-                <span>to</span>
-                <input type="date" id="historyEndDate" style="padding: 0.7rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface);">
+                <input type="date" id="historyStartDate" style="padding: 0.7rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);">
+                <span style="color: var(--text-primary);">to</span>
+                <input type="date" id="historyEndDate" style="padding: 0.7rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);">
                 <button id="applyHistoryFilter" class="export-btn" style="padding: 0.7rem 1.5rem; margin: 0;">Apply</button>
             </div>
         </div>
@@ -1042,16 +1042,16 @@
         <table style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr style="background: linear-gradient(135deg, rgba(2,132,199,0.1), rgba(139,92,246,0.1));">
-                    <th style="padding: 1rem; text-align: left;">Date & Time</th>
-                    <th style="padding: 1rem; text-align: left;">Glucose (mg/dL)</th>
-                    <th style="padding: 1rem; text-align: left;">Blood Pressure (mmHg)</th>
-                    <th style="padding: 1rem; text-align: left;">Heart Rate (bpm)</th>
-                    <th style="padding: 1rem; text-align: left;">SpO₂ (%)</th>
-                    <th style="padding: 1rem; text-align: left;">Status</th>
+                    <th style="padding: 1rem; text-align: left; color: var(--text-primary);">Date & Time</th>
+                    <th style="padding: 1rem; text-align: left; color: var(--text-primary);">Glucose (mg/dL)</th>
+                    <th style="padding: 1rem; text-align: left; color: var(--text-primary);">Blood Pressure (mmHg)</th>
+                    <th style="padding: 1rem; text-align: left; color: var(--text-primary);">Heart Rate (bpm)</th>
+                    <th style="padding: 1rem; text-align: left; color: var(--text-primary);">SpO₂ (%)</th>
+                    <th style="padding: 1rem; text-align: left; color: var(--text-primary);">Status</th>
                 </tr>
             </thead>
             <tbody id="historyTableBody">
-                <tr><td colspan="6" style="text-align: center; padding: 2rem;">Loading medical history from Firebase...</td></tr>
+                <tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-primary);">Loading medical history from Firebase...</td></tr>
             </tbody>
         </table>
     </div>
@@ -1059,15 +1059,17 @@
     <!-- Charts -->
     <div class="charts-row" style="margin-top: 1.5rem;">
         <div class="chart-card">
-            <h4><i class="fas fa-chart-line"></i> Glucose Trend (AI Model)</h4>
+            <h4 style="color: var(--text-primary);"><i class="fas fa-chart-line"></i> Glucose Trend (AI Model)</h4>
             <canvas id="glucoseHistoryChart" style="height: 250px;"></canvas>
         </div>
         <div class="chart-card">
-            <h4><i class="fas fa-chart-line"></i> Blood Pressure Trend (AI Model)</h4>
+            <h4 style="color: var(--text-primary);"><i class="fas fa-chart-line"></i> Blood Pressure Trend (AI Model)</h4>
             <canvas id="bpHistoryChart" style="height: 250px;"></canvas>
         </div>
     </div>
 </div>
+                    
+          
             <div class="page-section" id="appointmentsPage"><h2>Appointments</h2><div class="stat-card"><p>Upcoming appointments</p></div></div>
             <div class="page-section" id="reportsPage"><h2>Health Reports</h2><div class="stat-card"><p>Submit or view reports</p></div></div>
             <div class="page-section" id="settingsPage"><h2>Settings</h2><div class="stat-card"><button class="export-btn" id="saveSettingsBtn">Save Preferences</button></div></div>
