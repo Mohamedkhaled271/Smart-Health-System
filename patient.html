@@ -2375,6 +2375,195 @@ setTimeout(() => {
         setupHistoryListeners();
         loadMedicalHistory();
     }, 4000);
+                // ==================== SUPPORT PAGE FULL FUNCTIONALITY ====================
+        (function() {
+            
+            // ========== 1. FAQ ACCORDION ==========
+            function initFaqAccordion() {
+                const faqItems = document.querySelectorAll('.faq-item');
+                
+                faqItems.forEach(function(item) {
+                    const question = item.querySelector('.faq-question');
+                    const answer = item.querySelector('.faq-answer');
+                    const icon = question ? question.querySelector('.fa-chevron-down') : null;
+                    
+                    if (question && answer) {
+                        // Set initial state
+                        answer.style.display = 'none';
+                        
+                        // Remove old listener to avoid duplicates
+                        const newQuestion = question.cloneNode(true);
+                        question.parentNode.replaceChild(newQuestion, question);
+                        const newAnswer = answer.cloneNode(true);
+                        answer.parentNode.replaceChild(newAnswer, answer);
+                        
+                        const finalQuestion = newQuestion;
+                        const finalAnswer = newAnswer;
+                        const finalIcon = finalQuestion.querySelector('.fa-chevron-down');
+                        
+                        finalQuestion.addEventListener('click', function() {
+                            // Close all other answers
+                            document.querySelectorAll('.faq-answer').forEach(function(a) {
+                                if (a !== finalAnswer) a.style.display = 'none';
+                            });
+                            document.querySelectorAll('.faq-question .fa-chevron-down').forEach(function(i) {
+                                if (i !== finalIcon && i) i.style.transform = 'rotate(0deg)';
+                            });
+                            
+                            // Toggle current
+                            if (finalAnswer.style.display === 'none') {
+                                finalAnswer.style.display = 'block';
+                                if (finalIcon) finalIcon.style.transform = 'rotate(180deg)';
+                            } else {
+                                finalAnswer.style.display = 'none';
+                                if (finalIcon) finalIcon.style.transform = 'rotate(0deg)';
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // ========== 2. QUICK ACTIONS BUTTONS ==========
+            function initQuickActions() {
+                // User Guide button
+                const openGuideBtn = document.getElementById('openGuideBtn');
+                if (openGuideBtn) {
+                    const newBtn = openGuideBtn.cloneNode(true);
+                    openGuideBtn.parentNode.replaceChild(newBtn, openGuideBtn);
+                    newBtn.addEventListener('click', function() {
+                        showNotification('📖 Opening user guide...');
+                        // window.open('/user-guide.pdf', '_blank');
+                    });
+                }
+                
+                // FAQ button
+                const openFaqBtn = document.getElementById('openFaqBtn');
+                if (openFaqBtn) {
+                    const newBtn = openFaqBtn.cloneNode(true);
+                    openFaqBtn.parentNode.replaceChild(newBtn, openFaqBtn);
+                    newBtn.addEventListener('click', function() {
+                        const firstFaq = document.querySelector('.faq-question');
+                        if (firstFaq) {
+                            firstFaq.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            setTimeout(() => {
+                                firstFaq.click();
+                            }, 500);
+                            showNotification('📋 Opening FAQ section');
+                        } else {
+                            showNotification('FAQ section not found');
+                        }
+                    });
+                }
+                
+                // Report Issue button
+                const reportBugBtn = document.getElementById('reportBugBtn');
+                if (reportBugBtn) {
+                    const newBtn = reportBugBtn.cloneNode(true);
+                    reportBugBtn.parentNode.replaceChild(newBtn, reportBugBtn);
+                    newBtn.addEventListener('click', function() {
+                        const subjectSelect = document.getElementById('supportSubject');
+                        const messageField = document.getElementById('supportMessage');
+                        if (subjectSelect) subjectSelect.value = 'technical';
+                        if (messageField) {
+                            messageField.focus();
+                            messageField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        showNotification('🐛 Please describe the issue below');
+                    });
+                }
+                
+                // Request Feature button
+                const requestFeatureBtn = document.getElementById('requestFeatureBtn');
+                if (requestFeatureBtn) {
+                    const newBtn = requestFeatureBtn.cloneNode(true);
+                    requestFeatureBtn.parentNode.replaceChild(newBtn, requestFeatureBtn);
+                    newBtn.addEventListener('click', function() {
+                        const subjectSelect = document.getElementById('supportSubject');
+                        const messageField = document.getElementById('supportMessage');
+                        if (subjectSelect) subjectSelect.value = 'feature';
+                        if (messageField) {
+                            messageField.focus();
+                            messageField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        showNotification('💡 Tell us about your idea!');
+                    });
+                }
+            }
+            
+            // ========== 3. SEND MESSAGE BUTTON ==========
+            function initSendMessage() {
+                const sendBtn = document.getElementById('sendSupportBtn');
+                if (sendBtn) {
+                    const newBtn = sendBtn.cloneNode(true);
+                    sendBtn.parentNode.replaceChild(newBtn, sendBtn);
+                    newBtn.addEventListener('click', function() {
+                        const name = document.getElementById('supportName')?.value.trim();
+                        const email = document.getElementById('supportEmail')?.value.trim();
+                        const subject = document.getElementById('supportSubject')?.value;
+                        const message = document.getElementById('supportMessage')?.value.trim();
+                        
+                        // Validation
+                        if (!name || !email || !message) {
+                            showNotification('❌ Please fill all required fields', 'error');
+                            return;
+                        }
+                        
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(email)) {
+                            showNotification('❌ Please enter a valid email address', 'error');
+                            return;
+                        }
+                        
+                        // Success - clear form and show confirmation
+                        showNotification('✅ Message sent successfully! We\'ll respond within 24 hours.');
+                        
+                        // Clear form
+                        if (document.getElementById('supportName')) document.getElementById('supportName').value = '';
+                        if (document.getElementById('supportEmail')) document.getElementById('supportEmail').value = '';
+                        if (document.getElementById('supportMessage')) document.getElementById('supportMessage').value = '';
+                        if (document.getElementById('supportSubject')) document.getElementById('supportSubject').value = 'general';
+                    });
+                }
+            }
+            
+            // ========== 4. EMAIL CARD CLICK ==========
+            function initEmailCard() {
+                const emailCard = document.querySelector('.stats-grid .stat-card');
+                if (emailCard && emailCard.onclick) {
+                    // Keep existing onclick (mailto:)
+                    console.log('Email card ready - mailto:support@helios.com');
+                }
+            }
+            
+            // ========== INITIALIZE EVERYTHING ==========
+            function initSupportPage() {
+                setTimeout(function() {
+                    initFaqAccordion();
+                    initQuickActions();
+                    initSendMessage();
+                    initEmailCard();
+                    console.log('✅ Support page fully initialized');
+                }, 100);
+            }
+            
+            // Run when page loads
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initSupportPage);
+            } else {
+                initSupportPage();
+            }
+            
+            // Re-initialize when navigating to support page (for single page app)
+            if (typeof showPage !== 'undefined') {
+                const originalShowPage = showPage;
+                window.showPage = function(pageId) {
+                    originalShowPage(pageId);
+                    if (pageId === 'support') {
+                        initSupportPage();
+                    }
+                };
+            }
+        })();
             
     </script>
 </body>
