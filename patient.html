@@ -2961,11 +2961,10 @@ setTimeout(() => {
                 };
             }
         })();
-                        // ==================== LOGOUT BUTTON IN SIDEBAR (FIXED) ====================
+                                // ==================== LOGOUT BUTTON (FIXED - NO RETURN TO PATIENT) ====================
         (function() {
             const logoutBtn = document.getElementById('logoutSidebarBtn');
             if (logoutBtn) {
-                // Remove existing listeners by cloning
                 const newLogoutBtn = logoutBtn.cloneNode(true);
                 logoutBtn.parentNode.replaceChild(newLogoutBtn, logoutBtn);
                 
@@ -2980,38 +2979,40 @@ setTimeout(() => {
                         notif.innerText = 'Logging out...';
                         document.body.appendChild(notif);
                         
+                        // Clear everything
+                        localStorage.clear();
+                        sessionStorage.clear();
+                        
+                        // Clear cookies
+                        document.cookie.split(";").forEach(function(c) {
+                            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                        });
+                        
                         // Firebase logout
                         if (typeof firebase !== 'undefined' && firebase.auth) {
                             firebase.auth().signOut()
                                 .then(function() {
-                                    console.log('User signed out successfully');
-                                    notif.innerText = 'Logged out! Redirecting...';
+                                    notif.innerText = 'Logged out!';
                                     notif.style.background = '#10b981';
                                     setTimeout(function() {
-                                        window.location.href = 'index.html';
+                                        // Use replace to prevent going back
+                                        window.location.replace('index.html');
                                     }, 500);
                                 })
                                 .catch(function(error) {
-                                    console.error('Logout error:', error);
-                                    notif.innerText = 'Logout failed: ' + error.message;
+                                    notif.innerText = 'Logout failed';
                                     notif.style.background = '#ef4444';
-                                    setTimeout(function() {
-                                        notif.remove();
-                                    }, 2000);
+                                    setTimeout(function() { notif.remove(); }, 2000);
                                 });
                         } else {
-                            // Demo mode
-                            console.log('Demo mode: logging out');
-                            notif.innerText = 'Logged out (demo mode)';
+                            notif.innerText = 'Logged out';
                             notif.style.background = '#10b981';
                             setTimeout(function() {
-                                window.location.href = 'index.html';
+                                window.location.replace('index.html');
                             }, 500);
                         }
                     }
                 });
-            } else {
-                console.log('Logout button not found - check ID: logoutSidebarBtn');
             }
         })();
                 
