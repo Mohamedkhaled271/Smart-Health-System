@@ -3843,6 +3843,173 @@ function initSupportPage() {
     });
 })();
     </script>
+                <script>
+// ==================== SYNC WITH DOCTOR PORTAL (LABS + NOTES) ====================
+(function() {
+    let doctorSyncPatientId = null;
+    
+    // الحصول على Patient ID من Firebase
+    async function getPatientIdForSync() {
+        try {
+            const snapshot = await database.ref('patients').once('value');
+            const patients = snapshot.val();
+            if (patients) {
+                doctorSyncPatientId = Object.keys(patients)[0];
+                console.log('✅ Doctor Sync: Connected to patient:', doctorSyncPatientId);
+                return doctorSyncPatientId;
+            }
+        } catch(e) {
+            console.error('Error getting patient ID:', e);
+        }
+        return null;
+    }
+    
+    // تحديث جميع بيانات المعامل من Firebase
+    function syncLabResultsFromFirebase(data) {
+        if (!data) return;
+        
+        // Diabetes Profile
+        if (data.diabetes) {
+            updateLabElementIfExists('lab_fbg', data.diabetes.fbg, 'mg/dL');
+            updateLabElementIfExists('lab_hba1c', data.diabetes.hba1c, '%');
+            updateLabElementIfExists('lab_ppg', data.diabetes.ppg, 'mg/dL');
+            updateLabElementIfExists('lab_rbs', data.diabetes.rbs, 'mg/dL');
+        }
+        
+        // Kidney Function
+        if (data.kidney) {
+            updateLabElementIfExists('lab_creatinine', data.kidney.creatinine, 'mg/dL');
+            updateLabElementIfExists('lab_bun', data.kidney.bun, 'mg/dL');
+            updateLabElementIfExists('lab_egfr', data.kidney.egfr, 'mL/min');
+            updateLabElementIfExists('lab_uric_acid', data.kidney.uricAcid, 'mg/dL');
+        }
+        
+        // Liver Function
+        if (data.liver) {
+            updateLabElementIfExists('lab_alt', data.liver.alt, 'U/L');
+            updateLabElementIfExists('lab_ast', data.liver.ast, 'U/L');
+            updateLabElementIfExists('lab_alp', data.liver.alp, 'U/L');
+            updateLabElementIfExists('lab_bilirubin', data.liver.bilirubin, 'mg/dL');
+        }
+        
+        // Thyroid Function
+        if (data.thyroid) {
+            updateLabElementIfExists('lab_tsh', data.thyroid.tsh, 'µIU/mL');
+            updateLabElementIfExists('lab_t3', data.thyroid.t3, 'ng/dL');
+            updateLabElementIfExists('lab_t4', data.thyroid.t4, 'µg/dL');
+        }
+        
+        // Cardiac Markers
+        if (data.cardiac) {
+            updateLabElementIfExists('lab_troponin', data.cardiac.troponin, 'ng/mL');
+            updateLabElementIfExists('lab_ckmb', data.cardiac.ckmb, 'ng/mL');
+            updateLabElementIfExists('lab_bnp', data.cardiac.bnp, 'pg/mL');
+        }
+        
+        // Inflammation
+        if (data.inflammation) {
+            updateLabElementIfExists('lab_crp', data.inflammation.crp, 'mg/L');
+            updateLabElementIfExists('lab_esr', data.inflammation.esr, 'mm/hr');
+            updateLabElementIfExists('lab_pct', data.inflammation.pct, 'ng/mL');
+        }
+        
+        // تحديث وقت آخر تحديث
+        const lastUpdateSpan = document.getElementById('labLastUpdate');
+        if (lastUpdateSpan && data.lastUpdated) {
+            const date = new Date(data.lastUpdated);
+            lastUpdateSpan.innerHTML = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        }
+        
+        // إظهار إشعار للمريض
+        showPatientNotification('📊 Doctor has updated your lab results');
+    }
+    
+    // تحديث عنصر واحد إذا كان موجوداً
+    function updateLabElementIfExists(elementId, value, suffix) {
+        const element = document.getElementById(elementId);
+        if (element && value !== undefined && value !== null) {
+            element.innerHTML = `${value} <span style="font-size: 0.8rem;">${suffix}</span>`;
+            element.classList.add('data-update-pulse');
+            setTimeout(() => element.classList.remove('data-update-pulse'), 400);
+        }
+    }
+    
+    // تحديث ملاحظات الدكتور من Firebase
+    function syncDoctorNotesFromFirebase(notes) {
+        if (!notes) return;
+        
+        const doctorNotesDiv = document.getElementById('doctorNotes');
+        const doctorNotesDate = document.getElementById('doctorNotesDate');
+        
+        if (doctorNotesDiv) {
+            doctorNotesDiv.innerHTML = `
+                <i class="fas fa-quote-right" style="color: #8b5cf6; float: right; opacity: 0.5;"></i>
+                <p>📋 <strong>Clinical Summary:</strong> ${notes.summary || 'No summary available'}</p>
+                <p style="margin-top: 10px;">💊 <strong>Recommendations:</strong> ${notes.recommendations || 'No recommendations'}</p>
+                <p style="margin-top: 10px;">✅ <strong>Next Appointment:</strong> ${notes.nextAppointment || 'Not scheduled'}</p>
+            `;
+        }
+        
+        if (doctorNotesDate && notes.doctorName) {
+            const updateDate = notes.lastUpdated ? new Date(notes.lastUpdated).toLocaleDateString() : 'Today';
+            doctorNotesDate.innerHTML = `${updateDate} | <i class="fas fa-user-md"></i> ${notes.doctorName}`;
+        }
+        
+        // إظهار إشعار للمريض
+        showPatientNotification('📝 Doctor has updated your clinical notes');
+    }
+    
+    // إشعار بسيط للمريض
+    function showPatientNotification(message) {
+        // محاولة استخدام الـ notification الموجود
+        if (typeof showNotification === 'function') {
+            showNotification(message, 'info');
+        } else {
+            // عمل إشعار مؤقت
+            const notif = document.createElement('div');
+            notif.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#8b5cf6; color:white; padding:12px 20px; border-radius:30px; z-index:9999; font-size:0.8rem; box-shadow:0 4px 15px rgba(0,0,0,0.2); animation:fadeInUp 0.3s ease;';
+            notif.innerHTML = `<i class="fas fa-sync-alt"></i> ${message}`;
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 4000);
+        }
+    }
+    
+    // بدء الاستماع للتغييرات من Doctor Portal
+    async function startDoctorSync() {
+        const patientId = await getPatientIdForSync();
+        if (!patientId) {
+            console.log('Waiting for patient ID...');
+            setTimeout(startDoctorSync, 3000);
+            return;
+        }
+        
+        console.log('🩺 Listening for Doctor updates on patient:', patientId);
+        
+        // الاستماع لتغييرات المعامل
+        const labResultsRef = database.ref(`patients/${patientId}/labResults`);
+        labResultsRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                syncLabResultsFromFirebase(data);
+                console.log('📊 Lab results synced from Doctor');
+            }
+        });
+        
+        // الاستماع لتغييرات ملاحظات الدكتور
+        const doctorNotesRef = database.ref(`patients/${patientId}/doctorNotes`);
+        doctorNotesRef.on('value', (snapshot) => {
+            const notes = snapshot.val();
+            if (notes) {
+                syncDoctorNotesFromFirebase(notes);
+                console.log('📝 Doctor notes synced');
+            }
+        });
+    }
+    
+    // بدء المزامنة بعد تحميل الصفحة
+    setTimeout(startDoctorSync, 3000);
+})();
+</script>
 
 </body>
 </html>
