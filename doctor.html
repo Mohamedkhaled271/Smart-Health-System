@@ -227,14 +227,6 @@
         <div style="margin-top: 2rem; padding: 1rem;">
             <button id="themeToggle" class="btn-outline" style="width:100%"><i class="fas fa-moon"></i> Dark mode</button>
         </div>
-        <div style="margin-top: 2rem; padding: 1rem;">
-    <button id="themeToggle" class="btn-outline" style="width:100%"><i class="fas fa-moon"></i> Dark mode</button>
-</div> 
-        <div style="margin-top: 1rem; padding: 1rem;">
-    <button id="doctorLogoutBtn" class="btn-outline" style="width:100%; background: #ef4444; border-color: #ef4444; color: white;">
-        <i class="fas fa-sign-out-alt"></i> Logout
-    </button>
-</div>
     </aside>
 
     <main class="main-content">
@@ -605,59 +597,5 @@
 
     initDoctorPortal();
 </script>
-        // Event listeners for save buttons
-    document.getElementById('saveAllLabBtn')?.addEventListener('click', saveAllLabToFirebase);
-    document.getElementById('saveNotesBtn')?.addEventListener('click', saveClinicalNotes);
-    document.getElementById('forceRefreshPreviewBtn')?.addEventListener('click', updatePreviewFromFirebase);
-
-    initDoctorPortal();
-</script>
-
-<!-- ✅ ضع كود Logout هنا بالضبط - قبل </body> -->
-<script>
-// ==================== DOCTOR LOGOUT BUTTON ====================
-(function() {
-    function doctorLogout() {
-        console.log("Doctor logging out...");
-        
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        document.cookie.split(";").forEach(function(c) {
-            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-        });
-        
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-            firebase.auth().signOut().then(function() {
-                console.log("Firebase signOut successful");
-                window.location.replace("index.html");
-            }).catch(function(err) {
-                console.error("SignOut error:", err);
-                window.location.replace("index.html");
-            });
-        } else {
-            window.location.replace("index.html");
-        }
-    }
-    
-    window.addEventListener('DOMContentLoaded', function() {
-        var logoutBtn = document.getElementById('doctorLogoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                if (confirm('Are you sure you want to logout from Doctor Portal?')) {
-                    doctorLogout();
-                }
-            });
-            console.log("✅ Doctor logout button ready");
-        } else {
-            console.error("❌ Doctor logout button not found");
-        }
-    });
-})();
-</script>
-
-</body>
-</html>
 </body>
 </html>
