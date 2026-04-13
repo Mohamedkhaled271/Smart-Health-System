@@ -3776,6 +3776,47 @@ function initSupportPage() {
 })();
                 
             
-    </script>
+    <script>
+    (function() {
+        // انتظر حتى يتم تحميل الصفحة بالكامل
+        window.addEventListener('load', function() {
+            var logoutBtn = document.getElementById('logoutSidebarBtn');
+            if (logoutBtn) {
+                // إزالة أي مستمعات قديمة
+                var newBtn = logoutBtn.cloneNode(true);
+                logoutBtn.parentNode.replaceChild(newBtn, logoutBtn);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (confirm('تسجيل الخروج؟')) {
+                        // 1. مسح التخزين المحلي
+                        localStorage.clear();
+                        sessionStorage.clear();
+                        
+                        // 2. مسح الكوكيز
+                        document.cookie.split(";").forEach(function(c) {
+                            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                        });
+                        
+                        // 3. تسجيل الخروج من Firebase
+                        if (typeof firebase !== 'undefined' && firebase.auth) {
+                            firebase.auth().signOut()
+                                .then(function() {
+                                    window.location.href = 'index.html';
+                                })
+                                .catch(function() {
+                                    window.location.href = 'index.html';
+                                });
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    }
+                });
+            }
+        });
+    })();
+</script>
 </body>
 </html>
