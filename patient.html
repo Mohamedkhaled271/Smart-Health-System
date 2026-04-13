@@ -449,8 +449,7 @@
                 <a href="javascript:void(0)" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
                 <a href="javascript:void(0)" class="menu-item" data-page="profile"><i class="fas fa-user-circle"></i><span>Profile</span></a>
                 <a href="javascript:void(0)" class="menu-item" data-page="history"><i class="fas fa-history"></i><span>History</span></a>
-                <a href="javascript:void(0)" class="menu-item" data-page="appointments"><i class="fas fa-calendar-check"></i><span>Appointments</span></a>
-                <a href="javascript:void(0)" class="menu-item" data-page="reports"><i class="fas fa-file-alt"></i><span>Reports</span></a>
+                
                 <a href="javascript:void(0)" class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
             </div>
             <div class="sidebar-footer">
@@ -1070,213 +1069,174 @@
 </div>
                     
           
-            <div class="page-section" id="appointmentsPage"><h2>Appointments</h2><div class="stat-card"><p>Upcoming appointments</p></div></div>
-            <div class="page-section" id="reportsPage"><h2>Health Reports</h2><div class="stat-card"><p>Submit or view reports</p></div></div>
-            <div class="page-section" id="settingsPage">
-    <div style="margin-bottom: 2rem;">
-        <h2 style="font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #0284c7, #0ea5e9, #8b5cf6); -webkit-background-clip: text; background-clip: text; color: transparent;">
-            <i class="fas fa-sliders-h"></i> Settings
-        </h2>
-        <p style="color: var(--text-secondary);">Customize your dashboard experience</p>
+            
+             <div class="page-section" id="settingsPage">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #0284c7, #0ea5e9, #8b5cf6); -webkit-background-clip: text; background-clip: text; color: transparent;">
+                <i class="fas fa-cog"></i> Settings
+            </h2>
+            <p style="color: var(--text-secondary);">Customize your dashboard experience</p>
+        </div>
     </div>
 
-    <div class="settings-glass-card">
-        <!-- Premium Tabs -->
-        <div class="settings-tabs">
-            <button class="settings-tab active" data-tab="appearance">
+    <div class="vital-card" style="padding: 1.5rem;">
+        <!-- Tabs -->
+        <div style="display: flex; gap: 0.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; flex-wrap: wrap;">
+            <button class="settings-tab-btn active" data-tab="appearance" style="background: none; border: none; padding: 0.75rem 1.5rem; cursor: pointer; font-weight: 600; color: var(--text-primary); border-bottom: 2px solid transparent; transition: all 0.3s;">
                 <i class="fas fa-palette"></i> Appearance
             </button>
-            <button class="settings-tab" data-tab="notifications">
+            <button class="settings-tab-btn" data-tab="notifications" style="background: none; border: none; padding: 0.75rem 1.5rem; cursor: pointer; font-weight: 600; color: var(--text-primary); border-bottom: 2px solid transparent; transition: all 0.3s;">
                 <i class="fas fa-bell"></i> Notifications
             </button>
-            <button class="settings-tab" data-tab="data">
+            <button class="settings-tab-btn" data-tab="data" style="background: none; border: none; padding: 0.75rem 1.5rem; cursor: pointer; font-weight: 600; color: var(--text-primary); border-bottom: 2px solid transparent; transition: all 0.3s;">
                 <i class="fas fa-database"></i> Data
             </button>
-            <button class="settings-tab" data-tab="account">
+            <button class="settings-tab-btn" data-tab="account" style="background: none; border: none; padding: 0.75rem 1.5rem; cursor: pointer; font-weight: 600; color: var(--text-primary); border-bottom: 2px solid transparent; transition: all 0.3s;">
                 <i class="fas fa-user-shield"></i> Account
             </button>
         </div>
 
         <!-- Tab 1: Appearance -->
-        <div class="settings-panel active" id="panel-appearance">
-            <div class="settings-group">
-                <div class="settings-group-header">
-                    <i class="fas fa-palette"></i>
-                    <h3>Appearance Settings</h3>
-                </div>
-                
-                <div class="settings-item">
-                    <div class="settings-item-info">
-                        <div class="settings-item-title">
-                            <i class="fas fa-moon"></i> Theme Mode
-                        </div>
-                        <div class="settings-item-desc">Choose your preferred visual theme</div>
+        <div class="settings-tab-panel active" id="panel-appearance">
+            <div class="stat-card" style="margin-bottom: 1rem; padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="font-weight: 600;"><i class="fas fa-moon"></i> Theme Mode</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Choose your preferred visual theme</div>
                     </div>
-                    <div class="settings-item-control theme-buttons">
-                        <button class="theme-option" data-theme="light">☀️ Light</button>
-                        <button class="theme-option" data-theme="dark">🌙 Dark</button>
-                        <button class="theme-option" data-theme="auto">🔄 Auto</button>
+                    <div class="theme-buttons" style="display: flex; gap: 0.5rem;">
+                        <button class="theme-option-btn" data-theme="light" style="padding: 0.5rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); cursor: pointer;">☀️ Light</button>
+                        <button class="theme-option-btn" data-theme="dark" style="padding: 0.5rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); cursor: pointer;">🌙 Dark</button>
+                        <button class="theme-option-btn" data-theme="auto" style="padding: 0.5rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); cursor: pointer;">🔄 Auto</button>
                     </div>
                 </div>
+            </div>
 
-                <div class="settings-item">
-                    <div class="settings-item-info">
-                        <div class="settings-item-title">
-                            <i class="fas fa-text-height"></i> Font Size
-                        </div>
-                        <div class="settings-item-desc">Adjust text size for better readability</div>
+            <div class="stat-card" style="margin-bottom: 1rem; padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="font-weight: 600;"><i class="fas fa-text-height"></i> Font Size</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Adjust text size for better readability</div>
                     </div>
-                    <div class="settings-item-control">
-                        <select id="fontSizeSelect" class="settings-select">
-                            <option value="small">🔤 Small</option>
-                            <option value="medium" selected>🔤 Medium</option>
-                            <option value="large">🔤 Large</option>
-                        </select>
-                    </div>
+                    <select id="fontSizeSelect" style="padding: 0.5rem 1rem; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);">
+                        <option value="small">Small</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="large">Large</option>
+                    </select>
                 </div>
+            </div>
 
-                <div class="settings-item">
-                    <div class="settings-item-info">
-                        <div class="settings-item-title">
-                            <i class="fas fa-compress-alt"></i> Compact View
-                        </div>
-                        <div class="settings-item-desc">Show more content with reduced spacing</div>
+            <div class="stat-card" style="margin-bottom: 1rem; padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="font-weight: 600;"><i class="fas fa-compress-alt"></i> Compact View</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Show more content with reduced spacing</div>
                     </div>
-                    <div class="settings-item-control">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="compactViewToggle">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
+                    <label style="position: relative; display: inline-block; width: 52px; height: 28px;">
+                        <input type="checkbox" id="compactViewToggle" style="opacity: 0; width: 0; height: 0;">
+                        <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #cbd5e1, #94a3b8); transition: 0.3s; border-radius: 34px;"></span>
+                        <span style="position: absolute; content: ''; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%;"></span>
+                    </label>
                 </div>
+            </div>
 
-                <div class="settings-item">
-                    <div class="settings-item-info">
-                        <div class="settings-item-title">
-                            <i class="fas fa-film"></i> Animations
-                        </div>
-                        <div class="settings-item-desc">Enable smooth UI animations</div>
+            <div class="stat-card" style="margin-bottom: 1rem; padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="font-weight: 600;"><i class="fas fa-film"></i> Animations</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Enable smooth UI animations</div>
                     </div>
-                    <div class="settings-item-control">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="animationsToggle" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
+                    <label style="position: relative; display: inline-block; width: 52px; height: 28px;">
+                        <input type="checkbox" id="animationsToggle" checked style="opacity: 0; width: 0; height: 0;">
+                        <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #cbd5e1, #94a3b8); transition: 0.3s; border-radius: 34px;"></span>
+                        <span style="position: absolute; content: ''; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%;"></span>
+                    </label>
                 </div>
             </div>
         </div>
 
         <!-- Tab 2: Notifications -->
-        <div class="settings-panel" id="panel-notifications">
-            <div class="settings-group">
-                <div class="settings-group-header">
-                    <i class="fas fa-bell"></i>
-                    <h3>Notification Settings</h3>
+        <div class="settings-tab-panel" id="panel-notifications" style="display: none;">
+            <div class="stat-card" style="margin-bottom: 1rem; padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="font-weight: 600;"><i class="fas fa-volume-up"></i> Alert Sound</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Play sound for critical health alerts</div>
+                    </div>
+                    <label style="position: relative; display: inline-block; width: 52px; height: 28px;">
+                        <input type="checkbox" id="alertSoundToggle" checked style="opacity: 0; width: 0; height: 0;">
+                        <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #cbd5e1, #94a3b8); transition: 0.3s; border-radius: 34px;"></span>
+                        <span style="position: absolute; content: ''; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%;"></span>
+                    </label>
                 </div>
+            </div>
 
-                <div class="settings-item">
-                    <div class="settings-item-info">
-                        <div class="settings-item-title">
-                            <i class="fas fa-volume-up"></i> Alert Sound
-                        </div>
-                        <div class="settings-item-desc">Play sound for critical health alerts</div>
+            <div class="stat-card" style="margin-bottom: 1rem; padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="font-weight: 600;"><i class="fas fa-sync-alt"></i> Auto-refresh Data</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Automatically update vital signs</div>
                     </div>
-                    <div class="settings-item-control">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="alertSoundToggle" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="settings-item">
-                    <div class="settings-item-info">
-                        <div class="settings-item-title">
-                            <i class="fas fa-sync-alt"></i> Auto-refresh Data
-                        </div>
-                        <div class="settings-item-desc">Automatically update vital signs</div>
-                    </div>
-                    <div class="settings-item-control">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="autoRefreshToggle" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
+                    <label style="position: relative; display: inline-block; width: 52px; height: 28px;">
+                        <input type="checkbox" id="autoRefreshToggle" checked style="opacity: 0; width: 0; height: 0;">
+                        <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #cbd5e1, #94a3b8); transition: 0.3s; border-radius: 34px;"></span>
+                        <span style="position: absolute; content: ''; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%;"></span>
+                    </label>
                 </div>
             </div>
         </div>
 
         <!-- Tab 3: Data -->
-        <div class="settings-panel" id="panel-data">
-            <div class="settings-group">
-                <div class="settings-group-header">
-                    <i class="fas fa-database"></i>
-                    <h3>Data Management</h3>
+        <div class="settings-tab-panel" id="panel-data" style="display: none;">
+            <div class="stat-card" style="margin-bottom: 1rem; padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="font-weight: 600;"><i class="fas fa-download"></i> Export Medical History</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Download all your health records as CSV</div>
+                    </div>
+                    <button id="exportDataBtn" class="export-btn" style="margin: 0; padding: 0.5rem 1.2rem; background: linear-gradient(135deg, #10b981, #059669);">
+                        <i class="fas fa-download"></i> Export
+                    </button>
                 </div>
+            </div>
 
-                <div class="settings-item">
-                    <div class="settings-item-info">
-                        <div class="settings-item-title">
-                            <i class="fas fa-download"></i> Export Medical History
-                        </div>
-                        <div class="settings-item-desc">Download all your health records as CSV</div>
+            <div class="stat-card" style="margin-bottom: 1rem; padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="font-weight: 600;"><i class="fas fa-trash-alt"></i> Clear Cache</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Clear locally stored preferences and data</div>
                     </div>
-                    <div class="settings-item-control">
-                        <button id="exportDataBtn" class="settings-action-btn primary">
-                            <i class="fas fa-download"></i> Export
-                        </button>
-                    </div>
-                </div>
-
-                <div class="settings-item">
-                    <div class="settings-item-info">
-                        <div class="settings-item-title">
-                            <i class="fas fa-trash-alt"></i> Clear Cache
-                        </div>
-                        <div class="settings-item-desc">Clear locally stored preferences and data</div>
-                    </div>
-                    <div class="settings-item-control">
-                        <button id="clearCacheBtn" class="settings-action-btn warning">
-                            <i class="fas fa-trash-alt"></i> Clear
-                        </button>
-                    </div>
+                    <button id="clearCacheBtn" class="export-btn" style="margin: 0; padding: 0.5rem 1.2rem; background: linear-gradient(135deg, #f59e0b, #d97706);">
+                        <i class="fas fa-trash-alt"></i> Clear
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Tab 4: Account -->
-        <div class="settings-panel" id="panel-account">
-            <div class="settings-group">
-                <div class="settings-group-header">
-                    <i class="fas fa-user-shield"></i>
-                    <h3>Account Settings</h3>
-                </div>
-
-                <div class="settings-item">
-                    <div class="settings-item-info">
-                        <div class="settings-item-title">
-                            <i class="fas fa-key"></i> Change Password
-                        </div>
-                        <div class="settings-item-desc">Update your account password</div>
+        <div class="settings-tab-panel" id="panel-account" style="display: none;">
+            <div class="stat-card" style="margin-bottom: 1rem; padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="font-weight: 600;"><i class="fas fa-key"></i> Change Password</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Update your account password</div>
                     </div>
-                    <div class="settings-item-control">
-                        <button id="changePasswordBtn" class="settings-action-btn secondary">
-                            <i class="fas fa-key"></i> Change
-                        </button>
-                    </div>
+                    <button id="changePasswordBtn" class="export-btn" style="margin: 0; padding: 0.5rem 1.2rem; background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                        <i class="fas fa-key"></i> Change
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Save Button -->
-        <div class="settings-save-footer">
-            <button id="saveAllSettingsBtn" class="settings-save-btn">
+        <div style="margin-top: 1.5rem; text-align: right;">
+            <button id="saveAllSettingsBtn" class="export-btn" style="background: linear-gradient(135deg, #10b981, #059669);">
                 <i class="fas fa-save"></i> Save All Settings
             </button>
         </div>
     </div>
-</div>                    
+</div>                   
             <div class="page-section" id="supportPage"><h2>Support</h2><div class="stat-card"><p>Email: support@helios.com</p></div></div>
         </main>
     </div>
