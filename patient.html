@@ -2490,41 +2490,227 @@ setTimeout(() => {
                 }
             }
             
-            // ========== 3. SEND MESSAGE BUTTON ==========
-            function initSendMessage() {
-                const sendBtn = document.getElementById('sendSupportBtn');
-                if (sendBtn) {
-                    const newBtn = sendBtn.cloneNode(true);
-                    sendBtn.parentNode.replaceChild(newBtn, sendBtn);
-                    newBtn.addEventListener('click', function() {
-                        const name = document.getElementById('supportName')?.value.trim();
-                        const email = document.getElementById('supportEmail')?.value.trim();
-                        const subject = document.getElementById('supportSubject')?.value;
-                        const message = document.getElementById('supportMessage')?.value.trim();
-                        
-                        // Validation
-                        if (!name || !email || !message) {
-                            showNotification('❌ Please fill all required fields', 'error');
-                            return;
-                        }
-                        
-                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                        if (!emailRegex.test(email)) {
-                            showNotification('❌ Please enter a valid email address', 'error');
-                            return;
-                        }
-                        
-                        // Success - clear form and show confirmation
-                        showNotification('✅ Message sent successfully! We\'ll respond within 24 hours.');
-                        
-                        // Clear form
-                        if (document.getElementById('supportName')) document.getElementById('supportName').value = '';
-                        if (document.getElementById('supportEmail')) document.getElementById('supportEmail').value = '';
-                        if (document.getElementById('supportMessage')) document.getElementById('supportMessage').value = '';
-                        if (document.getElementById('supportSubject')) document.getElementById('supportSubject').value = 'general';
-                    });
-                }
+            // ========== 3. SEND MESSAGE BUTTON (SAVE TO FIREBASE) ==========
+function initSendMessage() {
+    const sendBtn = document.getElementById('sendSupportBtn');
+    if (sendBtn) {
+        const newBtn = sendBtn.cloneNode(true);
+        sendBtn.parentNode.replaceChild(newBtn, sendBtn);
+        
+        newBtn.addEventListener('click', async function() {
+            const name = document.getElementById('supportName')?.value.trim();
+            const email = document.getElementById('supportEmail')?.value.trim();
+            const subjectSelect = document.getElementById('supportSubject');
+            const subject = subjectSelect?.options[subjectSelect.selectedIndex]?.text || subjectSelect?.value || 'General';
+            const subjectValue = subjectSelect?.value || 'general';
+            const message = document.getElementById('supportMessage')?.value.trim();
+            
+            // Validation
+            if (!name || !email || !message) {
+                showNotification('❌ Please fill all required fields (Name, Email, Message)', 'error');
+                return;
             }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showNotification('❌ Please enter a valid email address', 'error');
+                return;
+            }
+            
+            // Disable button to prevent double submission
+            newBtn.disabled = true;
+            newBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            
+            try {
+                // Get patient ID if available
+                let patientId = 'anonymous';
+                if (typeof careSyncPatientId !== 'undefined' && careSyncPatientId) {
+                    patientId = careSyncPatientId;
+                } else {
+                    try {
+                        const snapshot = await database.ref('patients').once('value');
+                        const patients = snapshot.val();
+                        if (patients) {
+                            patientId = Object.keys(patients)[0];
+                        }
+                    } catch(e) { console.log('No patient ID found'); }
+                }
+                
+                // Create message object
+                const messageData = {
+                    id: Date.now().toString(),
+                    name: name,
+                    email: email,
+                    subject: subject,
+                    subjectCode: subjectValue,
+                    message: message,
+                    patientId: patientId,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    timestampLocal: new Date().toISOString(),
+                    status: 'pending',
+                    read: false
+                };
+                
+                // Save to Firebase under support_messages
+                const messagesRef = database.ref('support_messages');
+                const newMessageRef = messagesRef.push();
+                await newMessageRef.set(messageData);
+                
+                // Also save to local storage as backup
+                const localMessages = JSON.parse(localStorage.getItem('support_messages') || '[]');
+                localMessages.unshift({
+                    ...messageData,
+                    timestampLocal: new Date().toISOString()
+                });
+                // Keep only last 50 messages locally
+                while (localMessages.length > 50) localMessages.pop();
+                localStorage.setItem('support_messages', JSON.stringify(localMessages));
+                
+                // Show success notification
+                showNotification('✅ Message sent successfully! We\'ll respond within 24 hours.', 'success');
+                
+                // Clear form
+                if (document.getElementById('supportName')) document.getElementById('supportName').value = '';
+                if (document.getElementById('supportEmail')) document.getElementById('supportEmail').value = '';
+                if (document.getElementById('supportMessage')) document.getElementById('supportMessage').value = '';
+                if (document.getElementById('supportSubject')) document.getElementById('supportSubject').value = 'general';
+                
+                // Log to console for debugging
+                console.log('Support message saved to Firebase:', messageData);
+                
+            } catch (error) {
+                console.error('Error saving support message:', error);
+                showNotification('❌ Failed to send message. Please try again later.', 'error');
+                
+                // Fallback: Save to local storage only
+                try {
+                    const fallbackMessage = {
+                        id: Date.now().toString(),
+                        name: name,
+                        email: email,
+                        subject: subject,
+                        message: message,
+                        timestampLocal: new Date().toISOString(),
+                        status: 'pending_fallback'
+                    };
+                    const localMessages = JSON.parse(localStorage.getItem('support_messages') || '[]');
+                    localMessages.unshift(fallbackMessage);
+                    localStorage.setItem('support_messages', JSON.stringify(localMessages));
+                    showNotification('⚠️ Saved locally. Will sync when online.', 'warning');
+                } catch(e) {
+                    console.error('Fallback save also failed:', e);
+                }
+            } finally {
+                // Re-enable button
+                newBtn.disabled = false;
+                newBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+            }
+        });
+    }
+}
+
+// ========== ADD: VIEW SENT MESSAGES FUNCTION (OPTIONAL) ==========
+function viewSupportMessages() {
+    // This function can be called to show sent messages
+    const localMessages = JSON.parse(localStorage.getItem('support_messages') || '[]');
+    if (localMessages.length === 0) {
+        showNotification('No messages found', 'info');
+        return;
+    }
+    
+    // Create modal to show messages
+    let modal = document.getElementById('messagesModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'messagesModal';
+        modal.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; z-index:10000;';
+        modal.innerHTML = `
+            <div style="background:var(--surface); border-radius:28px; max-width:600px; width:90%; max-height:80vh; overflow:auto; padding:1.5rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <h3><i class="fas fa-envelope"></i> Your Messages</h3>
+                    <button id="closeMessagesModal" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+                </div>
+                <div id="messagesList"></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        document.getElementById('closeMessagesModal')?.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    }
+    
+    const messagesList = document.getElementById('messagesList');
+    if (messagesList) {
+        messagesList.innerHTML = localMessages.map(msg => `
+            <div style="border-bottom:1px solid var(--border); padding:1rem 0;">
+                <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+                    <strong>${escapeHtml(msg.subject)}</strong>
+                    <span style="font-size:0.7rem; color:var(--text-secondary);">${new Date(msg.timestampLocal).toLocaleString()}</span>
+                </div>
+                <div style="font-size:0.85rem; margin-top:0.5rem; color:var(--text-secondary);">${escapeHtml(msg.message.substring(0, 100))}${msg.message.length > 100 ? '...' : ''}</div>
+                <div style="font-size:0.7rem; margin-top:0.5rem;">
+                    <span style="background:${msg.status === 'pending' ? '#f59e0b20' : '#10b98120'}; color:${msg.status === 'pending' ? '#f59e0b' : '#10b981'}; padding:2px 8px; border-radius:12px;">
+                        ${msg.status === 'pending' ? 'Pending' : msg.status === 'pending_fallback' ? 'Local Only' : 'Replied'}
+                    </span>
+                </div>
+            </div>
+        `).join('');
+        
+        if (localMessages.length === 0) {
+            messagesList.innerHTML = '<div style="text-align:center; padding:2rem;">No messages yet</div>';
+        }
+    }
+    
+    modal.style.display = 'flex';
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ========== ADD: SYNC LOCAL MESSAGES TO FIREBASE ==========
+async function syncLocalMessagesToFirebase() {
+    const localMessages = JSON.parse(localStorage.getItem('support_messages') || '[]');
+    const pendingFallback = localMessages.filter(msg => msg.status === 'pending_fallback');
+    
+    if (pendingFallback.length === 0) return;
+    
+    console.log(`Syncing ${pendingFallback.length} pending messages to Firebase...`);
+    
+    for (const msg of pendingFallback) {
+        try {
+            const messageData = {
+                id: msg.id,
+                name: msg.name,
+                email: msg.email,
+                subject: msg.subject,
+                subjectCode: msg.subjectCode || 'general',
+                message: msg.message,
+                patientId: msg.patientId || 'anonymous',
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                timestampLocal: msg.timestampLocal,
+                status: 'pending',
+                read: false
+            };
+            
+            const messagesRef = database.ref('support_messages');
+            await messagesRef.push().set(messageData);
+            
+            // Update local status
+            msg.status = 'synced';
+        } catch(e) {
+            console.error('Failed to sync message:', e);
+        }
+    }
+    
+    // Save updated status
+    localStorage.setItem('support_messages', JSON.stringify(localMessages));
+}
             
             // ========== 4. EMAIL CARD CLICK ==========
             function initEmailCard() {
@@ -2536,15 +2722,21 @@ setTimeout(() => {
             }
             
             // ========== INITIALIZE EVERYTHING ==========
-            function initSupportPage() {
-                setTimeout(function() {
-                    initFaqAccordion();
-                    initQuickActions();
-                    initSendMessage();
-                    initEmailCard();
-                    console.log('✅ Support page fully initialized');
-                }, 100);
-            }
+function initSupportPage() {
+    setTimeout(function() {
+        initFaqAccordion();
+        initQuickActions();
+        initSendMessage();
+        initEmailCard();
+        console.log('✅ Support page fully initialized');
+        
+        // ========== ADD: Sync local messages to Firebase ==========
+        // Sync local messages when page loads
+        if (typeof database !== 'undefined') {
+            setTimeout(syncLocalMessagesToFirebase, 5000);
+        }
+    }, 100);
+}
             
             // Run when page loads
             if (document.readyState === 'loading') {
