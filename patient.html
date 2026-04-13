@@ -1739,57 +1739,122 @@ function startLabResultsSync() {
 setTimeout(() => {
     startLabResultsSync();
 }, 5000);
-            // ==================== MEDICAL HISTORY FROM FIREBASE (ESP32 + AI) ====================
+                // ==================== MEDICAL HISTORY FROM FIREBASE (ESP32 + AI MODEL) ====================
     
     let allHistoryData = [];
     let glucoseChart = null;
     let bpChart = null;
-    
-    // Load all readings from Firebase
+
+    // Helper function to format date with AM/PM in English
+    function formatDateTimeWithAMPM(timestamp) {
+        const date = new Date(timestamp);
+        const options = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        };
+        return date.toLocaleString('en-US', options);
+    }
+
+    // Helper function to format date only
+    function formatDateOnly(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+
+    // Load all readings from Firebase (ESP32 + AI Model)
     async function loadMedicalHistory() {
-        if (!careSyncPatientId) {
-            console.log('Waiting for patient ID...');
-            setTimeout(loadMedicalHistory, 2000);
+        let patientId = careSyncPatientId;
+        
+        if (!patientId) {
+            try {
+                const snapshot = await database.ref('patients').once('value');
+                const patients = snapshot.val();
+                if (patients) {
+                    patientId = Object.keys(patients)[0];
+                }
+            } catch(e) { 
+                console.log('Waiting for patient ID...'); 
+            }
+        }
+        
+        if (!patientId) {
+            console.log('No patient found, retrying in 3 seconds...');
+            setTimeout(loadMedicalHistory, 3000);
             return;
         }
         
         try {
-            const readingsRef = database.ref(`patients/${careSyncPatientId}/readings`);
+            const readingsRef = database.ref(`patients/${patientId}/readings`);
             const snapshot = await readingsRef.once('value');
             const readings = snapshot.val();
             
+            const esp32Ref = database.ref('/HELIOS_DATA_LIVE/Vitals');
+            const esp32Snapshot = await esp32Ref.once('value');
+            const esp32Data = esp32Snapshot.val();
+            
+            let combinedData = [];
+            
             if (readings) {
-                // Convert to array and sort by timestamp (newest first)
-                allHistoryData = Object.entries(readings).map(([timestamp, data]) => ({
-                    timestamp: parseInt(timestamp),
-                    date: new Date(parseInt(timestamp)),
-                    vitals: data.vitals || {},
-                    clinical: data.clinical || {}
-                })).sort((a, b) => b.timestamp - a.timestamp);
-                
-                updateHistoryUI();
-                updateHistoryCharts();
-                console.log(`✅ Loaded ${allHistoryData.length} medical records from Firebase`);
-            } else {
-                document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No medical history found in Firebase</td></tr>';
+                Object.entries(readings).forEach(([timestamp, data]) => {
+                    combinedData.push({
+                        timestamp: parseInt(timestamp),
+                        date: new Date(parseInt(timestamp)),
+                        source: 'AI Model',
+                        vitals: data.vitals || {},
+                        clinical: data.clinical || {}
+                    });
+                });
             }
+            
+            if (esp32Data && Object.keys(esp32Data).length > 0) {
+                combinedData.push({
+                    timestamp: Date.now(),
+                    date: new Date(),
+                    source: 'ESP32',
+                    vitals: {
+                        glucose: null,
+                        systolic_bp: null,
+                        diastolic_bp: null,
+                        heart_rate: esp32Data.HeartRate || null,
+                        spo2: esp32Data.SpO2 || null,
+                        body_temp: esp32Data.BodyTemp || null
+                    }
+                });
+            }
+            
+            allHistoryData = combinedData.sort((a, b) => b.timestamp - a.timestamp);
+            
+            updateHistoryUI();
+            updateHistoryCharts();
+            console.log(`✅ Loaded ${allHistoryData.length} medical records`);
+            
         } catch (error) {
             console.error('Error loading history:', error);
-            document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">Error loading history</td></tr>';
+            const tbody = document.getElementById('historyTableBody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">Error loading history</td></tr>';
         }
     }
-    
-    // Update UI with statistics and table
+
     function updateHistoryUI() {
         const total = allHistoryData.length;
         document.getElementById('totalReadings').innerText = total;
         
-        // Calculate averages
+        const aiData = allHistoryData.filter(d => d.source === 'AI Model');
+        
         let glucoseSum = 0, glucoseCount = 0;
         let sbpSum = 0, dbpSum = 0, bpCount = 0;
         let hrSum = 0, hrCount = 0;
         
-        allHistoryData.forEach(record => {
+        aiData.forEach(record => {
             if (record.vitals.glucose && record.vitals.glucose > 0) {
                 glucoseSum += record.vitals.glucose;
                 glucoseCount++;
@@ -1805,14 +1870,21 @@ setTimeout(() => {
             }
         });
         
+        const esp32Data = allHistoryData.filter(d => d.source === 'ESP32' && d.vitals.heart_rate);
+        esp32Data.forEach(record => {
+            if (record.vitals.heart_rate > 0) {
+                hrSum += record.vitals.heart_rate;
+                hrCount++;
+            }
+        });
+        
         document.getElementById('avgGlucose').innerHTML = glucoseCount > 0 ? Math.round(glucoseSum / glucoseCount) : '--';
         document.getElementById('avgBP').innerHTML = bpCount > 0 ? `${Math.round(sbpSum / bpCount)}/${Math.round(dbpSum / bpCount)}` : '--/--';
         document.getElementById('avgHeartRate').innerHTML = hrCount > 0 ? Math.round(hrSum / hrCount) : '--';
         
         renderHistoryTable();
     }
-    
-    // Render table with filters
+
     function renderHistoryTable() {
         const searchTerm = document.getElementById('historySearch')?.value.toLowerCase() || '';
         const filterType = document.getElementById('historyFilter')?.value || 'all';
@@ -1821,16 +1893,14 @@ setTimeout(() => {
         
         let filtered = [...allHistoryData];
         
-        // Apply search
         if (searchTerm) {
             filtered = filtered.filter(record => 
-                record.date.toLocaleString().toLowerCase().includes(searchTerm) ||
+                formatDateTimeWithAMPM(record.timestamp).toLowerCase().includes(searchTerm) ||
                 (record.vitals.glucose && record.vitals.glucose.toString().includes(searchTerm)) ||
                 (record.vitals.systolic_bp && record.vitals.systolic_bp.toString().includes(searchTerm))
             );
         }
         
-        // Apply filter type
         if (filterType !== 'all') {
             filtered = filtered.filter(record => {
                 if (filterType === 'glucose') return record.vitals.glucose && record.vitals.glucose > 0;
@@ -1840,18 +1910,19 @@ setTimeout(() => {
             });
         }
         
-        // Apply date filter
         if (startDate) {
             const start = new Date(startDate);
+            start.setHours(0, 0, 0, 0);
             filtered = filtered.filter(record => record.date >= start);
         }
         if (endDate) {
             const end = new Date(endDate);
-            end.setHours(23, 59, 59);
+            end.setHours(23, 59, 59, 999);
             filtered = filtered.filter(record => record.date <= end);
         }
         
         const tbody = document.getElementById('historyTableBody');
+        if (!tbody) return;
         
         if (filtered.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No records found</td></tr>';
@@ -1865,25 +1936,33 @@ setTimeout(() => {
             const hr = record.vitals.heart_rate || '--';
             const spo2 = record.vitals.spo2 || '--';
             
-            // Determine status based on values
             let status = '', statusColor = '';
-            if (glucose !== '--') {
-                if (glucose >= 200) { status = 'High Glucose'; statusColor = '#ef4444'; }
-                else if (glucose >= 126) { status = 'Elevated Glucose'; statusColor = '#f59e0b'; }
-                else if (glucose < 70 && glucose > 0) { status = 'Low Glucose'; statusColor = '#ef4444'; }
-                else if (sbp !== '--' && sbp >= 140) { status = 'High BP'; statusColor = '#f59e0b'; }
-                else { status = 'Normal'; statusColor = '#10b981'; }
+            if (glucose !== '--' && glucose > 0) {
+                if (glucose >= 200) { status = '⚠️ High Glucose'; statusColor = '#ef4444'; }
+                else if (glucose >= 126) { status = '⚠️ Elevated Glucose'; statusColor = '#f59e0b'; }
+                else if (glucose < 70) { status = '⚠️ Low Glucose'; statusColor = '#ef4444'; }
+                else { status = '✅ Normal'; statusColor = '#10b981'; }
             } else if (sbp !== '--' && sbp >= 140) {
-                status = 'High BP';
+                status = '⚠️ High BP';
+                statusColor = '#f59e0b';
+            } else if (hr !== '--' && (hr > 100 || hr < 60)) {
+                status = '⚠️ Abnormal HR';
                 statusColor = '#f59e0b';
             } else {
-                status = 'Normal';
+                status = '✅ Normal';
                 statusColor = '#10b981';
             }
             
+            const sourceBadge = record.source === 'AI Model' ? 
+                '<span style="background: #8b5cf620; color: #8b5cf6; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; margin-left: 8px;">🤖 AI</span>' : 
+                '<span style="background: #10b98120; color: #10b981; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; margin-left: 8px;">📡 ESP32</span>';
+            
             return `
                 <tr style="border-bottom: 1px solid var(--border);">
-                    <td style="padding: 1rem;">${record.date.toLocaleDateString()} ${record.date.toLocaleTimeString()}</td>
+                    <td style="padding: 1rem;">
+                        ${formatDateTimeWithAMPM(record.timestamp)}
+                        ${sourceBadge}
+                    </td>
                     <td style="padding: 1rem; font-weight: 600;">${glucose !== '--' ? glucose + ' mg/dL' : '--'}</td>
                     <td style="padding: 1rem; font-weight: 600;">${sbp !== '--' ? sbp + '/' + dbp + ' mmHg' : '--'}</td>
                     <td style="padding: 1rem; font-weight: 600;">${hr !== '--' ? hr + ' bpm' : '--'}</td>
@@ -1893,13 +1972,12 @@ setTimeout(() => {
             `;
         }).join('');
     }
-    
-    // Initialize and update charts
+
     function initHistoryCharts() {
         const glucoseCtx = document.getElementById('glucoseHistoryChart')?.getContext('2d');
         const bpCtx = document.getElementById('bpHistoryChart')?.getContext('2d');
         
-        if (glucoseCtx) {
+        if (glucoseCtx && !glucoseChart) {
             glucoseChart = new Chart(glucoseCtx, {
                 type: 'line',
                 data: { labels: [], datasets: [{ label: 'Glucose (mg/dL) - AI Model', data: [], borderColor: '#ef4444', backgroundColor: '#ef444420', tension: 0.3, fill: true }] },
@@ -1907,7 +1985,7 @@ setTimeout(() => {
             });
         }
         
-        if (bpCtx) {
+        if (bpCtx && !bpChart) {
             bpChart = new Chart(bpCtx, {
                 type: 'line',
                 data: { labels: [], datasets: [
@@ -1918,17 +1996,15 @@ setTimeout(() => {
             });
         }
     }
-    
+
     function updateHistoryCharts() {
         if (!glucoseChart && !bpChart) return;
         
-        // Get last 30 readings for charts (oldest to newest)
-        const last30 = [...allHistoryData].reverse().slice(-30);
-        
-        const labels = last30.map(r => r.date.toLocaleDateString());
-        const glucoseData = last30.map(r => r.vitals.glucose || null);
-        const sbpData = last30.map(r => r.vitals.systolic_bp || null);
-        const dbpData = last30.map(r => r.vitals.diastolic_bp || null);
+        const aiData = allHistoryData.filter(d => d.source === 'AI Model').reverse().slice(-30);
+        const labels = aiData.map(r => formatDateOnly(r.timestamp));
+        const glucoseData = aiData.map(r => r.vitals.glucose || null);
+        const sbpData = aiData.map(r => r.vitals.systolic_bp || null);
+        const dbpData = aiData.map(r => r.vitals.diastolic_bp || null);
         
         if (glucoseChart) {
             glucoseChart.data.labels = labels;
@@ -1943,15 +2019,14 @@ setTimeout(() => {
             bpChart.update();
         }
     }
-    
-    // Export to CSV
+
     function exportHistoryToCSV() {
         if (allHistoryData.length === 0) {
             alert('No data to export');
             return;
         }
         
-        const headers = ['Date', 'Time', 'Glucose (mg/dL)', 'Systolic BP', 'Diastolic BP', 'Heart Rate (bpm)', 'SpO₂ (%)', 'Status'];
+        const headers = ['Date & Time (AM/PM)', 'Source', 'Glucose (mg/dL)', 'Systolic BP', 'Diastolic BP', 'Heart Rate (bpm)', 'SpO₂ (%)', 'Status'];
         const rows = allHistoryData.map(record => {
             const glucose = record.vitals.glucose || '';
             const sbp = record.vitals.systolic_bp || '';
@@ -1964,13 +2039,24 @@ setTimeout(() => {
             else if (glucose >= 126) status = 'Elevated Glucose';
             else if (glucose < 70 && glucose > 0) status = 'Low Glucose';
             else if (sbp >= 140) status = 'High BP';
+            else if (hr > 100) status = 'High Heart Rate';
+            else if (hr < 60 && hr > 0) status = 'Low Heart Rate';
             else status = 'Normal';
             
-            return [record.date.toLocaleDateString(), record.date.toLocaleTimeString(), glucose, sbp, dbp, hr, spo2, status];
+            return [
+                formatDateTimeWithAMPM(record.timestamp),
+                record.source,
+                glucose,
+                sbp,
+                dbp,
+                hr,
+                spo2,
+                status
+            ];
         });
         
-        const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -1979,34 +2065,30 @@ setTimeout(() => {
         URL.revokeObjectURL(url);
         showNotification('History exported successfully!');
     }
-    
-    // Setup event listeners
+
     function setupHistoryListeners() {
-        document.getElementById('historySearch')?.addEventListener('input', () => renderHistoryTable());
-        document.getElementById('historyFilter')?.addEventListener('change', () => renderHistoryTable());
-        document.getElementById('applyHistoryFilter')?.addEventListener('click', () => renderHistoryTable());
-        document.getElementById('exportHistoryBtn')?.addEventListener('click', exportHistoryToCSV);
-        document.getElementById('refreshHistoryBtn')?.addEventListener('click', () => {
+        const searchInput = document.getElementById('historySearch');
+        const filterSelect = document.getElementById('historyFilter');
+        const applyBtn = document.getElementById('applyHistoryFilter');
+        const exportBtn = document.getElementById('exportHistoryBtn');
+        const refreshBtn = document.getElementById('refreshHistoryBtn');
+        
+        if (searchInput) searchInput.addEventListener('input', () => renderHistoryTable());
+        if (filterSelect) filterSelect.addEventListener('change', () => renderHistoryTable());
+        if (applyBtn) applyBtn.addEventListener('click', () => renderHistoryTable());
+        if (exportBtn) exportBtn.addEventListener('click', exportHistoryToCSV);
+        if (refreshBtn) refreshBtn.addEventListener('click', () => {
             loadMedicalHistory();
             showNotification('Refreshing medical history...');
         });
     }
-    
-    // Initialize history system
+
     setTimeout(() => {
         initHistoryCharts();
         setupHistoryListeners();
         loadMedicalHistory();
     }, 4000);
-    
-    // Show notification function
-    function showNotification(msg) {
-        const notif = document.createElement('div');
-        notif.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#10b981; color:white; padding:12px 24px; border-radius:50px; z-index:10000;';
-        notif.innerText = msg;
-        document.body.appendChild(notif);
-        setTimeout(() => notif.remove(), 3000);
-    }
+            
     </script>
 </body>
 </html>
