@@ -4010,115 +4010,109 @@ function initSupportPage() {
     setTimeout(startDoctorSync, 3000);
 })();
 </script>
-                // ==================== ESP32 INDEPENDENT LISTENER (NO INTERFERENCE) ====================
+                <!-- ========== ESP32 FIX - READ FROM CORRECT PATH WITH CORRECT FIELD NAMES ========== -->
+<script>
+// ==================== ESP32 INDEPENDENT LISTENER ====================
 (function() {
-    console.log("🟢 Starting ESP32 Independent Listener - Path: /HELIOS_DATA_LIVE/Vitals");
+    console.log("🟢 ESP32 Listener Active - Reading from /HELIOS_DATA_LIVE/Vitals");
     
-    // هذه الدالة تتعامل فقط مع مسار ESP32 المحدد
-    // ولا تلمس أي بيانات أخرى في patients/
-    
+    // هذه الدالة تتعامل فقط مع بيانات ESP32
     function updateESP32Only(vitals) {
-        if (!vitals) return false;
+        if (!vitals) return;
         
-        let updated = false;
+        console.log("📡 Updating UI with ESP32 data:", vitals);
         
-        // تحديث بطاقة Heart Rate فقط
-        if (vitals.HeartRate !== null && vitals.HeartRate !== undefined && !isNaN(vitals.HeartRate)) {
-            const heartElement = document.getElementById('heartValue');
-            if (heartElement) {
-                heartElement.innerHTML = `${Math.round(vitals.HeartRate)} <span>bpm</span>`;
-                heartElement.classList.add('data-update-pulse');
-                setTimeout(() => heartElement.classList.remove('data-update-pulse'), 400);
+        // Heart Rate - ESP32 يرسل "HeartRate"
+        if (vitals.HeartRate !== undefined && vitals.HeartRate !== null && !isNaN(vitals.HeartRate)) {
+            const el = document.getElementById('heartValue');
+            if (el) {
+                el.innerHTML = `${Math.round(vitals.HeartRate)} <span>bpm</span>`;
+                el.classList.add('data-update-pulse');
+                setTimeout(() => el.classList.remove('data-update-pulse'), 400);
             }
             updateIndicator('heartIndicator', vitals.HeartRate, 60, 100, 55, 110);
-            updated = true;
         }
         
-        // تحديث بطاقة SpO2 فقط
-        if (vitals.SpO2 !== null && vitals.SpO2 !== undefined && !isNaN(vitals.SpO2)) {
-            const spo2Element = document.getElementById('spo2Value');
-            if (spo2Element) {
-                spo2Element.innerHTML = `${Math.round(vitals.SpO2)} <span>%</span>`;
-                spo2Element.classList.add('data-update-pulse');
-                setTimeout(() => spo2Element.classList.remove('data-update-pulse'), 400);
+        // SpO2 - ESP32 يرسل "SpO2"
+        if (vitals.SpO2 !== undefined && vitals.SpO2 !== null && !isNaN(vitals.SpO2)) {
+            const el = document.getElementById('spo2Value');
+            if (el) {
+                el.innerHTML = `${Math.round(vitals.SpO2)} <span>%</span>`;
+                el.classList.add('data-update-pulse');
+                setTimeout(() => el.classList.remove('data-update-pulse'), 400);
             }
             updateIndicator('spo2Indicator', vitals.SpO2, 95, 100, 90, 100);
-            updated = true;
         }
         
-        // تحديث بطاقة Temperature فقط
-        if (vitals.BodyTemp !== null && vitals.BodyTemp !== undefined && !isNaN(vitals.BodyTemp)) {
-            const tempElement = document.getElementById('tempValue');
-            if (tempElement) {
-                tempElement.innerHTML = `${vitals.BodyTemp.toFixed(1)} <span>°C</span>`;
-                tempElement.classList.add('data-update-pulse');
-                setTimeout(() => tempElement.classList.remove('data-update-pulse'), 400);
+        // Body Temperature - ESP32 يرسل "BodyTemp"
+        if (vitals.BodyTemp !== undefined && vitals.BodyTemp !== null && !isNaN(vitals.BodyTemp)) {
+            const el = document.getElementById('tempValue');
+            if (el) {
+                el.innerHTML = `${vitals.BodyTemp.toFixed(1)} <span>°C</span>`;
+                el.classList.add('data-update-pulse');
+                setTimeout(() => el.classList.remove('data-update-pulse'), 400);
             }
             updateIndicator('tempIndicator', vitals.BodyTemp, 36.0, 37.5, 35.5, 38.0);
-            updated = true;
         }
         
-        // تحديث البيئة (Room Temp, Humidity, Motion)
-        if (vitals.RoomTemp !== null && vitals.RoomTemp !== undefined && !isNaN(vitals.RoomTemp)) {
-            const roomElement = document.getElementById('roomTempValue');
-            if (roomElement) {
-                roomElement.innerHTML = `${vitals.RoomTemp.toFixed(1)} °C`;
-                roomElement.classList.add('data-update-pulse');
-                setTimeout(() => roomElement.classList.remove('data-update-pulse'), 400);
+        // Room Temperature - ESP32 يرسل "RoomTemp"
+        if (vitals.RoomTemp !== undefined && vitals.RoomTemp !== null && !isNaN(vitals.RoomTemp)) {
+            const el = document.getElementById('roomTempValue');
+            if (el) {
+                el.innerHTML = `${vitals.RoomTemp.toFixed(1)} °C`;
+                el.classList.add('data-update-pulse');
+                setTimeout(() => el.classList.remove('data-update-pulse'), 400);
             }
-            updated = true;
         }
         
-        if (vitals.Humidity !== null && vitals.Humidity !== undefined && !isNaN(vitals.Humidity)) {
-            const humElement = document.getElementById('humidityValue');
-            if (humElement) {
-                humElement.innerHTML = `${vitals.Humidity.toFixed(1)} %`;
-                humElement.classList.add('data-update-pulse');
-                setTimeout(() => humElement.classList.remove('data-update-pulse'), 400);
+        // Humidity - ESP32 يرسل "Humidity"
+        if (vitals.Humidity !== undefined && vitals.Humidity !== null && !isNaN(vitals.Humidity)) {
+            const el = document.getElementById('humidityValue');
+            if (el) {
+                el.innerHTML = `${vitals.Humidity.toFixed(1)} %`;
+                el.classList.add('data-update-pulse');
+                setTimeout(() => el.classList.remove('data-update-pulse'), 400);
             }
-            updated = true;
         }
         
-        if (vitals.Motion !== null && vitals.Motion !== undefined && !isNaN(vitals.Motion)) {
-            const motionElement = document.getElementById('motionValue');
-            if (motionElement) {
-                motionElement.innerHTML = `${vitals.Motion.toFixed(2)} m/s²`;
-                motionElement.classList.add('data-update-pulse');
-                setTimeout(() => motionElement.classList.remove('data-update-pulse'), 400);
+        // Motion - ESP32 يرسل "Motion"
+        if (vitals.Motion !== undefined && vitals.Motion !== null && !isNaN(vitals.Motion)) {
+            const el = document.getElementById('motionValue');
+            if (el) {
+                el.innerHTML = `${vitals.Motion.toFixed(2)} m/s²`;
+                el.classList.add('data-update-pulse');
+                setTimeout(() => el.classList.remove('data-update-pulse'), 400);
             }
-            updated = true;
         }
         
-        // تحديث الـ Gauges والـ Charts
-        if (vitals.HeartRate !== null && vitals.SpO2 !== null && vitals.BodyTemp !== null) {
-            if (typeof heartGauge !== 'undefined' && heartGauge) heartGauge.updateSeries([vitals.HeartRate]);
-            if (typeof spo2Gauge !== 'undefined' && spo2Gauge) spo2Gauge.updateSeries([vitals.SpO2]);
-            if (typeof tempGauge !== 'undefined' && tempGauge) tempGauge.updateSeries([((vitals.BodyTemp - 35) / 5) * 100]);
-            
-            // تحديث الـ Trends
-            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            if (typeof timeLabels !== 'undefined') {
-                timeLabels.push(now);
-                heartHistory.push(vitals.HeartRate);
-                spo2History.push(vitals.SpO2);
-                tempHistory.push(vitals.BodyTemp);
-                if (timeLabels.length > 12) {
-                    timeLabels.shift(); heartHistory.shift(); spo2History.shift(); tempHistory.shift();
-                }
-                if (typeof heartTrendChart !== 'undefined' && heartTrendChart) {
-                    heartTrendChart.data.labels = [...timeLabels];
-                    heartTrendChart.data.datasets[0].data = [...heartHistory];
-                    heartTrendChart.update('none');
-                }
-                if (typeof multiTrendChart !== 'undefined' && multiTrendChart) {
-                    multiTrendChart.data.labels = [...timeLabels];
-                    multiTrendChart.data.datasets[0].data = [...spo2History];
-                    multiTrendChart.data.datasets[1].data = [...tempHistory];
-                    multiTrendChart.update('none');
-                }
+        // Update timestamp
+        const lastUpdate = document.getElementById('lastUpdate');
+        if (lastUpdate) {
+            lastUpdate.innerHTML = new Date().toLocaleTimeString();
+        }
+        
+        // Update status badge
+        const badge = document.getElementById('liveStatusBadge');
+        if (badge) {
+            badge.innerHTML = '<i class="fas fa-circle" style="font-size:0.6rem; color:#10b981;"></i><span>ESP32 Live</span>';
+            badge.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        }
+        
+        // Update gauges and charts if all three exist
+        if (vitals.HeartRate && vitals.SpO2 && vitals.BodyTemp) {
+            if (typeof heartGauge !== 'undefined' && heartGauge) {
+                heartGauge.updateSeries([vitals.HeartRate]);
+            }
+            if (typeof spo2Gauge !== 'undefined' && spo2Gauge) {
+                spo2Gauge.updateSeries([vitals.SpO2]);
+            }
+            if (typeof tempGauge !== 'undefined' && tempGauge) {
+                let tempPercent = ((vitals.BodyTemp - 35) / 5) * 100;
+                tempPercent = Math.min(100, Math.max(0, tempPercent));
+                tempGauge.updateSeries([tempPercent]);
             }
             
-            // تحديث Health Score
+            // Update Health Score
             let score = 100;
             if (vitals.HeartRate > 100 || vitals.HeartRate < 60) score -= 20;
             if (vitals.SpO2 < 95) score -= 25;
@@ -4126,85 +4120,64 @@ function initSupportPage() {
             score = Math.max(0, Math.min(100, score));
             const healthScoreEl = document.getElementById('healthScore');
             if (healthScoreEl) healthScoreEl.innerHTML = score;
-            
-            // تحديث التنبيهات
-            let alerts = [];
-            if (vitals.HeartRate > 120 || vitals.HeartRate < 50) alerts.push(`⚠️ Abnormal Heart Rate: ${vitals.HeartRate} BPM`);
-            if (vitals.SpO2 < 90) alerts.push(`⚠️ Low Oxygen: ${vitals.SpO2}%`);
-            if (vitals.BodyTemp > 38.5 || vitals.BodyTemp < 35.5) alerts.push(`⚠️ Abnormal Temperature: ${vitals.BodyTemp}°C`);
-            
-            const alertsCountEl = document.getElementById('activeAlertsCount');
-            if (alertsCountEl) alertsCountEl.innerText = alerts.length;
-            
-            const alertsContainer = document.getElementById('alertsList');
-            if (alertsContainer) {
-                if (alerts.length > 0) {
-                    alertsContainer.innerHTML = alerts.map(a => `<div class="alert-item"><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i>${a}</div>`).join('');
-                } else {
-                    // الاحتفاظ بالتنبيهات الموجودة من Care Sync إذا كانت موجودة
-                    const currentAlerts = alertsContainer.innerHTML;
-                    if (!currentAlerts.includes('ESP32') && !currentAlerts.includes('Care Sync')) {
-                        alertsContainer.innerHTML = '<div class="alert-item">✅ All vitals within normal range</div>';
-                    }
+        }
+    }
+    
+    // الاستماع المباشر لمسار ESP32
+    const esp32Ref = database.ref('/HELIOS_DATA_LIVE/Vitals');
+    
+    // الاستماع للبيانات الجديدة
+    esp32Ref.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data && typeof data === 'object') {
+            console.log("📡 ESP32 Data Received:", data);
+            updateESP32Only({
+                HeartRate: data.HeartRate,
+                SpO2: data.SpO2,
+                BodyTemp: data.BodyTemp,
+                RoomTemp: data.RoomTemp,
+                Humidity: data.Humidity,
+                Motion: data.Motion
+            });
+        }
+    }, (error) => {
+        console.error("ESP32 Listener Error:", error);
+    });
+    
+    // جلب البيانات الحالية عند التحميل
+    setTimeout(() => {
+        database.ref('/HELIOS_DATA_LIVE/Vitals').once('value').then((snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                console.log("📡 Initial ESP32 Data Load:", data);
+                updateESP32Only({
+                    HeartRate: data.HeartRate,
+                    SpO2: data.SpO2,
+                    BodyTemp: data.BodyTemp,
+                    RoomTemp: data.RoomTemp,
+                    Humidity: data.Humidity,
+                    Motion: data.Motion
+                });
+            } else {
+                console.log("⚠️ No ESP32 data found at /HELIOS_DATA_LIVE/Vitals yet. Waiting for ESP32 to send data...");
+                const badge = document.getElementById('liveStatusBadge');
+                if (badge) {
+                    badge.innerHTML = '<i class="fas fa-circle" style="font-size:0.6rem; color:#f59e0b;"></i><span>Waiting for ESP32...</span>';
+                    badge.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
                 }
             }
-        }
-        
-        // تحديث وقت آخر تحديث
-        const lastUpdateEl = document.getElementById('lastUpdate');
-        if (lastUpdateEl) lastUpdateEl.innerHTML = new Date().toLocaleTimeString();
-        
-        // تحديث حالة ESP32
-        const statusBadge = document.getElementById('liveStatusBadge');
-        if (statusBadge) {
-            statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size:0.6rem; color:#10b981;"></i><span>ESP32 Live</span>';
-            statusBadge.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-        }
-        
-        return updated;
-    }
-    
-    // الاستماع المباشر لمسار ESP32 فقط
-    function startESP32Listener() {
-        const esp32Ref = database.ref('/HELIOS_DATA_LIVE/Vitals');
-        
-        // الاستماع للبيانات الجديدة
-        esp32Ref.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data && typeof data === 'object') {
-                console.log("📡 ESP32 Data Received:", data);
-                
-                const vitals = {
-                    HeartRate: data.HeartRate || data.heart_rate || data.hr || null,
-                    SpO2: data.SpO2 || data.spo2 || data.oxygen || null,
-                    BodyTemp: data.BodyTemp || data.body_temp || data.temperature || data.temp || null,
-                    RoomTemp: data.RoomTemp || data.room_temp || data.ambient_temp || null,
-                    Humidity: data.Humidity || data.humidity || null,
-                    Motion: data.Motion || data.motion || null
-                };
-                
-                updateESP32Only(vitals);
-            }
-        }, (error) => {
-            console.error("ESP32 Listener Error:", error);
         });
-    }
+    }, 2000);
     
-    // بدء الاستماع بعد تحميل الصفحة
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(startESP32Listener, 1000);
-        });
-    } else {
-        setTimeout(startESP32Listener, 1000);
-    }
-    
-    console.log("✅ ESP32 Independent Listener Ready - Reads ONLY from /HELIOS_DATA_LIVE/Vitals");
+    console.log("✅ ESP32 Listener Ready - Reading from /HELIOS_DATA_LIVE/Vitals");
     console.log("✅ This will NOT affect:");
     console.log("   - Care Sync AI Model Data (patients/*/readings)");
     console.log("   - Lab Results (patients/*/labResults)");
     console.log("   - Doctor Notes (patients/*/doctorNotes)");
 })();
+</script>
+<!-- ============================================================== -->
+               
 
 </body>
 </html>
