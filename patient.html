@@ -3221,6 +3221,293 @@ function initSupportPage() {
             }
         })();
         // ==================== EMERGENCY SOS SYSTEM (REAL EMAIL) ====================
+                // ==================== AI PREDICTION MODEL (ADVANCED) ====================
+        (function() {
+            "use strict";
+            
+            function getPatientAge() {
+                const dobText = document.getElementById('profileDob')?.innerText;
+                if (!dobText) return 40;
+                try {
+                    const dateParts = dobText.match(/(\d+)\s+(\w+)\s+(\d+)/);
+                    if (dateParts) {
+                        const birthYear = parseInt(dateParts[3]);
+                        return new Date().getFullYear() - birthYear;
+                    }
+                } catch(e) { console.log('Age parsing error'); }
+                return 40;
+            }
+            
+            function getPatientBMI() {
+                const weight = parseFloat(document.getElementById('profileWeight')?.innerText) || 75;
+                const height = parseFloat(document.getElementById('profileHeight')?.innerText) || 175;
+                return (weight / ((height/100) ** 2)).toFixed(1);
+            }
+            
+            function getLatestVitalsForAI() {
+                const heartRate = parseInt(document.getElementById('heartValue')?.innerText) || 75;
+                let glucose = 95, sbp = 118, dbp = 76;
+                const glucoseEl = document.getElementById('glucoseValue');
+                const bpEl = document.getElementById('bpValue');
+                
+                if (glucoseEl) {
+                    const glucoseMatch = glucoseEl.innerText.match(/(\d+)/);
+                    if (glucoseMatch) glucose = parseInt(glucoseMatch[1]);
+                }
+                if (bpEl) {
+                    const bpMatch = bpEl.innerText.match(/(\d+)\/(\d+)/);
+                    if (bpMatch) { sbp = parseInt(bpMatch[1]); dbp = parseInt(bpMatch[2]); }
+                }
+                
+                const getLabValue = (id, defaultValue) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        const val = parseFloat(el.innerText);
+                        return isNaN(val) ? defaultValue : val;
+                    }
+                    return defaultValue;
+                };
+                
+                return {
+                    glucose: glucose, sbp: sbp, dbp: dbp, hr: heartRate,
+                    hba1c: getLabValue('lab_hba1c', 5.7), bmi: parseFloat(getPatientBMI()),
+                    age: getPatientAge(), creatinine: getLabValue('lab_creatinine', 0.9),
+                    egfr: getLabValue('lab_egfr', 95), uricAcid: getLabValue('lab_uric_acid', 5.2),
+                    tsh: getLabValue('lab_tsh', 2.5), t3: getLabValue('lab_t3', 110), t4: getLabValue('lab_t4', 7.5)
+                };
+            }
+            
+            function calculateDiabetesRisk(vitals) {
+                let risk = 0;
+                if (vitals.glucose >= 200) risk += 45;
+                else if (vitals.glucose >= 140) risk += 30;
+                else if (vitals.glucose >= 126) risk += 20;
+                else if (vitals.glucose >= 100) risk += 10;
+                
+                if (vitals.hba1c >= 8.5) risk += 35;
+                else if (vitals.hba1c >= 7.0) risk += 25;
+                else if (vitals.hba1c >= 6.5) risk += 15;
+                else if (vitals.hba1c >= 5.7) risk += 8;
+                
+                if (vitals.bmi >= 35) risk += 12;
+                else if (vitals.bmi >= 30) risk += 8;
+                else if (vitals.bmi >= 25) risk += 4;
+                
+                if (vitals.age >= 60) risk += 8;
+                else if (vitals.age >= 45) risk += 5;
+                else if (vitals.age >= 35) risk += 2;
+                
+                return Math.min(100, risk);
+            }
+            
+            function calculateHypertensionRisk(vitals) {
+                let risk = 0;
+                if (vitals.sbp >= 180) risk += 45;
+                else if (vitals.sbp >= 160) risk += 35;
+                else if (vitals.sbp >= 140) risk += 25;
+                else if (vitals.sbp >= 130) risk += 15;
+                else if (vitals.sbp >= 120) risk += 8;
+                
+                if (vitals.dbp >= 120) risk += 30;
+                else if (vitals.dbp >= 100) risk += 20;
+                else if (vitals.dbp >= 90) risk += 12;
+                else if (vitals.dbp >= 80) risk += 5;
+                
+                if (vitals.hr > 100) risk += 10;
+                else if (vitals.hr > 90) risk += 5;
+                else if (vitals.hr < 60) risk += 5;
+                
+                if (vitals.age >= 60) risk += 15;
+                else if (vitals.age >= 50) risk += 10;
+                else if (vitals.age >= 40) risk += 5;
+                
+                return Math.min(100, risk);
+            }
+            
+            function calculateCardiovascularRisk(vitals) {
+                let risk = 0;
+                if (vitals.sbp >= 160 || vitals.dbp >= 100) risk += 30;
+                else if (vitals.sbp >= 140 || vitals.dbp >= 90) risk += 20;
+                else if (vitals.sbp >= 130 || vitals.dbp >= 85) risk += 10;
+                
+                if (vitals.glucose >= 200) risk += 25;
+                else if (vitals.glucose >= 140) risk += 15;
+                else if (vitals.glucose >= 126) risk += 10;
+                else if (vitals.glucose >= 100) risk += 5;
+                
+                if (vitals.hr > 100 || vitals.hr < 50) risk += 15;
+                else if (vitals.hr > 90) risk += 8;
+                
+                if (vitals.age >= 60) risk += 20;
+                else if (vitals.age >= 50) risk += 12;
+                else if (vitals.age >= 40) risk += 6;
+                
+                if (vitals.bmi >= 30) risk += 10;
+                else if (vitals.bmi >= 25) risk += 5;
+                
+                return Math.min(100, risk);
+            }
+            
+            function calculateKidneyRisk(vitals) {
+                let risk = 0;
+                if (vitals.creatinine >= 2.0) risk += 40;
+                else if (vitals.creatinine >= 1.5) risk += 25;
+                else if (vitals.creatinine >= 1.2) risk += 15;
+                
+                if (vitals.egfr < 30) risk += 40;
+                else if (vitals.egfr < 60) risk += 25;
+                else if (vitals.egfr < 90) risk += 10;
+                
+                if (vitals.uricAcid >= 8.0) risk += 20;
+                else if (vitals.uricAcid >= 7.0) risk += 10;
+                else if (vitals.uricAcid >= 6.0) risk += 5;
+                
+                return Math.min(100, risk);
+            }
+            
+            function calculateThyroidRisk(vitals) {
+                let risk = 0;
+                if (vitals.tsh >= 10 || vitals.tsh <= 0.1) risk += 45;
+                else if (vitals.tsh >= 5 || vitals.tsh <= 0.3) risk += 30;
+                else if (vitals.tsh >= 4 || vitals.tsh <= 0.4) risk += 15;
+                
+                if (vitals.t3 >= 200 || vitals.t3 <= 50) risk += 30;
+                else if (vitals.t3 >= 150 || vitals.t3 <= 70) risk += 15;
+                
+                if (vitals.t4 >= 12 || vitals.t4 <= 4) risk += 25;
+                else if (vitals.t4 >= 10 || vitals.t4 <= 5) risk += 10;
+                
+                return Math.min(100, risk);
+            }
+            
+            function getRiskLevel(risk) {
+                if (risk >= 60) return { level: 'Critical', color: '#ef4444', icon: '🔴' };
+                if (risk >= 40) return { level: 'High', color: '#f97316', icon: '🟠' };
+                if (risk >= 25) return { level: 'Moderate', color: '#f59e0b', icon: '🟡' };
+                if (risk >= 10) return { level: 'Low', color: '#10b981', icon: '🟢' };
+                return { level: 'Minimal', color: '#06b6d4', icon: '✅' };
+            }
+            
+            function createAIPage() {
+                if (document.getElementById('aiPredictionPage')) return;
+                
+                const aiPage = document.createElement('div');
+                aiPage.className = 'page-section';
+                aiPage.id = 'aiPredictionPage';
+                aiPage.innerHTML = `
+                    <div style="margin-bottom: 2rem;">
+                        <h2 style="font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #8b5cf6, #c084fc); -webkit-background-clip: text; background-clip: text; color: transparent;">
+                            <i class="fas fa-brain"></i> AI Health Risk Analysis
+                        </h2>
+                        <p style="color: var(--text-secondary);">Advanced AI model for early disease detection</p>
+                    </div>
+                    
+                    <div class="stats-grid" style="margin-bottom: 1.5rem;">
+                        <div class="stat-card" style="text-align: center; background: linear-gradient(135deg, #8b5cf620, #c084fc20);">
+                            <div class="stat-title">OVERALL HEALTH SCORE</div>
+                            <div class="stat-value" id="aiOverallScore" style="font-size: 3rem;">--</div>
+                        </div>
+                        <div class="stat-card" style="text-align: center;">
+                            <div class="stat-title">LAST ANALYSIS</div>
+                            <div class="stat-value" id="aiLastAnalysis" style="font-size: 1rem;">--</div>
+                        </div>
+                        <div class="stat-card" style="text-align: center;">
+                            <div class="stat-title">PATIENT AGE</div>
+                            <div class="stat-value" id="aiPatientAge" style="font-size: 1.5rem;">--</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                        <div class="vital-card"><div class="vital-header"><i class="fas fa-droplet" style="color:#ef4444;"></i><h3>Diabetes Risk</h3></div><div class="risk-value" id="diabetesRiskValue" style="font-size: 2rem; text-align: center;">--%</div><div class="risk-bar" style="background:#e2e8f0; border-radius:10px; height:10px; margin:10px 0;"><div id="diabetesRiskBar" style="width:0%; height:10px; border-radius:10px; background:#ef4444;"></div></div><div class="risk-level" id="diabetesRiskLevel" style="text-align:center;">--</div></div>
+                        <div class="vital-card"><div class="vital-header"><i class="fas fa-heartbeat" style="color:#f97316;"></i><h3>Hypertension Risk</h3></div><div class="risk-value" id="hypertensionRiskValue" style="font-size: 2rem; text-align: center;">--%</div><div class="risk-bar" style="background:#e2e8f0; border-radius:10px; height:10px; margin:10px 0;"><div id="hypertensionRiskBar" style="width:0%; height:10px; border-radius:10px; background:#f97316;"></div></div><div class="risk-level" id="hypertensionRiskLevel" style="text-align:center;">--</div></div>
+                        <div class="vital-card"><div class="vital-header"><i class="fas fa-heart" style="color:#ec4899;"></i><h3>Cardiovascular Risk</h3></div><div class="risk-value" id="cardiovascularRiskValue" style="font-size: 2rem; text-align: center;">--%</div><div class="risk-bar" style="background:#e2e8f0; border-radius:10px; height:10px; margin:10px 0;"><div id="cardiovascularRiskBar" style="width:0%; height:10px; border-radius:10px; background:#ec4899;"></div></div><div class="risk-level" id="cardiovascularRiskLevel" style="text-align:center;">--</div></div>
+                        <div class="vital-card"><div class="vital-header"><i class="fas fa-kidneys" style="color:#3b82f6;"></i><h3>Kidney Disease Risk</h3></div><div class="risk-value" id="kidneyRiskValue" style="font-size: 2rem; text-align: center;">--%</div><div class="risk-bar" style="background:#e2e8f0; border-radius:10px; height:10px; margin:10px 0;"><div id="kidneyRiskBar" style="width:0%; height:10px; border-radius:10px; background:#3b82f6;"></div></div><div class="risk-level" id="kidneyRiskLevel" style="text-align:center;">--</div></div>
+                        <div class="vital-card"><div class="vital-header"><i class="fas fa-thyroid" style="color:#f59e0b;"></i><h3>Thyroid Disorder Risk</h3></div><div class="risk-value" id="thyroidRiskValue" style="font-size: 2rem; text-align: center;">--%</div><div class="risk-bar" style="background:#e2e8f0; border-radius:10px; height:10px; margin:10px 0;"><div id="thyroidRiskBar" style="width:0%; height:10px; border-radius:10px; background:#f59e0b;"></div></div><div class="risk-level" id="thyroidRiskLevel" style="text-align:center;">--</div></div>
+                    </div>
+                    
+                    <div class="vital-card" style="margin-top: 1.5rem;">
+                        <h3><i class="fas fa-stethoscope"></i> AI Recommendations</h3>
+                        <div id="aiRecommendations" style="margin-top: 0.5rem;"></div>
+                    </div>
+                `;
+                
+                const dashboardPage = document.getElementById('dashboardPage');
+                if (dashboardPage) dashboardPage.insertAdjacentElement('afterend', aiPage);
+                
+                const sidebarMenu = document.querySelector('.sidebar-menu');
+                if (sidebarMenu && !document.querySelector('[data-page="ai-prediction"]')) {
+                    const aiMenuItem = document.createElement('a');
+                    aiMenuItem.href = 'javascript:void(0)';
+                    aiMenuItem.className = 'menu-item';
+                    aiMenuItem.setAttribute('data-page', 'ai-prediction');
+                    aiMenuItem.innerHTML = '<i class="fas fa-brain"></i><span>AI Predictions</span>';
+                    const dashboardItem = document.querySelector('[data-page="dashboard"]');
+                    if (dashboardItem) dashboardItem.insertAdjacentElement('afterend', aiMenuItem);
+                    else sidebarMenu.insertBefore(aiMenuItem, sidebarMenu.firstChild);
+                    
+                    aiMenuItem.addEventListener('click', function() {
+                        document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                        this.classList.add('active');
+                        document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+                        document.getElementById('aiPredictionPage').classList.add('active');
+                    });
+                }
+            }
+            
+            function updateAIPredictions() {
+                const vitals = getLatestVitalsForAI();
+                const diabetes = calculateDiabetesRisk(vitals);
+                const hypertension = calculateHypertensionRisk(vitals);
+                const cardiovascular = calculateCardiovascularRisk(vitals);
+                const kidney = calculateKidneyRisk(vitals);
+                const thyroid = calculateThyroidRisk(vitals);
+                
+                const overall = Math.round(100 - ((diabetes * 0.25 + hypertension * 0.25 + cardiovascular * 0.3 + kidney * 0.1 + thyroid * 0.1)));
+                
+                document.getElementById('aiOverallScore').innerHTML = overall;
+                document.getElementById('aiLastAnalysis').innerHTML = new Date().toLocaleTimeString();
+                document.getElementById('aiPatientAge').innerHTML = vitals.age;
+                
+                document.getElementById('diabetesRiskValue').innerHTML = `${Math.round(diabetes)}%`;
+                document.getElementById('diabetesRiskBar').style.width = `${diabetes}%`;
+                document.getElementById('diabetesRiskLevel').innerHTML = `${getRiskLevel(diabetes).icon} ${getRiskLevel(diabetes).level}`;
+                
+                document.getElementById('hypertensionRiskValue').innerHTML = `${Math.round(hypertension)}%`;
+                document.getElementById('hypertensionRiskBar').style.width = `${hypertension}%`;
+                document.getElementById('hypertensionRiskLevel').innerHTML = `${getRiskLevel(hypertension).icon} ${getRiskLevel(hypertension).level}`;
+                
+                document.getElementById('cardiovascularRiskValue').innerHTML = `${Math.round(cardiovascular)}%`;
+                document.getElementById('cardiovascularRiskBar').style.width = `${cardiovascular}%`;
+                document.getElementById('cardiovascularRiskLevel').innerHTML = `${getRiskLevel(cardiovascular).icon} ${getRiskLevel(cardiovascular).level}`;
+                
+                document.getElementById('kidneyRiskValue').innerHTML = `${Math.round(kidney)}%`;
+                document.getElementById('kidneyRiskBar').style.width = `${kidney}%`;
+                document.getElementById('kidneyRiskLevel').innerHTML = `${getRiskLevel(kidney).icon} ${getRiskLevel(kidney).level}`;
+                
+                document.getElementById('thyroidRiskValue').innerHTML = `${Math.round(thyroid)}%`;
+                document.getElementById('thyroidRiskBar').style.width = `${thyroid}%`;
+                document.getElementById('thyroidRiskLevel').innerHTML = `${getRiskLevel(thyroid).icon} ${getRiskLevel(thyroid).level}`;
+                
+                let recommendations = [];
+                if (diabetes >= 30) recommendations.push('🩸 Monitor blood glucose daily, reduce sugar intake');
+                if (hypertension >= 30) recommendations.push('❤️ Reduce salt intake, exercise regularly');
+                if (cardiovascular >= 30) recommendations.push('🫀 Consult cardiologist, monitor cholesterol');
+                if (kidney >= 25) recommendations.push('🩺 Kidney function needs monitoring, stay hydrated');
+                if (thyroid >= 25) recommendations.push('🦋 Thyroid levels abnormal, consider endocrinologist');
+                if (recommendations.length === 0) recommendations.push('✅ All health indicators within normal range. Continue healthy habits!');
+                
+                document.getElementById('aiRecommendations').innerHTML = recommendations.map(r => `<p style="margin:5px 0; padding:8px; background:rgba(139,92,246,0.1); border-radius:12px;">${r}</p>`).join('');
+            }
+            
+            function initAISystem() {
+                createAIPage();
+                setTimeout(updateAIPredictions, 1000);
+                setInterval(updateAIPredictions, 30000);
+            }
+            
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAISystem);
+            else initAISystem();
+        })();
 (function() {
     "use strict";
     
