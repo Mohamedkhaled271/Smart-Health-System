@@ -4,27 +4,6 @@
 (function() {
     "use strict";
 
-    // ==================== AUTH GUARD ====================
-    if (typeof firebase !== 'undefined') {
-        firebase.auth().onAuthStateChanged((user) => {
-            if (!user) {
-                window.location.href = 'index.html';
-                return;
-            }
-            firebase.database().ref(`users/${user.uid}/role`).once('value').then((snapshot) => {
-                const role = snapshot.val();
-                if (role !== 'patient') {
-                    if (role === 'doctor') window.location.href = 'doctor.html';
-                    else if (role === 'admin') window.location.href = 'admin.html';
-                    else window.location.href = 'index.html';
-                }
-            }).catch(() => {
-                window.location.href = 'index.html';
-            });
-        });
-    } else {
-        console.warn('Firebase not loaded, skipping auth guard');
-    }
 
     // ==================== GLOBAL VARIABLES ====================
     let mqttSimInterval;                // Interval for simulated MQTT updates
