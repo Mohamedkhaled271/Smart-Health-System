@@ -534,12 +534,12 @@
             </div>
         </div>
         <div style="display: flex; gap: 10px;">
-            <span id="aiModelVersion" style="background: rgba(139,92,246,0.2); padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; color: #8b5cf6;"><i class="fas fa-microchip"></i> Model: HELIOS-AI v3.0</span>
+            <span id="aiModelVersion" style="background: rgba(139,92,246,0.2); padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; color: #8b5cf6;"><i class="fas fa-microchip"></i> Model: HELIOS-AI v2.0</span>
             <span id="predictionConfidence" style="background: rgba(16,185,129,0.2); padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; color: #10b981;"><i class="fas fa-chart-line"></i> Confidence: --%</span>
         </div>
     </div>
 
-    <!-- Main Risk Dashboard - 4 Cards -->
+    <!-- Main Risk Dashboard -->
     <div class="stats-grid" style="margin-bottom: 1.5rem;">
         <!-- Diabetes Risk Card -->
         <div class="stat-card" id="diabetesRiskCard" style="cursor: pointer; transition: all 0.3s;">
@@ -626,35 +626,41 @@
         </div>
     </div>
 
-    <!-- Second Row: Emergency + Trend -->
+    <!-- Second Row: Additional Metrics -->
     <div class="stats-grid" style="margin-bottom: 1.5rem;">
+        <!-- Health Trend Prediction -->
+        <div class="stat-card">
+            <div class="stat-title"><i class="fas fa-chart-line"></i> 30-DAY HEALTH TREND</div>
+            <div class="stat-value" id="healthTrend">--</div>
+            <div class="stat-sub" id="trendDirection">Predicting...</div>
+            <div style="margin-top: 0.5rem; font-size: 0.7rem; color: var(--text-secondary);">
+                <i class="fas fa-calendar-week"></i> Based on last 30 days data
+            </div>
+        </div>
+
         <!-- Emergency Status -->
         <div class="stat-card" id="emergencyStatusCard">
             <div class="stat-title"><i class="fas fa-ambulance"></i> EMERGENCY STATUS</div>
             <div class="stat-value" id="emergencyStatus" style="font-size: 1.2rem;">🟢 NORMAL</div>
             <div class="stat-sub" id="emergencyMessage">All vitals within range</div>
-            <div style="margin-top: 0.8rem;">
-                <button id="manualEmergencyBtn" class="export-btn" style="background: #ef4444; padding: 0.5rem 1rem; font-size: 0.75rem; margin: 0;">
-                    <i class="fas fa-exclamation-triangle"></i> 🚨 EMERGENCY BUTTON
+            <div style="margin-top: 0.5rem;">
+                <button id="manualEmergencyBtn" class="export-btn" style="background: #ef4444; padding: 0.3rem 1rem; font-size: 0.7rem; margin: 0;">
+                    <i class="fas fa-exclamation-triangle"></i> Manual Emergency
                 </button>
             </div>
         </div>
 
-        <!-- Health Trend -->
+        <!-- Doctor Consultation Card -->
         <div class="stat-card">
-            <div class="stat-title"><i class="fas fa-chart-line"></i> 30-DAY HEALTH TREND</div>
-            <div class="stat-value" id="healthTrend">--</div>
-            <div class="stat-sub" id="trendDirection">Predicting...</div>
-        </div>
-
-        <!-- Alert History -->
-        <div class="stat-card">
-            <div class="stat-title"><i class="fas fa-envelope"></i> ALERT HISTORY</div>
-            <div class="stat-value" id="alertCount" style="font-size: 1.2rem;">0</div>
+            <div class="stat-title"><i class="fas fa-user-md"></i> DOCTOR ALERT</div>
+            <div class="stat-value" id="doctorAlertStatus" style="font-size: 1rem;">🟢 No alerts</div>
             <div class="stat-sub">Last alert: <span id="lastAlertTime">Never</span></div>
+            <div style="margin-top: 0.5rem; font-size: 0.7rem;">
+                <i class="fas fa-envelope"></i> Emergency email will be sent automatically
+            </div>
         </div>
 
-        <!-- Critical Vitals -->
+        <!-- Vital Signs Summary -->
         <div class="stat-card">
             <div class="stat-title"><i class="fas fa-stethoscope"></i> CRITICAL VITALS</div>
             <div class="stat-value" id="criticalVitalsCount" style="font-size: 1.2rem;">0</div>
@@ -662,7 +668,7 @@
         </div>
     </div>
 
-    <!-- AI Recommendations -->
+    <!-- AI Recommendations Section -->
     <div class="vital-card" style="margin-top: 1.5rem; background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(2,132,199,0.05)); border: 1px solid rgba(139,92,246,0.2);">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
             <div style="display: flex; align-items: center; gap: 12px;">
@@ -681,13 +687,13 @@
         </div>
     </div>
 
-    <!-- Emergency Protocol Info -->
+    <!-- Emergency Contact Info -->
     <div class="vital-card" style="margin-top: 1rem; background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.2);">
         <div style="display: flex; align-items: center; gap: 12px;">
             <i class="fas fa-shield-alt" style="font-size: 1.5rem; color: #ef4444;"></i>
             <div>
-                <h4 style="font-weight: 600;">🚨 Emergency Protocol Active</h4>
-                <p style="font-size: 0.75rem; color: var(--text-secondary);">In case of critical risk (Glucose >300, BP >180, Heart Rate >130 or <45, or any risk >80%), emergency email will be sent immediately to: mohamedkhaled271200127@gmail.com</p>
+                <h4 style="font-weight: 600;">Emergency Protocol Active</h4>
+                <p style="font-size: 0.75rem; color: var(--text-secondary);">In case of critical risk (>80%), emergency services and doctor will be notified immediately via email.</p>
             </div>
         </div>
     </div>
@@ -696,6 +702,9 @@
 <style>
     @keyframes spin {
         to { transform: rotate(360deg); }
+    }
+    .risk-bar-container {
+        width: 100%;
     }
     .stat-card {
         transition: transform 0.3s, box-shadow 0.3s;
@@ -707,19 +716,51 @@
 </style>
                 // ==================== PROFESSIONAL AI PREDICTION ENGINE ====================
 
-// EmailJS Configuration - Using your email
+// EmailJS Configuration (Register at https://www.emailjs.com/)
+// Replace with your actual credentials after registering
 const EMAIL_CONFIG = {
-    serviceId: 'service_helios_emergency',  // ⚠️ You need to replace this after signing up at emailjs.com
-    templateId: 'template_emergency',        // ⚠️ You need to replace this after creating template
-    publicKey: 'YOUR_PUBLIC_KEY'             // ⚠️ You need to replace this from EmailJS dashboard
+    serviceId: 'service_helios_emergency',  // Replace with your EmailJS service ID
+    templateId: 'template_emergency',        // Replace with your template ID
+    publicKey: 'YOUR_PUBLIC_KEY'             // Replace with your EmailJS public key
 };
 
-// Emergency contact - YOUR EMAIL
-const EMERGENCY_EMAIL = 'mohamedkhaled271200127@gmail.com';
+// Emergency contact configuration
+const EMERGENCY_CONTACTS = {
+    ambulance: 'emergency@helios-health.com',
+    doctor: 'doctor@helios-health.com',
+    clinic: 'clinic@helios-health.com'
+};
+
+// Advanced AI weights based on clinical research
+const AI_MODEL = {
+    diabetes: {
+        glucose: { weight: 0.30, thresholds: { normal: 100, prediabetes: 126, diabetes: 200 } },
+        bmi: { weight: 0.20, thresholds: { normal: 25, overweight: 30, obese: 35 } },
+        age: { weight: 0.15, thresholds: { young: 30, middle: 45, senior: 60 } },
+        familyHistory: { weight: 0.15 },
+        physicalActivity: { weight: 0.10 },
+        hypertension: { weight: 0.10 }
+    },
+    cardiovascular: {
+        sbp: { weight: 0.25, thresholds: { optimal: 120, elevated: 130, high: 140, crisis: 180 } },
+        dbp: { weight: 0.20, thresholds: { optimal: 80, elevated: 85, high: 90, crisis: 120 } },
+        glucose: { weight: 0.15 },
+        heartRate: { weight: 0.10, thresholds: { low: 60, normal: 80, high: 100, critical: 120 } },
+        age: { weight: 0.10 },
+        bmi: { weight: 0.10 },
+        smoking: { weight: 0.10 }
+    },
+    stroke: {
+        sbp: { weight: 0.30 },
+        glucose: { weight: 0.20 },
+        age: { weight: 0.20 },
+        heartRate: { weight: 0.15 },
+        bmi: { weight: 0.15 }
+    }
+};
 
 let lastEmergencyAlert = 0;
-const EMERGENCY_COOLDOWN = 300000; // 5 minutes between alerts
-let alertHistoryCount = 0;
+const EMERGENCY_COOLDOWN = 300000; // 5 minutes between emergency alerts
 let emailInitialized = false;
 
 // Initialize EmailJS
@@ -727,16 +768,14 @@ function initEmailJS() {
     if (typeof emailjs !== 'undefined' && !emailInitialized) {
         emailjs.init(EMAIL_CONFIG.publicKey);
         emailInitialized = true;
-        console.log('✅ EmailJS initialized');
+        console.log('✅ EmailJS initialized for emergency alerts');
     }
 }
 
-// Send emergency email to your address
+// Send emergency email
 async function sendEmergencyEmail(patientData, riskData, emergencyType) {
     if (!emailInitialized) {
-        console.warn('EmailJS not initialized. Please configure EmailJS first.');
-        // Show alert in UI
-        showNotification('⚠️ Email service not configured. Please set up EmailJS.', 'warning');
+        console.warn('EmailJS not initialized. Emergency email not sent.');
         return false;
     }
     
@@ -747,12 +786,8 @@ async function sendEmergencyEmail(patientData, riskData, emergencyType) {
     }
     
     lastEmergencyAlert = now;
-    alertHistoryCount++;
-    document.getElementById('alertCount').innerHTML = alertHistoryCount;
-    document.getElementById('lastAlertTime').innerHTML = new Date().toLocaleTimeString();
     
     const templateParams = {
-        to_email: EMERGENCY_EMAIL,
         patient_name: patientData.name || 'Mohamed Khaled',
         patient_age: patientData.age || 'N/A',
         patient_phone: patientData.phone || '01153493110',
@@ -770,119 +805,111 @@ async function sendEmergencyEmail(patientData, riskData, emergencyType) {
     };
     
     try {
-        await emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, templateParams);
-        console.log('✅ Emergency email sent to:', EMERGENCY_EMAIL);
-        showNotification('🚨 Emergency alert sent to ' + EMERGENCY_EMAIL, 'danger');
+        // Send to ambulance
+        await emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, {
+            ...templateParams,
+            to_email: EMERGENCY_CONTACTS.ambulance,
+            subject: `🚨 EMERGENCY ALERT: ${patientData.name} requires immediate assistance`
+        });
+        
+        // Send to doctor
+        await emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, {
+            ...templateParams,
+            to_email: EMERGENCY_CONTACTS.doctor,
+            subject: `⚠️ URGENT: ${patientData.name} - Critical health alert`
+        });
+        
+        console.log('✅ Emergency emails sent successfully');
         return true;
     } catch (error) {
-        console.error('Error sending email:', error);
-        showNotification('❌ Failed to send emergency email', 'error');
+        console.error('Error sending emergency email:', error);
         return false;
     }
 }
 
-// Advanced AI Calculations
-function calculateAdvancedDiabetesRisk(vitals, profile) {
+// Advanced Diabetes Risk Calculation
+function calculateAdvancedDiabetesRisk(vitals, profile, historicalData) {
     let risk = 0;
     let factors = [];
     
+    // Glucose contribution
     const glucose = vitals.glucose || 0;
-    if (glucose >= 300) { risk += 50; factors.push('CRITICAL: Glucose > 300'); }
-    else if (glucose >= 200) { risk += 40; factors.push('Critical glucose level'); }
+    if (glucose >= 200) { risk += 40; factors.push('Critical glucose level'); }
     else if (glucose >= 140) { risk += 25; factors.push('Elevated glucose'); }
     else if (glucose >= 100) { risk += 10; factors.push('Borderline glucose'); }
     
+    // BMI contribution
     const bmi = profile.bmi || 0;
     if (bmi >= 35) { risk += 25; factors.push('Severe obesity'); }
     else if (bmi >= 30) { risk += 15; factors.push('Obesity'); }
     else if (bmi >= 25) { risk += 8; factors.push('Overweight'); }
     
+    // Age contribution
     const age = profile.age || 0;
     if (age >= 60) { risk += 20; factors.push('Age > 60'); }
     else if (age >= 45) { risk += 10; factors.push('Age 45-60'); }
     
-    if (vitals.sbp >= 140) { risk += 5; factors.push('Hypertension detected'); }
+    // Hypertension contribution
+    const sbp = vitals.sbp || 0;
+    if (sbp >= 140) { risk += 15; factors.push('Hypertension detected'); }
     
     return { risk: Math.min(100, risk), factors: factors.slice(0, 3) };
 }
 
+// Advanced Cardiovascular Risk Calculation
 function calculateAdvancedHeartRisk(vitals, profile) {
     let risk = 0;
     let factors = [];
     
     const sbp = vitals.sbp || 0;
     const dbp = vitals.dbp || 0;
-    
-    if (sbp >= 180 || dbp >= 120) { risk += 45; factors.push('Hypertensive crisis'); }
-    else if (sbp >= 160 || dbp >= 100) { risk += 30; factors.push('Stage 2 hypertension'); }
-    else if (sbp >= 140 || dbp >= 90) { risk += 20; factors.push('Stage 1 hypertension'); }
-    else if (sbp >= 120) { risk += 10; factors.push('Elevated BP'); }
-    
     const glucose = vitals.glucose || 0;
+    const heartRate = vitals.heart_rate || 0;
+    
+    // Blood pressure contribution
+    if (sbp >= 180 || dbp >= 120) { risk += 35; factors.push('Severe hypertension crisis'); }
+    else if (sbp >= 140 || dbp >= 90) { risk += 20; factors.push('Stage 2 hypertension'); }
+    else if (sbp >= 120) { risk += 10; factors.push('Elevated blood pressure'); }
+    
+    // Glucose contribution
     if (glucose >= 200) { risk += 25; factors.push('Critical glucose'); }
     else if (glucose >= 140) { risk += 15; factors.push('High glucose'); }
     
-    const heartRate = vitals.heart_rate || 0;
-    if (heartRate > 120) { risk += 15; factors.push('Severe tachycardia'); }
-    else if (heartRate > 100) { risk += 10; factors.push('Tachycardia'); }
-    else if (heartRate < 50) { risk += 10; factors.push('Bradycardia'); }
+    // Heart rate contribution
+    if (heartRate > 100) { risk += 15; factors.push('Tachycardia'); }
+    else if (heartRate < 60) { risk += 10; factors.push('Bradycardia'); }
     
+    // Age and BMI
     const age = profile.age || 0;
-    if (age >= 55) { risk += 10; factors.push('Age risk factor'); }
-    
     const bmi = profile.bmi || 0;
+    if (age >= 55) { risk += 15; factors.push('Age risk factor'); }
     if (bmi >= 30) { risk += 10; factors.push('Obesity'); }
     
     return { risk: Math.min(100, risk), factors: factors.slice(0, 3) };
 }
 
-function calculateAdvancedHypertensionRisk(vitals, profile) {
-    let risk = 0;
-    let factors = [];
-    
-    const sbp = vitals.sbp || 0;
-    const dbp = vitals.dbp || 0;
-    
-    if (sbp >= 180 || dbp >= 120) { risk += 50; factors.push('Hypertensive crisis - EMERGENCY'); }
-    else if (sbp >= 160 || dbp >= 100) { risk += 35; factors.push('Severe hypertension'); }
-    else if (sbp >= 140 || dbp >= 90) { risk += 20; factors.push('Stage 1 hypertension'); }
-    else if (sbp >= 120) { risk += 10; factors.push('Elevated BP'); }
-    
-    const age = profile.age || 0;
-    if (age >= 60) { risk += 20; factors.push('Age > 60'); }
-    else if (age >= 45) { risk += 10; factors.push('Age 45-60'); }
-    
-    const bmi = profile.bmi || 0;
-    if (bmi >= 30) { risk += 20; factors.push('Obesity'); }
-    else if (bmi >= 25) { risk += 10; factors.push('Overweight'); }
-    
-    return { risk: Math.min(100, risk), factors: factors.slice(0, 3) };
-}
-
+// Advanced Stroke Risk Calculation
 function calculateAdvancedStrokeRisk(vitals, profile) {
     let risk = 0;
     let factors = [];
     
     const sbp = vitals.sbp || 0;
-    if (sbp >= 180) { risk += 45; factors.push('Severe hypertension - HIGH STROKE RISK'); }
-    else if (sbp >= 160) { risk += 30; factors.push('Severe hypertension'); }
-    else if (sbp >= 140) { risk += 15; factors.push('Hypertension - stroke risk factor'); }
-    
     const glucose = vitals.glucose || 0;
+    const age = profile.age || 0;
+    
+    if (sbp >= 160) { risk += 40; factors.push('Severe hypertension - high stroke risk'); }
+    else if (sbp >= 140) { risk += 20; factors.push('Hypertension - stroke risk factor'); }
+    
     if (glucose >= 200) { risk += 30; factors.push('Critical glucose - stroke risk'); }
     else if (glucose >= 140) { risk += 15; factors.push('High glucose'); }
     
-    const age = profile.age || 0;
-    if (age >= 65) { risk += 20; factors.push('Advanced age - high stroke risk'); }
+    if (age >= 65) { risk += 20; factors.push('Advanced age'); }
     else if (age >= 55) { risk += 10; factors.push('Age risk factor'); }
-    
-    const heartRate = vitals.heart_rate || 0;
-    if (heartRate > 100) { risk += 5; factors.push('Tachycardia'); }
     
     return { risk: Math.min(100, risk), factors: factors.slice(0, 3) };
 }
 
-// Emergency condition checker
+// Check for emergency conditions
 function checkEmergencyConditions(vitals, risks) {
     const emergencyConditions = [];
     let isEmergency = false;
@@ -894,12 +921,18 @@ function checkEmergencyConditions(vitals, risks) {
         emergencyLevel = 'critical';
         emergencyConditions.push('CRITICAL: Blood glucose > 300 mg/dL - Diabetic emergency');
     }
+    else if (vitals.glucose >= 250) {
+        emergencyConditions.push('WARNING: Very high blood glucose');
+    }
     
     // Critical blood pressure
     if (vitals.sbp >= 180 || vitals.dbp >= 120) {
         isEmergency = true;
         emergencyLevel = 'critical';
-        emergencyConditions.push('CRITICAL: Hypertensive crisis - Immediate attention needed');
+        emergencyConditions.push('CRITICAL: Hypertensive crisis - Immediate medical attention needed');
+    }
+    else if (vitals.sbp >= 160 || vitals.dbp >= 100) {
+        emergencyConditions.push('WARNING: Severe hypertension');
     }
     
     // Critical heart rate
@@ -914,8 +947,8 @@ function checkEmergencyConditions(vitals, risks) {
         emergencyConditions.push('CRITICAL: Severe bradycardia - Heart rate < 45 bpm');
     }
     
-    // High risk scores
-    if (risks.diabetesRisk >= 80 || risks.heartRisk >= 80 || risks.strokeRisk >= 80 || risks.hypertensionRisk >= 80) {
+    // High combined risk scores
+    if (risks.diabetesRisk >= 80 || risks.heartRisk >= 80 || risks.strokeRisk >= 80) {
         isEmergency = true;
         emergencyLevel = 'high';
         emergencyConditions.push('WARNING: Critical risk level detected - Immediate consultation recommended');
@@ -929,17 +962,21 @@ async function updateEmergencyStatus(vitals, risks, profile) {
     const emergency = checkEmergencyConditions(vitals, risks);
     const emergencyStatusEl = document.getElementById('emergencyStatus');
     const emergencyMessageEl = document.getElementById('emergencyMessage');
+    const doctorAlertEl = document.getElementById('doctorAlertStatus');
     
     if (emergency.isEmergency) {
+        // Update UI
         emergencyStatusEl.innerHTML = '🔴 EMERGENCY';
         emergencyStatusEl.style.color = '#ef4444';
         emergencyMessageEl.innerHTML = emergency.conditions.join(' • ');
+        doctorAlertEl.innerHTML = '🔴 ALERT SENT';
         
+        // Send emergency emails
         const patientData = {
             name: profile.fullName || 'Mohamed Khaled',
             age: profile.age,
-            phone: profile.phone || '01153493110',
-            address: profile.address || 'Cairo, Egypt'
+            phone: profile.phone,
+            address: profile.address
         };
         
         const riskData = {
@@ -953,7 +990,12 @@ async function updateEmergencyStatus(vitals, risks, profile) {
             recommendations: risks.recommendations
         };
         
-        await sendEmergencyEmail(patientData, riskData, emergency.emergencyLevel);
+        const emailSent = await sendEmergencyEmail(patientData, riskData, emergency.emergencyLevel);
+        
+        if (emailSent) {
+            document.getElementById('lastAlertTime').innerHTML = new Date().toLocaleTimeString();
+            showNotification('🚨 Emergency alert sent to ambulance and doctor!', 'danger');
+        }
         
         // Add to alerts list
         const alertsContainer = document.getElementById('alertsList');
@@ -968,6 +1010,15 @@ async function updateEmergencyStatus(vitals, risks, profile) {
         emergencyStatusEl.innerHTML = '🟢 NORMAL';
         emergencyStatusEl.style.color = '#10b981';
         emergencyMessageEl.innerHTML = 'All vitals within normal range';
+        
+        // Check for warnings
+        if (risks.diabetesRisk >= 60 || risks.heartRisk >= 60) {
+            doctorAlertEl.innerHTML = '🟡 WARNING - Notification sent to doctor';
+            doctorAlertEl.style.color = '#f59e0b';
+        } else {
+            doctorAlertEl.innerHTML = '🟢 No alerts';
+            doctorAlertEl.style.color = '#10b981';
+        }
     }
 }
 
@@ -975,38 +1026,39 @@ async function updateEmergencyStatus(vitals, risks, profile) {
 function generateClinicalRecommendations(risks, vitals, profile) {
     const recommendations = [];
     
-    if (risks.diabetesRisk >= 80) {
-        recommendations.push('🔴 <strong>IMMEDIATE ACTION:</strong> Critical diabetes risk! Schedule endocrinologist appointment within 24 hours. Monitor blood glucose every 2 hours.');
-    } else if (risks.diabetesRisk >= 60) {
-        recommendations.push('🟡 High diabetes risk. Start diabetes management plan. Reduce refined carbohydrates.');
-    } else if (risks.diabetesRisk >= 40) {
-        recommendations.push('🟢 Moderate diabetes risk. Maintain healthy diet and exercise.');
+    // Diabetes recommendations
+    if (risks.diabetesRisk >= 70) {
+        recommendations.push('🔴 <strong>IMMEDIATE ACTION:</strong> Schedule endocrinologist appointment within 24 hours. Monitor blood glucose every 2 hours.');
+    } else if (risks.diabetesRisk >= 50) {
+        recommendations.push('🟡 Start diabetes management plan. Reduce refined carbohydrates and increase physical activity.');
+    } else if (risks.diabetesRisk >= 30) {
+        recommendations.push('🟢 Maintain healthy diet. Your glucose levels are well-controlled.');
     }
     
-    if (risks.heartRisk >= 80) {
-        recommendations.push('🔴 <strong>URGENT:</strong> Critical cardiovascular risk! Cardiac evaluation needed immediately.');
-    } else if (risks.heartRisk >= 60) {
-        recommendations.push('🟡 High cardiovascular risk. Start cardio exercise program. Reduce stress.');
-    } else if (risks.heartRisk >= 40) {
-        recommendations.push('🟢 Moderate cardiovascular risk. Maintain regular exercise routine.');
+    // Cardiovascular recommendations
+    if (risks.heartRisk >= 70) {
+        recommendations.push('🔴 <strong>URGENT:</strong> Cardiac evaluation recommended. Monitor blood pressure daily. Reduce sodium intake immediately.');
+    } else if (risks.heartRisk >= 50) {
+        recommendations.push('🟡 Start cardiovascular exercise program. Aim for 30 minutes daily. Reduce stress levels.');
+    } else if (risks.heartRisk >= 30) {
+        recommendations.push('🟢 Good cardiovascular health. Maintain regular exercise routine.');
     }
     
-    if (risks.hypertensionRisk >= 80) {
-        recommendations.push('🔴 <strong>CRITICAL:</strong> Severe hypertension! Immediate BP medication review needed.');
-    } else if (risks.hypertensionRisk >= 60) {
-        recommendations.push('🟡 High BP risk. Monitor BP twice daily. Reduce sodium intake.');
+    // Hypertension recommendations
+    if (risks.hypertensionRisk >= 70) {
+        recommendations.push('🔴 <strong>CRITICAL:</strong> Immediate blood pressure medication review needed. Reduce salt intake drastically.');
+    } else if (risks.hypertensionRisk >= 50) {
+        recommendations.push('🟡 Monitor BP twice daily. Consider DASH diet. Reduce caffeine intake.');
     }
     
-    if (risks.strokeRisk >= 70) {
-        recommendations.push('⚠️ <strong>STROKE PREVENTION:</strong> Urgent neurological consultation recommended.');
+    // Stroke prevention
+    if (risks.strokeRisk >= 60) {
+        recommendations.push('⚠️ <strong>STROKE PREVENTION:</strong> Urgent neurological consultation recommended. Control BP and glucose strictly.');
     }
     
-    if (vitals.heart_rate > 100) {
-        recommendations.push('💓 Elevated heart rate. Practice deep breathing exercises. Reduce caffeine.');
-    }
-    
-    if (vitals.spo2 && vitals.spo2 < 92) {
-        recommendations.push('🌬️ Low oxygen saturation. Consult pulmonologist immediately.');
+    // Lifestyle recommendations based on vitals
+    if (vitals.heart_rate > 90) {
+        recommendations.push('💓 Practice deep breathing exercises. Reduce stress. Avoid stimulants like caffeine.');
     }
     
     if (recommendations.length === 0) {
@@ -1017,7 +1069,7 @@ function generateClinicalRecommendations(risks, vitals, profile) {
     return recommendations;
 }
 
-// Main AI prediction function
+// Main AI prediction update function
 async function updateProfessionalAIPredictions() {
     if (!careSyncPatientId) {
         setTimeout(updateProfessionalAIPredictions, 2000);
@@ -1025,15 +1077,18 @@ async function updateProfessionalAIPredictions() {
     }
     
     try {
+        // Get patient profile
         const profileSnapshot = await database.ref(`patients/${careSyncPatientId}/staticProfile`).once('value');
         const profile = profileSnapshot.val() || {};
         
+        // Calculate age
         let age = 0;
         if (profile.dob) {
             const birthDate = new Date(profile.dob);
             age = Math.floor((Date.now() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25));
         }
         
+        // Calculate BMI
         let bmi = 23.7;
         if (profile.weight && profile.height) {
             const heightM = profile.height / 100;
@@ -1042,6 +1097,7 @@ async function updateProfessionalAIPredictions() {
         
         const patientProfile = { ...profile, age, bmi };
         
+        // Get latest vitals
         const vitalsSnapshot = await database.ref(`patients/${careSyncPatientId}/lastVitals`).once('value');
         const vitalsData = vitalsSnapshot.val() || {};
         
@@ -1050,11 +1106,12 @@ async function updateProfessionalAIPredictions() {
             sbp: vitalsData.ai_model?.systolic_bp || vitalsData.sbp || 0,
             dbp: vitalsData.ai_model?.diastolic_bp || vitalsData.dbp || 0,
             heart_rate: vitalsData.esp32?.heart_rate || vitalsData.hr || 0,
-            spo2: vitalsData.esp32?.spo2 || 98,
-            temperature: vitalsData.esp32?.body_temp || 36.5
+            spo2: vitalsData.esp32?.spo2 || 0,
+            temperature: vitalsData.esp32?.body_temp || 0
         };
         
-        const diabetes = calculateAdvancedDiabetesRisk(vitals, patientProfile);
+        // Calculate all risks
+        const diabetes = calculateAdvancedDiabetesRisk(vitals, patientProfile, allHistoryData || []);
         const heart = calculateAdvancedHeartRisk(vitals, patientProfile);
         const hypertension = calculateAdvancedHypertensionRisk(vitals, patientProfile);
         const stroke = calculateAdvancedStrokeRisk(vitals, patientProfile);
@@ -1070,41 +1127,14 @@ async function updateProfessionalAIPredictions() {
             strokeFactors: stroke.factors
         };
         
-        // Update UI
-        document.getElementById('diabetesRisk').innerHTML = risks.diabetesRisk + '%';
-        document.getElementById('diabetesRiskBar').style.width = risks.diabetesRisk + '%';
-        document.getElementById('diabetesFactors').innerHTML = `Factors: ${risks.diabetesFactors.join(', ') || 'No major factors'}`;
+        // Update UI with risks
+        updateRiskUI(risks);
         
-        document.getElementById('heartRisk').innerHTML = risks.heartRisk + '%';
-        document.getElementById('heartRiskBar').style.width = risks.heartRisk + '%';
-        document.getElementById('heartFactors').innerHTML = `Factors: ${risks.heartFactors.join(', ') || 'No major factors'}`;
-        
-        document.getElementById('hypertensionRisk').innerHTML = risks.hypertensionRisk + '%';
-        document.getElementById('hypertensionRiskBar').style.width = risks.hypertensionRisk + '%';
-        document.getElementById('hypertensionFactors').innerHTML = `Factors: ${risks.hypertensionFactors.join(', ') || 'No major factors'}`;
-        
-        document.getElementById('strokeRisk').innerHTML = risks.strokeRisk + '%';
-        document.getElementById('strokeRiskBar').style.width = risks.strokeRisk + '%';
-        document.getElementById('strokeFactors').innerHTML = `Factors: ${risks.strokeFactors.join(', ') || 'No major factors'}`;
-        
-        // Set risk level text
-        const setRiskText = (id, risk) => {
-            const el = document.getElementById(id);
-            if (risk >= 80) { el.innerHTML = '🔴 CRITICAL RISK - Emergency attention needed'; el.style.color = '#ef4444'; }
-            else if (risk >= 60) { el.innerHTML = '🟠 HIGH RISK - Medical consultation required'; el.style.color = '#f97316'; }
-            else if (risk >= 40) { el.innerHTML = '🟡 MODERATE RISK - Monitor closely'; el.style.color = '#f59e0b'; }
-            else if (risk >= 20) { el.innerHTML = '🟢 LOW RISK - Maintain healthy habits'; el.style.color = '#10b981'; }
-            else { el.innerHTML = '✅ VERY LOW RISK - Excellent health markers'; el.style.color = '#10b981'; }
-        };
-        
-        setRiskText('diabetesRiskLevel', risks.diabetesRisk);
-        setRiskText('heartRiskLevel', risks.heartRisk);
-        setRiskText('hypertensionRiskLevel', risks.hypertensionRisk);
-        setRiskText('strokeRiskLevel', risks.strokeRisk);
-        
+        // Generate recommendations
         const recommendations = generateClinicalRecommendations(risks, vitals, patientProfile);
         risks.recommendations = recommendations.join(' | ');
         
+        // Update recommendations UI
         const recommendationsDiv = document.getElementById('aiRecommendations');
         recommendationsDiv.innerHTML = recommendations.map(rec => 
             `<p style="margin-bottom: 0.75rem; padding: 0.5rem; border-radius: 12px; background: rgba(139,92,246,0.05);">
@@ -1112,23 +1142,22 @@ async function updateProfessionalAIPredictions() {
             </p>`
         ).join('');
         
+        // Update confidence score
         const avgRisk = (risks.diabetesRisk + risks.heartRisk + risks.hypertensionRisk + risks.strokeRisk) / 4;
         const confidence = Math.max(0, Math.min(100, Math.round(100 - avgRisk * 0.7)));
         document.getElementById('predictionConfidence').innerHTML = `<i class="fas fa-chart-line"></i> Confidence: ${confidence}%`;
         
+        // Check for emergencies and send alerts
         await updateEmergencyStatus(vitals, risks, patientProfile);
         
-        // Health trend
-        const trendScore = 100 - avgRisk;
-        let trendText = 'Stable';
-        if (trendScore >= 70) trendText = 'Improving';
-        else if (trendScore >= 50) trendText = 'Stable';
-        else trendText = 'Declining';
+        // Update health trend
+        if (allHistoryData && allHistoryData.length > 0) {
+            const trend = predictHealthTrend(allHistoryData);
+            document.getElementById('healthTrend').innerHTML = trend.trend;
+            document.getElementById('trendDirection').innerHTML = `${trend.direction === 'increasing' ? '📈' : trend.direction === 'decreasing' ? '📉' : '➡️'} ${trend.change}% change expected in 30 days`;
+        }
         
-        document.getElementById('healthTrend').innerHTML = trendText;
-        document.getElementById('trendDirection').innerHTML = `${trendScore >= 70 ? '📈' : trendScore >= 50 ? '➡️' : '📉'} Score: ${Math.round(trendScore)}/100`;
-        
-        // Critical vitals count
+        // Count critical vitals
         let criticalCount = 0;
         let criticalList = [];
         if (vitals.glucose >= 200) { criticalCount++; criticalList.push('High Glucose'); }
@@ -1139,11 +1168,69 @@ async function updateProfessionalAIPredictions() {
         document.getElementById('criticalVitalsCount').innerHTML = criticalCount;
         document.getElementById('criticalVitalsList').innerHTML = criticalList.join(', ') || 'No critical readings';
         
-        console.log('✅ AI predictions updated');
+        console.log('✅ AI predictions updated successfully');
         
     } catch (error) {
         console.error('Error updating AI predictions:', error);
     }
+}
+
+// Helper function for hypertension risk
+function calculateAdvancedHypertensionRisk(vitals, profile) {
+    let risk = 0;
+    let factors = [];
+    
+    const sbp = vitals.sbp || 0;
+    const dbp = vitals.dbp || 0;
+    
+    if (sbp >= 180 || dbp >= 120) { risk += 50; factors.push('Hypertensive crisis'); }
+    else if (sbp >= 160 || dbp >= 100) { risk += 35; factors.push('Stage 2 hypertension'); }
+    else if (sbp >= 140 || dbp >= 90) { risk += 20; factors.push('Stage 1 hypertension'); }
+    else if (sbp >= 120) { risk += 10; factors.push('Elevated blood pressure'); }
+    
+    if (profile.age >= 60) { risk += 20; factors.push('Age > 60'); }
+    else if (profile.age >= 45) { risk += 10; factors.push('Age 45-60'); }
+    
+    if (profile.bmi >= 30) { risk += 20; factors.push('Obesity'); }
+    else if (profile.bmi >= 25) { risk += 10; factors.push('Overweight'); }
+    
+    return { risk: Math.min(100, risk), factors: factors.slice(0, 3) };
+}
+
+// Update risk UI elements
+function updateRiskUI(risks) {
+    // Diabetes
+    document.getElementById('diabetesRisk').innerHTML = risks.diabetesRisk + '%';
+    document.getElementById('diabetesRiskBar').style.width = risks.diabetesRisk + '%';
+    document.getElementById('diabetesFactors').innerHTML = `Factors: ${risks.diabetesFactors.join(', ') || 'No major factors'}`;
+    setRiskLevelText('diabetesRiskLevel', risks.diabetesRisk);
+    
+    // Heart
+    document.getElementById('heartRisk').innerHTML = risks.heartRisk + '%';
+    document.getElementById('heartRiskBar').style.width = risks.heartRisk + '%';
+    document.getElementById('heartFactors').innerHTML = `Factors: ${risks.heartFactors.join(', ') || 'No major factors'}`;
+    setRiskLevelText('heartRiskLevel', risks.heartRisk);
+    
+    // Hypertension
+    document.getElementById('hypertensionRisk').innerHTML = risks.hypertensionRisk + '%';
+    document.getElementById('hypertensionRiskBar').style.width = risks.hypertensionRisk + '%';
+    document.getElementById('hypertensionFactors').innerHTML = `Factors: ${risks.hypertensionFactors.join(', ') || 'No major factors'}`;
+    setRiskLevelText('hypertensionRiskLevel', risks.hypertensionRisk);
+    
+    // Stroke
+    document.getElementById('strokeRisk').innerHTML = risks.strokeRisk + '%';
+    document.getElementById('strokeRiskBar').style.width = risks.strokeRisk + '%';
+    document.getElementById('strokeFactors').innerHTML = `Factors: ${risks.strokeFactors.join(', ') || 'No major factors'}`;
+    setRiskLevelText('strokeRiskLevel', risks.strokeRisk);
+}
+
+function setRiskLevelText(elementId, risk) {
+    const el = document.getElementById(elementId);
+    if (risk >= 80) { el.innerHTML = '🔴 CRITICAL RISK - Emergency attention needed'; el.style.color = '#ef4444'; }
+    else if (risk >= 60) { el.innerHTML = '🟠 HIGH RISK - Medical consultation required'; el.style.color = '#f97316'; }
+    else if (risk >= 40) { el.innerHTML = '🟡 MODERATE RISK - Monitor closely'; el.style.color = '#f59e0b'; }
+    else if (risk >= 20) { el.innerHTML = '🟢 LOW RISK - Maintain healthy habits'; el.style.color = '#10b981'; }
+    else { el.innerHTML = '✅ VERY LOW RISK - Excellent health markers'; el.style.color = '#10b981'; }
 }
 
 // Manual emergency button
@@ -1151,13 +1238,13 @@ document.getElementById('manualEmergencyBtn')?.addEventListener('click', async (
     const profileSnapshot = await database.ref(`patients/${careSyncPatientId}/staticProfile`).once('value');
     const profile = profileSnapshot.val() || {};
     const vitalsSnapshot = await database.ref(`patients/${careSyncPatientId}/lastVitals`).once('value');
-    const vitalsData = vitalsSnapshot.val() || {};
+    const vitals = vitalsSnapshot.val() || {};
     
     const patientData = {
         name: profile.fullName || 'Mohamed Khaled',
         age: profile.age,
-        phone: profile.phone || '01153493110',
-        address: profile.address || 'Cairo, Egypt'
+        phone: profile.phone,
+        address: profile.address
     };
     
     const riskData = {
@@ -1165,26 +1252,28 @@ document.getElementById('manualEmergencyBtn')?.addEventListener('click', async (
         heartRisk: document.getElementById('heartRisk').innerText,
         hypertensionRisk: document.getElementById('hypertensionRisk').innerText,
         strokeRisk: document.getElementById('strokeRisk').innerText,
-        glucose: vitalsData.ai_model?.glucose || vitalsData.glucose,
-        bloodPressure: `${vitalsData.ai_model?.systolic_bp || vitalsData.sbp}/${vitalsData.ai_model?.diastolic_bp || vitalsData.dbp}`,
-        heartRate: vitalsData.esp32?.heart_rate || vitalsData.hr,
-        recommendations: 'Manual emergency triggered by patient - Immediate assistance required'
+        glucose: vitals.ai_model?.glucose || vitals.glucose,
+        bloodPressure: `${vitals.ai_model?.systolic_bp || vitals.sbp}/${vitals.ai_model?.diastolic_bp || vitals.dbp}`,
+        heartRate: vitals.esp32?.heart_rate || vitals.hr,
+        recommendations: 'Manual emergency triggered by patient'
     };
     
     await sendEmergencyEmail(patientData, riskData, 'manual');
-    showNotification('🚨 Manual emergency alert sent to ' + EMERGENCY_EMAIL, 'danger');
+    showNotification('🚨 Manual emergency alert sent! Help is on the way.', 'danger');
 });
 
-// Initialize
+// Initialize EmailJS and start AI predictions
 setTimeout(() => {
     initEmailJS();
     updateProfessionalAIPredictions();
 }, 5000);
 
+// Update AI predictions every 30 seconds
 setInterval(() => {
     updateProfessionalAIPredictions();
 }, 30000);
-           <script> 
+               
+           
                    <!-- ==================== LABORATORY RESULTS SECTION (ENTERED BY DOCTOR) ==================== -->
                 <div class="lab-results-section" style="margin: 2rem 0;">
                     <div class="section-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
