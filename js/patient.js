@@ -824,37 +824,6 @@ document.getElementById('exportBtn')?.addEventListener('click', function() {
         showNotification(`Settings saved: Email ${email}, Language ${lang}`);
     });
 
-    // ==================== LOGOUT BUTTON (FIXED) ====================
-(function() {
-    const logoutBtn = document.getElementById('logoutSidebarBtn');
-    
-    if (logoutBtn) {
-        const newLogoutBtn = logoutBtn.cloneNode(true);
-        logoutBtn.parentNode.replaceChild(newLogoutBtn, logoutBtn);
-        
-        newLogoutBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            if (confirm('⚠️ Are you sure you want to logout?')) {
-                localStorage.clear();
-                sessionStorage.clear();
-                
-                if (typeof firebase !== 'undefined' && firebase.auth) {
-                    firebase.auth().signOut()
-                        .then(function() {
-                            window.location.replace('index.html');
-                        })
-                        .catch(function(error) {
-                            window.location.replace('index.html');
-                        });
-                } else {
-                    window.location.replace('index.html');
-                }
-            }
-        });
-    }
-})();
 
     // ==================== CLEANUP ====================
     window.addEventListener('beforeunload', () => {
