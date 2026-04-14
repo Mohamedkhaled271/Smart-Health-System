@@ -622,13 +622,14 @@
     }
     
     // تحويل القيم في حقول الإدخال (inputs)
-    function convertInputNumbers() {
-        document.querySelectorAll('input[type="number"], input[type="text"]').forEach(input => {
-            if (input.value && input.value.match(/[٠-٩]/)) {
-                input.value = toEnglishNumbers(input.value);
-            }
-        });
-    }
+function convertInputNumbers() {
+    // تحويل جميع حقول الإدخال
+    document.querySelectorAll('input').forEach(input => {
+        if (input.value && input.value.match(/[٠-٩]/)) {
+            input.value = toEnglishNumbers(input.value);
+        }
+    });
+}
     
     // تحويل النصوص المعروضة (preview)
     function convertDisplayNumbers() {
