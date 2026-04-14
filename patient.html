@@ -1987,7 +1987,7 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
         });
         if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
 
-        // ========== EXPORT COMPREHENSIVE MEDICAL REPORT (PROFESSIONAL) ==========
+        // ========== EXPORT COMPREHENSIVE MEDICAL REPORT (COMPLETE) ==========
 document.getElementById('exportBtn')?.addEventListener('click', async () => {
     try {
         const btn = document.getElementById('exportBtn');
@@ -1999,34 +1999,26 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         let yPos = 25;
         
-        // دالة لتنسيق التاريخ بشكل صحيح
+        // دالة لتنظيف النص واستخراج الرقم فقط
+        function getNumber(value) {
+            if (!value || value === '--') return '--';
+            const match = value.toString().match(/(\d+\.?\d*)/);
+            return match ? match[1] : '--';
+        }
+        
+        // دالة لتنسيق التاريخ
         function formatDate(dateStr) {
             if (!dateStr || dateStr === 'Never' || dateStr === '--') return 'Not recorded';
             try {
-                // تنظيف النص من أي رموز غريبة
                 let cleanStr = dateStr.replace(/[^\d\/\-]/g, '');
-                if (cleanStr.match(/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/)) {
-                    let parts = cleanStr.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-                    if (parts) {
-                        return `${parts[1].padStart(2,'0')}/${parts[2].padStart(2,'0')}/${parts[3]}`;
-                    }
+                let parts = cleanStr.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+                if (parts) {
+                    return `${parts[1].padStart(2,'0')}/${parts[2].padStart(2,'0')}/${parts[3]}`;
                 }
                 return dateStr;
             } catch(e) {
                 return 'Not recorded';
             }
-        }
-        
-        // تنظيف النص من الرموز الغريبة
-        function cleanText(text) {
-            if (!text) return '';
-            // إزالة الرموز الغريبة مثل Ø=ÜÊ وغيرها
-            let cleaned = text.replace(/[^\x20-\x7E\n\r]/g, '');
-            cleaned = cleaned.replace(/Ø[=ÜÊËŠàáâãäåæçèéêëìíîï]/g, '');
-            cleaned = cleaned.replace(/[^\w\s\.\,\:\;\-\/\*\(\)]/g, '');
-            // إصلاح المسافات الزائدة
-            cleaned = cleaned.replace(/\s+/g, ' ');
-            return cleaned.trim();
         }
         
         // ========== HEADER ==========
@@ -2052,10 +2044,9 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         
         // ========== 1. PATIENT INFORMATION ==========
         doc.setFillColor(240, 248, 255);
-        doc.rect(15, yPos, 180, 42, 'F');
+        doc.rect(15, yPos, 180, 38, 'F');
         doc.setDrawColor(2, 132, 199);
-        doc.setLineWidth(0.5);
-        doc.rect(15, yPos, 180, 42);
+        doc.rect(15, yPos, 180, 38);
         
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
@@ -2071,12 +2062,12 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         const patientDob = document.getElementById('profileDob')?.innerText || '15 March 1985';
         const patientPhone = document.getElementById('profilePhone')?.innerText || 'Not provided';
         
-        doc.text(`Name: ${cleanText(patientName)}`, 20, yPos + 20);
-        doc.text(`Patient ID: ${cleanText(patientId)}`, 20, yPos + 30);
-        doc.text(`Date of Birth: ${cleanText(patientDob)}`, 20, yPos + 40);
-        doc.text(`Phone: ${cleanText(patientPhone)}`, 120, yPos + 25);
+        doc.text(`Name: ${patientName}`, 20, yPos + 20);
+        doc.text(`Patient ID: ${patientId}`, 20, yPos + 30);
+        doc.text(`DOB: ${patientDob}`, 120, yPos + 20);
+        doc.text(`Phone: ${patientPhone}`, 120, yPos + 30);
         
-        yPos += 52;
+        yPos += 48;
         
         // ========== 2. CURRENT VITAL SIGNS ==========
         doc.setFillColor(255, 250, 240);
@@ -2093,24 +2084,19 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         
-        let heartRate = document.getElementById('heartValue')?.innerText || '-- bpm';
-        let spo2 = document.getElementById('spo2Value')?.innerText || '-- %';
-        let temp = document.getElementById('tempValue')?.innerText || '-- °C';
-        let bp = document.getElementById('bpValue')?.innerText || '--/-- mmHg';
-        let glucose = document.getElementById('glucoseValue')?.innerText || '-- mg/dL';
+        let heartRate = document.getElementById('heartValue')?.innerText || '--';
+        let spo2 = document.getElementById('spo2Value')?.innerText || '--';
+        let temp = document.getElementById('tempValue')?.innerText || '--';
+        let bp = document.getElementById('bpValue')?.innerText || '--/--';
+        let glucose = document.getElementById('glucoseValue')?.innerText || '--';
         let healthScore = document.getElementById('healthScore')?.innerText || '--';
         
-        // تنظيف القيم من الأرقام الزائدة
-        heartRate = heartRate.replace(/[^0-9]/g, '') + ' bpm';
-        spo2 = spo2.replace(/[^0-9]/g, '') + ' %';
-        temp = temp.replace(/[^0-9\.]/g, '') + ' °C';
-        
-        doc.text(`Heart Rate: ${heartRate}`, 20, yPos + 22);
-        doc.text(`Oxygen Saturation: ${spo2}`, 20, yPos + 34);
-        doc.text(`Body Temperature: ${temp}`, 20, yPos + 46);
-        doc.text(`Blood Pressure: ${cleanText(bp)}`, 120, yPos + 22);
-        doc.text(`Blood Glucose: ${cleanText(glucose)}`, 120, yPos + 34);
-        doc.text(`Health Score: ${cleanText(healthScore)}/100`, 120, yPos + 46);
+        doc.text(`Heart Rate: ${getNumber(heartRate)} bpm`, 20, yPos + 22);
+        doc.text(`Oxygen Saturation: ${getNumber(spo2)} %`, 20, yPos + 34);
+        doc.text(`Body Temperature: ${getNumber(temp)} °C`, 20, yPos + 46);
+        doc.text(`Blood Pressure: ${bp}`, 120, yPos + 22);
+        doc.text(`Blood Glucose: ${getNumber(glucose)} mg/dL`, 120, yPos + 34);
+        doc.text(`Health Score: ${getNumber(healthScore)}/100`, 120, yPos + 46);
         
         yPos += 65;
         
@@ -2129,16 +2115,13 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         
-        let roomTemp = document.getElementById('roomTempValue')?.innerText || '-- °C';
-        let humidity = document.getElementById('humidityValue')?.innerText || '-- %';
-        let motion = document.getElementById('motionValue')?.innerText || '-- m/s²';
+        let roomTemp = document.getElementById('roomTempValue')?.innerText || '--';
+        let humidity = document.getElementById('humidityValue')?.innerText || '--';
+        let motion = document.getElementById('motionValue')?.innerText || '--';
         
-        roomTemp = roomTemp.replace(/[^0-9\.]/g, '') + ' °C';
-        humidity = humidity.replace(/[^0-9\.]/g, '') + ' %';
-        
-        doc.text(`Room Temperature: ${roomTemp}`, 20, yPos + 22);
-        doc.text(`Humidity: ${humidity}`, 20, yPos + 32);
-        doc.text(`Motion Index: ${cleanText(motion)}`, 120, yPos + 27);
+        doc.text(`Room Temperature: ${getNumber(roomTemp)} °C`, 20, yPos + 22);
+        doc.text(`Humidity: ${getNumber(humidity)} %`, 20, yPos + 32);
+        doc.text(`Motion Index: ${motion}`, 120, yPos + 27);
         
         yPos += 48;
         
@@ -2157,60 +2140,189 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         
-        let avgGlucose = document.getElementById('weeklyAvgGlucose')?.innerText || '-- mg/dL';
-        let avgHeart = document.getElementById('weeklyAvgHeart')?.innerText || '-- bpm';
+        let avgGlucose = document.getElementById('weeklyAvgGlucose')?.innerText || '--';
+        let avgHeart = document.getElementById('weeklyAvgHeart')?.innerText || '--';
         let totalReads = document.getElementById('weeklyTotalReads')?.innerText || '0';
         let weekRange = document.getElementById('reportWeekRange')?.innerText || 'Last 7 days';
         let weeklyComparison = document.getElementById('weeklyComparison')?.innerText || '--';
         
-        avgGlucose = avgGlucose.replace(/[^0-9]/g, '') + ' mg/dL';
-        avgHeart = avgHeart.replace(/[^0-9]/g, '') + ' bpm';
-        
-        doc.text(`Period: ${cleanText(weekRange)}`, 20, yPos + 22);
-        doc.text(`Average Glucose: ${avgGlucose}`, 20, yPos + 32);
-        doc.text(`Average Heart Rate: ${avgHeart}`, 20, yPos + 42);
-        doc.text(`Total Readings: ${cleanText(totalReads)}`, 120, yPos + 32);
-        doc.text(`Status: ${cleanText(weeklyComparison)}`, 120, yPos + 42);
+        doc.text(`Period: ${weekRange}`, 20, yPos + 22);
+        doc.text(`Average Glucose: ${getNumber(avgGlucose)} mg/dL`, 20, yPos + 32);
+        doc.text(`Average Heart Rate: ${getNumber(avgHeart)} bpm`, 20, yPos + 42);
+        doc.text(`Total Readings: ${totalReads}`, 120, yPos + 32);
+        doc.text(`Status: ${weeklyComparison}`, 120, yPos + 42);
         
         yPos += 58;
         
-        // ========== 5. LABORATORY RESULTS ==========
+        // ========== 5. LABORATORY RESULTS (COMPLETE) ==========
+        // حساب الارتفاع المطلوب (كل 4 صفوف = 40mm)
         doc.setFillColor(255, 248, 225);
-        doc.rect(15, yPos, 180, 68, 'F');
+        doc.rect(15, yPos, 180, 175, 'F');
         doc.setDrawColor(2, 132, 199);
-        doc.rect(15, yPos, 180, 68);
+        doc.rect(15, yPos, 180, 175);
         
-        doc.setFontSize(12);
+        doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(2, 132, 199);
         doc.text("Laboratory Results", 20, yPos + 8);
         
         doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
+        
+        let rowY = yPos + 22;
+        
+        // جلب جميع البيانات من Firebase
+        // Diabetes Profile
+        const lab_fbg = document.getElementById('lab_fbg')?.innerText || '--';
+        const lab_hba1c = document.getElementById('lab_hba1c')?.innerText || '--';
+        const lab_ppg = document.getElementById('lab_ppg')?.innerText || '--';
+        const lab_rbs = document.getElementById('lab_rbs')?.innerText || '--';
+        
+        // Kidney Function
+        const lab_creatinine = document.getElementById('lab_creatinine')?.innerText || '--';
+        const lab_bun = document.getElementById('lab_bun')?.innerText || '--';
+        const lab_egfr = document.getElementById('lab_egfr')?.innerText || '--';
+        const lab_uric_acid = document.getElementById('lab_uric_acid')?.innerText || '--';
+        
+        // Liver Function
+        const lab_alt = document.getElementById('lab_alt')?.innerText || '--';
+        const lab_ast = document.getElementById('lab_ast')?.innerText || '--';
+        const lab_alp = document.getElementById('lab_alp')?.innerText || '--';
+        const lab_bilirubin = document.getElementById('lab_bilirubin')?.innerText || '--';
+        
+        // Thyroid Function
+        const lab_tsh = document.getElementById('lab_tsh')?.innerText || '--';
+        const lab_t3 = document.getElementById('lab_t3')?.innerText || '--';
+        const lab_t4 = document.getElementById('lab_t4')?.innerText || '--';
+        
+        // Cardiac Markers
+        const lab_troponin = document.getElementById('lab_troponin')?.innerText || '--';
+        const lab_ckmb = document.getElementById('lab_ckmb')?.innerText || '--';
+        const lab_bnp = document.getElementById('lab_bnp')?.innerText || '--';
+        
+        // Inflammation
+        const lab_crp = document.getElementById('lab_crp')?.innerText || '--';
+        const lab_esr = document.getElementById('lab_esr')?.innerText || '--';
+        const lab_pct = document.getElementById('lab_pct')?.innerText || '--';
+        
+        // ===== الصف الأول: Diabetes Profile =====
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(239, 68, 68);
+        doc.text("🩸 Diabetes Profile", 20, rowY);
+        rowY += 6;
+        doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
+        doc.text(`Fasting Blood Glucose (FBG): ${getNumber(lab_fbg)} mg/dL`, 20, rowY);
+        doc.text(`Normal range: 70-100 mg/dL`, 120, rowY);
+        rowY += 5;
+        doc.text(`HbA1c: ${getNumber(lab_hba1c)} %`, 20, rowY);
+        doc.text(`Normal range: 4-5.6 %`, 120, rowY);
+        rowY += 5;
+        doc.text(`Postprandial Glucose (PPG): ${getNumber(lab_ppg)} mg/dL`, 20, rowY);
+        doc.text(`Normal range: <140 mg/dL`, 120, rowY);
+        rowY += 5;
+        doc.text(`Random Blood Sugar (RBS): ${getNumber(lab_rbs)} mg/dL`, 20, rowY);
+        doc.text(`Normal range: <140 mg/dL`, 120, rowY);
+        rowY += 8;
         
-        let fbg = document.getElementById('lab_fbg')?.innerText || '--';
-        let hba1c = document.getElementById('lab_hba1c')?.innerText || '--';
-        let creatinine = document.getElementById('lab_creatinine')?.innerText || '--';
-        let egfr = document.getElementById('lab_egfr')?.innerText || '--';
-        let alt = document.getElementById('lab_alt')?.innerText || '--';
-        let tsh = document.getElementById('lab_tsh')?.innerText || '--';
+        // ===== الصف الثاني: Kidney Function =====
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(59, 130, 246);
+        doc.text("🫀 Kidney Function", 20, rowY);
+        rowY += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Creatinine: ${getNumber(lab_creatinine)} mg/dL`, 20, rowY);
+        doc.text(`Normal range: 0.6-1.2 mg/dL`, 120, rowY);
+        rowY += 5;
+        doc.text(`Blood Urea Nitrogen (BUN): ${getNumber(lab_bun)} mg/dL`, 20, rowY);
+        doc.text(`Normal range: 7-20 mg/dL`, 120, rowY);
+        rowY += 5;
+        doc.text(`eGFR: ${getNumber(lab_egfr)} mL/min`, 20, rowY);
+        doc.text(`Normal range: >60 mL/min`, 120, rowY);
+        rowY += 5;
+        doc.text(`Uric Acid: ${getNumber(lab_uric_acid)} mg/dL`, 20, rowY);
+        doc.text(`Normal range: 3.5-7.2 mg/dL`, 120, rowY);
+        rowY += 8;
         
-        fbg = fbg.replace(/[^0-9\.]/g, '');
-        hba1c = hba1c.replace(/[^0-9\.]/g, '');
-        creatinine = creatinine.replace(/[^0-9\.]/g, '');
-        alt = alt.replace(/[^0-9\.]/g, '');
+        // ===== الصف الثالث: Liver Function =====
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(16, 185, 129);
+        doc.text("🧪 Liver Function", 20, rowY);
+        rowY += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        doc.text(`ALT (SGPT): ${getNumber(lab_alt)} U/L`, 20, rowY);
+        doc.text(`Normal range: 10-40 U/L`, 120, rowY);
+        rowY += 5;
+        doc.text(`AST (SGOT): ${getNumber(lab_ast)} U/L`, 20, rowY);
+        doc.text(`Normal range: 10-35 U/L`, 120, rowY);
+        rowY += 5;
+        doc.text(`ALP: ${getNumber(lab_alp)} U/L`, 20, rowY);
+        doc.text(`Normal range: 30-120 U/L`, 120, rowY);
+        rowY += 5;
+        doc.text(`Bilirubin (Total): ${getNumber(lab_bilirubin)} mg/dL`, 20, rowY);
+        doc.text(`Normal range: 0.3-1.2 mg/dL`, 120, rowY);
+        rowY += 8;
         
-        doc.text(`Fasting Blood Glucose: ${fbg} mg/dL`, 20, yPos + 22);
-        doc.text(`HbA1c: ${hba1c} %`, 20, yPos + 32);
-        doc.text(`Creatinine: ${creatinine} mg/dL`, 20, yPos + 42);
-        doc.text(`eGFR: ${cleanText(egfr)} mL/min`, 20, yPos + 52);
-        doc.text(`ALT (SGPT): ${alt} U/L`, 20, yPos + 62);
-        doc.text(`TSH: ${cleanText(tsh)} µIU/mL`, 120, yPos + 32);
+        // ===== الصف الرابع: Thyroid Function =====
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(245, 158, 11);
+        doc.text("🦋 Thyroid Function", 20, rowY);
+        rowY += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        doc.text(`TSH: ${getNumber(lab_tsh)} µIU/mL`, 20, rowY);
+        doc.text(`Normal range: 0.4-4.0 µIU/mL`, 120, rowY);
+        rowY += 5;
+        doc.text(`T3: ${getNumber(lab_t3)} ng/dL`, 20, rowY);
+        doc.text(`Normal range: 80-200 ng/dL`, 120, rowY);
+        rowY += 5;
+        doc.text(`T4: ${getNumber(lab_t4)} µg/dL`, 20, rowY);
+        doc.text(`Normal range: 5-12 µg/dL`, 120, rowY);
+        rowY += 8;
         
-        yPos += 78;
+        // ===== الصف الخامس: Cardiac Markers =====
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(236, 72, 153);
+        doc.text("❤️ Cardiac Markers", 20, rowY);
+        rowY += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Troponin I: ${getNumber(lab_troponin)} ng/mL`, 20, rowY);
+        doc.text(`Normal range: <0.04 ng/mL`, 120, rowY);
+        rowY += 5;
+        doc.text(`CK-MB: ${getNumber(lab_ckmb)} ng/mL`, 20, rowY);
+        doc.text(`Normal range: <5.0 ng/mL`, 120, rowY);
+        rowY += 5;
+        doc.text(`NT-proBNP: ${getNumber(lab_bnp)} pg/mL`, 20, rowY);
+        doc.text(`Normal range: <125 pg/mL`, 120, rowY);
+        rowY += 8;
+        
+        // ===== الصف السادس: Inflammation =====
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(139, 92, 246);
+        doc.text("🔥 Inflammation & Infection", 20, rowY);
+        rowY += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        doc.text(`C-Reactive Protein (CRP): ${getNumber(lab_crp)} mg/L`, 20, rowY);
+        doc.text(`Normal range: <5.0 mg/L`, 120, rowY);
+        rowY += 5;
+        doc.text(`ESR: ${getNumber(lab_esr)} mm/hr`, 20, rowY);
+        doc.text(`Normal range: <20 mm/hr`, 120, rowY);
+        rowY += 5;
+        doc.text(`Procalcitonin (PCT): ${getNumber(lab_pct)} ng/mL`, 20, rowY);
+        doc.text(`Normal range: <0.15 ng/mL`, 120, rowY);
+        
+        yPos += 185;
         
         // ========== 6. DOCTOR'S NOTES ==========
+        if (yPos > 250) {
+            doc.addPage();
+            yPos = 20;
+        }
+        
         doc.setFillColor(240, 248, 255);
         doc.rect(15, yPos, 180, 55, 'F');
         doc.setDrawColor(2, 132, 199);
@@ -2230,27 +2342,21 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         const doctorNotesDiv = document.getElementById('doctorNotes');
         if (doctorNotesDiv) {
             doctorNotesText = doctorNotesDiv.innerText || doctorNotesDiv.textContent;
-            doctorNotesText = cleanText(doctorNotesText);
-            // تنظيف النص من التكرارات
-            doctorNotesText = doctorNotesText.replace(/Clinical Summary: Clinical Summary:/g, 'Clinical Summary:');
-            doctorNotesText = doctorNotesText.replace(/Recommendations: Recommendations:/g, 'Recommendations:');
         }
         
         doc.text(`Last Review: ${formatDate(doctorDate)}`, 20, yPos + 22);
         
         const splitNotes = doc.splitTextToSize(doctorNotesText, 170);
         let textY = yPos + 32;
-        for (let i = 0; i < Math.min(splitNotes.length, 6); i++) {
-            if (textY < 270) {
-                doc.text(splitNotes[i], 20, textY);
-                textY += 5;
-            }
+        for (let i = 0; i < Math.min(splitNotes.length, 5); i++) {
+            doc.text(splitNotes[i], 20, textY);
+            textY += 5;
         }
         
-        yPos = Math.max(textY + 8, yPos + 65);
+        yPos += 65;
         
         // ========== 7. DAILY CHECK-IN ==========
-        if (yPos > 250) {
+        if (yPos > 270) {
             doc.addPage();
             yPos = 20;
         }
@@ -2272,13 +2378,13 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         let streakCount = document.getElementById('streakCount')?.innerText || '0';
         let lastCheckin = document.getElementById('lastCheckinDate')?.innerText || 'Never';
         
-        doc.text(`Current Streak: ${cleanText(streakCount)} day(s)`, 20, yPos + 24);
+        doc.text(`Current Streak: ${streakCount} day(s)`, 20, yPos + 24);
         doc.text(`Last Check-in: ${formatDate(lastCheckin)}`, 20, yPos + 34);
         
         yPos += 48;
         
         // ========== 8. HEALTH TIP ==========
-        if (yPos > 260) {
+        if (yPos > 270) {
             doc.addPage();
             yPos = 20;
         }
@@ -2291,21 +2397,20 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFontSize(11);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(16, 185, 129);
-        doc.text("Health Tip of the Day", 20, yPos + 7);
+        doc.text("Health Tip", 20, yPos + 7);
         
         doc.setFontSize(9);
         doc.setFont('helvetica', 'italic');
         doc.setTextColor(80, 80, 80);
         
         let tipText = document.getElementById('medicalTipText')?.innerText || 'Stay healthy and active!';
-        tipText = cleanText(tipText);
         const splitTip = doc.splitTextToSize(tipText, 170);
         doc.text(splitTip, 20, yPos + 18);
         
         yPos += 42;
         
         // ========== 9. FOOTER ==========
-        if (yPos > 270) {
+        if (yPos > 280) {
             doc.addPage();
             yPos = 20;
         }
