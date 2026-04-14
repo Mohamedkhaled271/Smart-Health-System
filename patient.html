@@ -1988,20 +1988,235 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
         if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
 
         // Export PDF
-        document.getElementById('exportBtn')?.addEventListener('click', () => {
-            const doc = new jspdf.jsPDF();
-            doc.setFontSize(22);
-            doc.text("HELIOS - Medical Health Report", 14, 20);
-            doc.setFontSize(12);
-            doc.text(`Heart Rate: ${document.getElementById('heartValue')?.innerText || '--'}`, 14, 45);
-            doc.text(`Oxygen Saturation: ${document.getElementById('spo2Value')?.innerText || '--'}`, 14, 55);
-            doc.text(`Body Temperature: ${document.getElementById('tempValue')?.innerText || '--'}`, 14, 65);
-            doc.text(`Room Temperature: ${document.getElementById('roomTempValue')?.innerText || '--'}`, 14, 75);
-            doc.text(`Humidity: ${document.getElementById('humidityValue')?.innerText || '--'}`, 14, 85);
-            doc.text(`Health Score: ${document.getElementById('healthScore')?.innerText || '--'}`, 14, 105);
-            doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 120);
-            doc.save("helios_medical_report.pdf");
-        });
+        // ========== EXPORT COMPREHENSIVE MEDICAL REPORT ==========
+document.getElementById('exportBtn')?.addEventListener('click', async () => {
+    try {
+        // إظهار مؤقت تحميل
+        const btn = document.getElementById('exportBtn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Report...';
+        btn.disabled = true;
+        
+        const doc = new jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        let yPos = 20;
+        
+        // ========== HEADER ==========
+        doc.setFillColor(2, 132, 199);
+        doc.rect(0, 0, 210, 40, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
+        doc.text("HELIOS Medical Report", 105, 25, { align: 'center' });
+        doc.setFontSize(10);
+        doc.text(`Generated: ${new Date().toLocaleString()}`, 105, 35, { align: 'center' });
+        
+        yPos = 55;
+        doc.setTextColor(0, 0, 0);
+        
+        // ========== 1. PATIENT INFORMATION ==========
+        doc.setFillColor(240, 248, 255);
+        doc.rect(14, yPos, 182, 35, 'F');
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(2, 132, 199);
+        doc.text("👤 Patient Information", 20, yPos + 8);
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        const patientName = document.getElementById('profileName')?.innerText || 'Mohamed Khaled';
+        const patientId = document.getElementById('profileId')?.innerText || 'P-10042';
+        const patientAge = document.getElementById('profileDob')?.innerText || '15 March 1985';
+        const patientPhone = document.getElementById('profilePhone')?.innerText || 'Not provided';
+        
+        doc.text(`Name: ${patientName}`, 20, yPos + 18);
+        doc.text(`Patient ID: ${patientId}`, 20, yPos + 26);
+        doc.text(`DOB: ${patientAge}`, 120, yPos + 18);
+        doc.text(`Phone: ${patientPhone}`, 120, yPos + 26);
+        
+        yPos += 45;
+        
+        // ========== 2. CURRENT VITAL SIGNS ==========
+        if (yPos > 250) { doc.addPage(); yPos = 20; }
+        doc.setFillColor(255, 250, 240);
+        doc.rect(14, yPos, 182, 50, 'F');
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(2, 132, 199);
+        doc.text("📊 Current Vital Signs", 20, yPos + 8);
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        
+        const heartRate = document.getElementById('heartValue')?.innerText || '--';
+        const spo2 = document.getElementById('spo2Value')?.innerText || '--';
+        const temp = document.getElementById('tempValue')?.innerText || '--';
+        const bp = document.getElementById('bpValue')?.innerText || '--/--';
+        const glucose = document.getElementById('glucoseValue')?.innerText || '--';
+        const healthScore = document.getElementById('healthScore')?.innerText || '--';
+        
+        doc.text(`❤️ Heart Rate: ${heartRate}`, 20, yPos + 20);
+        doc.text(`🫁 Oxygen Saturation: ${spo2}`, 20, yPos + 30);
+        doc.text(`🌡️ Body Temperature: ${temp}`, 20, yPos + 40);
+        doc.text(`💓 Blood Pressure: ${bp}`, 120, yPos + 20);
+        doc.text(`🩸 Blood Glucose: ${glucose}`, 120, yPos + 30);
+        doc.text(`⭐ Health Score: ${healthScore}/100`, 120, yPos + 40);
+        
+        yPos += 60;
+        
+        // ========== 3. ENVIRONMENT DATA ==========
+        if (yPos > 250) { doc.addPage(); yPos = 20; }
+        doc.setFillColor(240, 255, 240);
+        doc.rect(14, yPos, 182, 35, 'F');
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(2, 132, 199);
+        doc.text("🌍 Environment Data", 20, yPos + 8);
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        
+        const roomTemp = document.getElementById('roomTempValue')?.innerText || '--';
+        const humidity = document.getElementById('humidityValue')?.innerText || '--';
+        const motion = document.getElementById('motionValue')?.innerText || '--';
+        
+        doc.text(`🏠 Room Temperature: ${roomTemp}`, 20, yPos + 20);
+        doc.text(`💧 Humidity: ${humidity}`, 20, yPos + 28);
+        doc.text(`🏃 Motion Index: ${motion}`, 120, yPos + 24);
+        
+        yPos += 45;
+        
+        // ========== 4. WEEKLY HEALTH REPORT ==========
+        if (yPos > 250) { doc.addPage(); yPos = 20; }
+        doc.setFillColor(255, 245, 255);
+        doc.rect(14, yPos, 182, 40, 'F');
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(2, 132, 199);
+        doc.text("📈 Weekly Health Summary", 20, yPos + 8);
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        
+        const avgGlucose = document.getElementById('weeklyAvgGlucose')?.innerText || '--';
+        const avgHeart = document.getElementById('weeklyAvgHeart')?.innerText || '--';
+        const totalReads = document.getElementById('weeklyTotalReads')?.innerText || '0';
+        const weekRange = document.getElementById('reportWeekRange')?.innerText || 'Last 7 days';
+        
+        doc.text(`📅 Period: ${weekRange}`, 20, yPos + 20);
+        doc.text(`🩸 Avg Glucose: ${avgGlucose}`, 20, yPos + 28);
+        doc.text(`❤️ Avg Heart Rate: ${avgHeart}`, 20, yPos + 36);
+        doc.text(`📊 Total Readings: ${totalReads}`, 120, yPos + 28);
+        
+        yPos += 50;
+        
+        // ========== 5. LABORATORY RESULTS ==========
+        if (yPos > 250) { doc.addPage(); yPos = 20; }
+        doc.setFillColor(255, 248, 225);
+        doc.rect(14, yPos, 182, 55, 'F');
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(2, 132, 199);
+        doc.text("🔬 Laboratory Results", 20, yPos + 8);
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        
+        const fbg = document.getElementById('lab_fbg')?.innerText || '--';
+        const hba1c = document.getElementById('lab_hba1c')?.innerText || '--';
+        const creatinine = document.getElementById('lab_creatinine')?.innerText || '--';
+        const egfr = document.getElementById('lab_egfr')?.innerText || '--';
+        const alt = document.getElementById('lab_alt')?.innerText || '--';
+        const tsh = document.getElementById('lab_tsh')?.innerText || '--';
+        
+        doc.text(`🩸 Fasting Blood Glucose: ${fbg} mg/dL`, 20, yPos + 20);
+        doc.text(`📊 HbA1c: ${hba1c} %`, 20, yPos + 28);
+        doc.text(`🫀 Creatinine: ${creatinine} mg/dL`, 20, yPos + 36);
+        doc.text(`💧 eGFR: ${egfr} mL/min`, 20, yPos + 44);
+        doc.text(`🧪 ALT: ${alt} U/L`, 120, yPos + 20);
+        doc.text(`🦋 TSH: ${tsh} µIU/mL`, 120, yPos + 28);
+        
+        yPos += 65;
+        
+        // ========== 6. DOCTOR'S NOTES ==========
+        if (yPos > 250) { doc.addPage(); yPos = 20; }
+        doc.setFillColor(240, 248, 255);
+        doc.rect(14, yPos, 182, 50, 'F');
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(2, 132, 199);
+        doc.text("👨‍⚕️ Doctor's Notes", 20, yPos + 8);
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        
+        const doctorDate = document.getElementById('doctorNotesDate')?.innerText || 'Not available';
+        const doctorNotesText = document.getElementById('doctorNotes')?.innerText || 'No clinical notes available';
+        
+        doc.text(`📅 Last Review: ${doctorDate}`, 20, yPos + 20);
+        
+        // تقسيم النص الطويل
+        const splitNotes = doc.splitTextToSize(doctorNotesText.substring(0, 300), 170);
+        doc.text(splitNotes, 20, yPos + 30);
+        
+        yPos += 60;
+        
+        // ========== 7. DAILY CHECK-IN STREAK ==========
+        if (yPos > 250) { doc.addPage(); yPos = 20; }
+        doc.setFillColor(255, 240, 245);
+        doc.rect(14, yPos, 182, 30, 'F');
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(2, 132, 199);
+        doc.text("📅 Daily Check-in Activity", 20, yPos + 8);
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        
+        const streakCount = document.getElementById('streakCount')?.innerText || '0';
+        const lastCheckin = document.getElementById('lastCheckinDate')?.innerText || 'Never';
+        
+        doc.text(`🔥 Current Streak: ${streakCount} day(s)`, 20, yPos + 20);
+        doc.text(`📆 Last Check-in: ${lastCheckin}`, 120, yPos + 20);
+        
+        yPos += 40;
+        
+        // ========== 8. FOOTER ==========
+        doc.setFillColor(240, 240, 240);
+        doc.rect(14, yPos, 182, 20, 'F');
+        doc.setFontSize(8);
+        doc.setTextColor(100, 100, 100);
+        doc.text("This report is generated automatically by HELIOS Medical System.", 105, yPos + 8, { align: 'center' });
+        doc.text("For medical emergencies, please contact your healthcare provider immediately.", 105, yPos + 15, { align: 'center' });
+        
+        // حفظ الملف
+        doc.save(`HELIOS_Medical_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+        
+        // إعادة الزر إلى حالته الطبيعية
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        
+        // إظهار إشعار نجاح
+        if (typeof showNotification === 'function') {
+            showNotification('✅ Report exported successfully!', 'success');
+        } else {
+            alert('✅ Report exported successfully!');
+        }
+        
+    } catch (error) {
+        console.error('Export error:', error);
+        const btn = document.getElementById('exportBtn');
+        btn.innerHTML = '<i class="fas fa-download"></i> Export Comprehensive Report';
+        btn.disabled = false;
+        alert('❌ Error generating report. Please try again.');
+    }
+});
 
         document.getElementById('collapseSidebar')?.addEventListener('click', () => {
             const sidebar = document.getElementById('sidebar');
