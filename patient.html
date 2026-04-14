@@ -1986,7 +1986,8 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
             localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
         });
         if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
-        // ========== EXPORT PDF - FULLY FIXED VERSION (NO STATUS) ==========
+
+        // ========== EXPORT PDF - FULLY FIXED VERSION ==========
 document.getElementById('exportBtn')?.addEventListener('click', async () => {
     try {
         const btn = document.getElementById('exportBtn');
@@ -1999,7 +2000,7 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         let yPos = 25;
         let pageNumber = 1;
         
-        // ========== دوال تنظيف النص ==========
+        // ========== دوال التنظيف ==========
         function cleanText(text) {
             if (!text) return 'Not available';
             let cleaned = text.replace(/[^\x20-\x7E\n\r]/g, '');
@@ -2132,11 +2133,11 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         yPos += 48;
         
         // ========== 4. WEEKLY HEALTH SUMMARY (بدون Status) ==========
-        ensureSpace(50);
+        ensureSpace(55);
         doc.setFillColor(255, 245, 255);
-        doc.rect(15, yPos, 180, 42, 'F');
+        doc.rect(15, yPos, 180, 48, 'F');
         doc.setDrawColor(2, 132, 199);
-        doc.rect(15, yPos, 180, 42);
+        doc.rect(15, yPos, 180, 48);
         
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
@@ -2152,14 +2153,14 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.text(`Average Heart Rate: ${getSafeValue('weeklyAvgHeart', '--')} bpm`, 20, yPos + 42);
         doc.text(`Total Readings: ${getCleanText('weeklyTotalReads', '0')}`, 120, yPos + 32);
         
-        yPos += 52;
+        yPos += 58;
         
         // ========== 5. LABORATORY RESULTS ==========
         ensureSpace(10);
         doc.setFillColor(255, 248, 225);
-        doc.rect(15, yPos, 180, 155, 'F');
+        doc.rect(15, yPos, 180, 185, 'F');
         doc.setDrawColor(2, 132, 199);
-        doc.rect(15, yPos, 180, 155);
+        doc.rect(15, yPos, 180, 185);
         
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
@@ -2181,6 +2182,10 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.text(`FBG: ${getSafeValue('lab_fbg', '--')} mg/dL (Normal: 70-100)`, 20, rowY);
         rowY += 5;
         doc.text(`HbA1c: ${getSafeValue('lab_hba1c', '--')} % (Normal: 4.0-5.6)`, 20, rowY);
+        rowY += 5;
+        doc.text(`PPG: ${getSafeValue('lab_ppg', '--')} mg/dL (Normal: <140)`, 20, rowY);
+        rowY += 5;
+        doc.text(`RBS: ${getSafeValue('lab_rbs', '--')} mg/dL (Normal: <140)`, 20, rowY);
         rowY += 8;
         
         // Kidney Function
@@ -2190,13 +2195,13 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         rowY += 5;
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
-        doc.text(`Creatinine: ${getSafeValue('lab_creatinine', '--')} mg/dL`, 20, rowY);
+        doc.text(`Creatinine: ${getSafeValue('lab_creatinine', '--')} mg/dL (Normal: 0.6-1.2)`, 20, rowY);
         rowY += 5;
-        doc.text(`BUN: ${getSafeValue('lab_bun', '--')} mg/dL`, 20, rowY);
+        doc.text(`BUN: ${getSafeValue('lab_bun', '--')} mg/dL (Normal: 7-20)`, 20, rowY);
         rowY += 5;
-        doc.text(`eGFR: ${getSafeValue('lab_egfr', '--')} mL/min`, 20, rowY);
+        doc.text(`eGFR: ${getSafeValue('lab_egfr', '--')} mL/min (Normal: >60)`, 20, rowY);
         rowY += 5;
-        doc.text(`Uric Acid: ${getSafeValue('lab_uric_acid', '--')} mg/dL`, 20, rowY);
+        doc.text(`Uric Acid: ${getSafeValue('lab_uric_acid', '--')} mg/dL (Normal: 3.5-7.2)`, 20, rowY);
         rowY += 8;
         
         // Liver Function
@@ -2206,13 +2211,13 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         rowY += 5;
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
-        doc.text(`ALT: ${getSafeValue('lab_alt', '--')} U/L`, 20, rowY);
+        doc.text(`ALT: ${getSafeValue('lab_alt', '--')} U/L (Normal: 10-40)`, 20, rowY);
         rowY += 5;
-        doc.text(`AST: ${getSafeValue('lab_ast', '--')} U/L`, 20, rowY);
+        doc.text(`AST: ${getSafeValue('lab_ast', '--')} U/L (Normal: 10-35)`, 20, rowY);
         rowY += 5;
-        doc.text(`ALP: ${getSafeValue('lab_alp', '--')} U/L`, 20, rowY);
+        doc.text(`ALP: ${getSafeValue('lab_alp', '--')} U/L (Normal: 30-120)`, 20, rowY);
         rowY += 5;
-        doc.text(`Bilirubin: ${getSafeValue('lab_bilirubin', '--')} mg/dL`, 20, rowY);
+        doc.text(`Bilirubin: ${getSafeValue('lab_bilirubin', '--')} mg/dL (Normal: 0.3-1.2)`, 20, rowY);
         rowY += 8;
         
         // Thyroid Function
@@ -2222,11 +2227,11 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         rowY += 5;
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
-        doc.text(`TSH: ${getSafeValue('lab_tsh', '--')} µIU/mL`, 20, rowY);
+        doc.text(`TSH: ${getSafeValue('lab_tsh', '--')} µIU/mL (Normal: 0.4-4.0)`, 20, rowY);
         rowY += 5;
-        doc.text(`T3: ${getSafeValue('lab_t3', '--')} ng/dL`, 20, rowY);
+        doc.text(`T3: ${getSafeValue('lab_t3', '--')} ng/dL (Normal: 80-200)`, 20, rowY);
         rowY += 5;
-        doc.text(`T4: ${getSafeValue('lab_t4', '--')} µg/dL`, 20, rowY);
+        doc.text(`T4: ${getSafeValue('lab_t4', '--')} µg/dL (Normal: 5-12)`, 20, rowY);
         rowY += 8;
         
         // Cardiac Markers
@@ -2236,27 +2241,27 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         rowY += 5;
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
-        doc.text(`Troponin I: ${getSafeValue('lab_troponin', '--')} ng/mL`, 20, rowY);
+        doc.text(`Troponin I: ${getSafeValue('lab_troponin', '--')} ng/mL (Normal: <0.04)`, 20, rowY);
         rowY += 5;
-        doc.text(`CK-MB: ${getSafeValue('lab_ckmb', '--')} ng/mL`, 20, rowY);
+        doc.text(`CK-MB: ${getSafeValue('lab_ckmb', '--')} ng/mL (Normal: <5.0)`, 20, rowY);
         rowY += 5;
-        doc.text(`NT-proBNP: ${getSafeValue('lab_bnp', '--')} pg/mL`, 20, rowY);
+        doc.text(`NT-proBNP: ${getSafeValue('lab_bnp', '--')} pg/mL (Normal: <125)`, 20, rowY);
         rowY += 8;
         
-        // Inflammation
+        // Inflammation Markers
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(139, 92, 246);
         doc.text("Inflammation Markers", 20, rowY);
         rowY += 5;
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
-        doc.text(`CRP: ${getSafeValue('lab_crp', '--')} mg/L`, 20, rowY);
+        doc.text(`CRP: ${getSafeValue('lab_crp', '--')} mg/L (Normal: <5.0)`, 20, rowY);
         rowY += 5;
-        doc.text(`ESR: ${getSafeValue('lab_esr', '--')} mm/hr`, 20, rowY);
+        doc.text(`ESR: ${getSafeValue('lab_esr', '--')} mm/hr (Normal: <20)`, 20, rowY);
         rowY += 5;
-        doc.text(`PCT: ${getSafeValue('lab_pct', '--')} ng/mL`, 20, rowY);
+        doc.text(`PCT: ${getSafeValue('lab_pct', '--')} ng/mL (Normal: <0.15)`, 20, rowY);
         
-        yPos += 165;
+        yPos += 195;
         
         // ========== 6. DOCTOR'S NOTES ==========
         ensureSpace(70);
