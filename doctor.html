@@ -439,12 +439,12 @@
                 esr: parseFloat(document.getElementById('edit_esr').value),
                 pct: parseFloat(document.getElementById('edit_pct').value)
             },
-            lastUpdated: new Date().toISOString()
+            lastUpdated: formatDateTimeArabic(Date.now(), true)
         };
         try {
             await db.ref(`patients/${currentPatientId}/labResults`).update(labData);
             document.getElementById('labSyncMsg').innerHTML = '✅ Lab data saved to Firebase at ' + new Date().toLocaleTimeString();
-            document.getElementById('lastWriteTime').innerHTML = new Date().toLocaleString();
+            document.getElementById('lastWriteTime').innerHTML = formatDateTimeArabic(Date.now(), true);
             showToast('Lab results synced to Firebase');
         } catch(err) {
             console.error(err);
@@ -460,13 +460,13 @@
         recommendations: document.getElementById('edit_recommendations').value,
         nextAppointment: document.getElementById('edit_next_appointment').value,
         doctorName: document.getElementById('edit_doctor_name').value,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: formatDateTimeArabic(Date.now(), true)
     };
     try {
         // ✅ استخدم update() بدلاً من set()
         await db.ref(`patients/${currentPatientId}/doctorNotes`).update(notesData);
         document.getElementById('notesSyncMsg').innerHTML = '✅ Clinical notes published at ' + new Date().toLocaleTimeString();
-        document.getElementById('lastNotesWriteTime').innerHTML = new Date().toLocaleString();
+        document.getElementById('lastNotesWriteTime').innerHTML = formatDateTimeArabic(Date.now(), true);
         showToast('Doctor notes updated in Firebase');
     } catch(err) {
         document.getElementById('notesSyncMsg').innerHTML = '❌ Error: ' + err.message;
@@ -695,6 +695,32 @@ if (logoutBtn) {
             }
         }
     });
+}
+// ==================== دوال تنسيق التواريخ العربية ====================
+function formatDateTimeArabic(timestamp, includeTime = true) {
+    if (!timestamp) return '--';
+    const date = new Date(timestamp);
+    
+    // تنسيق التاريخ: يوم/شهر/سنة
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const dateStr = `${day}/${month}/${year}`;
+    
+    if (!includeTime) return dateStr;
+    
+    // تنسيق الوقت بصيغة 12 ساعة مع AM/PM
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    const timeStr = `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+    
+    return `${dateStr} ${timeStr}`;
+}
+
+function formatDateOnlyArabic(timestamp) {
+    return formatDateTimeArabic(timestamp, false);
 }
 </script>
 </body>
