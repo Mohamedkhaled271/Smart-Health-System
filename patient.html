@@ -4722,34 +4722,119 @@ function initSupportPage() {
     
 })();
 </script>
-<!-- ============================================================== -->     
-                <!-- ========== FIX MOBILE VIEW ========== -->
+<!-- ========== FLEXIBLE MOBILE VIEW - LIKE PC BUT ADAPTIVE ========== -->
 <script>
 (function() {
-    // تثبيت عرض الصفحة مثل الكمبيوتر
+    "use strict";
+    
+    console.log("🟢 Setting up responsive mobile view...");
+    
+    // تعديل viewport للسماح بالتكبير والتصغير
     let viewport = document.querySelector('meta[name="viewport"]');
     if (viewport) {
-        viewport.setAttribute('content', 'width=1200, initial-scale=1.0, user-scalable=yes');
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes');
     }
     
-    // إضافة CSS لتثبيت العرض
+    // إضافة CSS الديناميكي
     const style = document.createElement('style');
     style.textContent = `
-        body { min-width: 1200px !important; overflow-x: auto !important; }
-        .vitals-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; }
-        .env-grid { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; }
-        .charts-row { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; }
-        .vital-card, .stat-card, .chart-card { min-width: 160px !important; }
-        @media (max-width: 1200px) {
-            .vitals-grid, .env-grid, .charts-row { overflow-x: auto !important; }
+        /* تثبيت عرض الشبكات على جميع الشاشات */
+        .vitals-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(140px, 1fr)) !important;
+            gap: 0.8rem !important;
+        }
+        
+        .env-grid {
+            display: grid !important;
+            grid-template-columns: repeat(4, minmax(100px, 1fr)) !important;
+            gap: 0.5rem !important;
+        }
+        
+        .charts-row {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.8rem !important;
+        }
+        
+        /* تحسين حجم الكروت على الموبايل */
+        .vital-card, .stat-card, .chart-card {
+            padding: 0.8rem !important;
+        }
+        
+        .vital-value {
+            font-size: 1.5rem !important;
+        }
+        
+        .vital-header h3 {
+            font-size: 0.85rem !important;
+        }
+        
+        .vital-header i {
+            font-size: 1.5rem !important;
+        }
+        
+        .gauge-container {
+            height: 90px !important;
+        }
+        
+        .stat-value {
+            font-size: 1.3rem !important;
+        }
+        
+        /* السماح بالتمرير الأفقي إذا لزم الأمر */
+        .main-content {
+            overflow-x: auto !important;
+            padding: 0.8rem !important;
+        }
+        
+        /* تحسين الـ sidebar على الموبايل */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px !important;
+                position: fixed !important;
+                z-index: 1000 !important;
+                height: 100vh !important;
+            }
+            .sidebar span {
+                display: none !important;
+            }
+            .main-content {
+                margin-left: 70px !important;
+                width: calc(100% - 70px) !important;
+            }
+            .sidebar:hover {
+                width: 250px !important;
+            }
+            .sidebar:hover span {
+                display: inline !important;
+            }
+        }
+        
+        /* للأجهزة الصغيرة جداً */
+        @media (max-width: 550px) {
+            .vitals-grid {
+                grid-template-columns: repeat(3, minmax(120px, 1fr)) !important;
+                gap: 0.5rem !important;
+            }
+            .env-grid {
+                grid-template-columns: repeat(4, minmax(80px, 1fr)) !important;
+                gap: 0.3rem !important;
+            }
+            .vital-value {
+                font-size: 1.2rem !important;
+            }
+            .vital-header h3 {
+                font-size: 0.7rem !important;
+            }
         }
     `;
     document.head.appendChild(style);
     
-    console.log("✅ Mobile view fixed - Now showing like PC");
+    console.log("✅ Responsive view active - 3 cards per row on mobile");
 })();
 </script>
-<!-- ============================================== -->
+<!-- ================================================== -->
 
 </body>
 </html>
