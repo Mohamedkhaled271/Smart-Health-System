@@ -1986,7 +1986,7 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
             localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
         });
         if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
-        // ========== EXPORT PDF - VERSION COMPATIBLE WITH ESP32 & FIREBASE ==========
+        // ========== EXPORT PDF - FULLY FIXED VERSION (NO STATUS) ==========
 document.getElementById('exportBtn')?.addEventListener('click', async () => {
     try {
         const btn = document.getElementById('exportBtn');
@@ -1999,38 +1999,37 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         let yPos = 25;
         let pageNumber = 1;
         
-        // دالة آمنة لجلب القيم
-        function getSafeValue(elementId, defaultValue = '--') {
-            const el = document.getElementById(elementId);
-            if (el && el.innerText) {
-                let value = el.innerText;
-                // استخراج الرقم فقط إذا كان موجوداً
-                const match = value.match(/(\d+\.?\d*)/);
-                return match ? match[1] : value;
-            }
-            return defaultValue;
-        }
-        
-        // دالة لجلب النص الكامل
-        function getSafeText(elementId, defaultValue = 'Not available') {
-            const el = document.getElementById(elementId);
-            if (el && el.innerText) {
-                return el.innerText.trim();
-            }
-            return defaultValue;
-        }
-        
-        // دالة لتنظيف النص
+        // ========== دوال تنظيف النص ==========
         function cleanText(text) {
-            if (!text) return '';
-            // إزالة الرموز الغريبة
+            if (!text) return 'Not available';
             let cleaned = text.replace(/[^\x20-\x7E\n\r]/g, '');
-            cleaned = cleaned.replace(/Ø[=ÜÊËŠàáâãäåæçèéêëìíîï]/g, '');
+            cleaned = cleaned.replace(/[ØÜÊËŠàáâãäåæçèéêëìíîï]/g, '');
+            cleaned = cleaned.replace(/([A-Za-z])\s+([A-Za-z])/g, '$1$2');
             cleaned = cleaned.replace(/\s+/g, ' ');
             return cleaned.trim();
         }
         
-        // دالة لإضافة صفحة جديدة
+        function getNumber(value) {
+            if (!value || value === '--') return '--';
+            const match = value.toString().match(/(\d+\.?\d*)/);
+            return match ? match[1] : '--';
+        }
+        
+        function getCleanText(elementId, defaultValue = '--') {
+            const el = document.getElementById(elementId);
+            if (el && el.innerText) return cleanText(el.innerText);
+            return defaultValue;
+        }
+        
+        function getSafeValue(elementId, defaultValue = '--') {
+            const el = document.getElementById(elementId);
+            if (el && el.innerText) {
+                const match = el.innerText.match(/(\d+\.?\d*)/);
+                return match ? match[1] : defaultValue;
+            }
+            return defaultValue;
+        }
+        
         function ensureSpace(needed) {
             if (yPos + needed > 280) {
                 doc.addPage();
@@ -2053,7 +2052,7 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.text("HELIOS", 105, 22, { align: 'center' });
         doc.setFontSize(12);
         doc.setFont('helvetica', 'normal');
-        doc.text("Medical Health Report", 105, 33, { align: 'center' });
+        doc.text("Comprehensive Medical Report", 105, 33, { align: 'center' });
         doc.setFontSize(9);
         const now = new Date();
         const dateStr = `${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()} - ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
@@ -2078,19 +2077,14 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         
-        const patientName = getSafeText('profileName', 'Mohamed Khaled');
-        const patientId = getSafeText('profileId', 'P-10042');
-        const patientDob = getSafeText('profileDob', '15 March 1985');
-        const patientPhone = getSafeText('profilePhone', 'Not provided');
-        
-        doc.text(`Name: ${patientName}`, 20, yPos + 20);
-        doc.text(`Patient ID: ${patientId}`, 20, yPos + 30);
-        doc.text(`DOB: ${patientDob}`, 120, yPos + 20);
-        doc.text(`Phone: ${patientPhone}`, 120, yPos + 30);
+        doc.text(`Name: ${getCleanText('profileName', 'Mohamed Khaled')}`, 20, yPos + 20);
+        doc.text(`Patient ID: ${getCleanText('profileId', 'P-10042')}`, 20, yPos + 30);
+        doc.text(`DOB: ${getCleanText('profileDob', '15 March 1985')}`, 120, yPos + 20);
+        doc.text(`Phone: ${getCleanText('profilePhone', 'Not provided')}`, 120, yPos + 30);
         
         yPos += 48;
         
-        // ========== 2. CURRENT VITAL SIGNS (من ESP32) ==========
+        // ========== 2. CURRENT VITAL SIGNS ==========
         ensureSpace(60);
         doc.setFillColor(255, 250, 240);
         doc.rect(15, yPos, 180, 55, 'F');
@@ -2100,30 +2094,22 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(2, 132, 199);
-        doc.text("Current Vital Signs (ESP32)", 20, yPos + 8);
+        doc.text("Current Vital Signs", 20, yPos + 8);
         
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         
-        // جلب البيانات من ESP32
-        let heartRate = getSafeValue('heartValue', '--');
-        let spo2 = getSafeValue('spo2Value', '--');
-        let temp = getSafeValue('tempValue', '--');
-        let bp = getSafeText('bpValue', '--/--');
-        let glucose = getSafeValue('glucoseValue', '--');
-        let healthScore = getSafeValue('healthScore', '--');
-        
-        doc.text(`Heart Rate: ${heartRate} bpm`, 20, yPos + 22);
-        doc.text(`Oxygen Saturation: ${spo2} %`, 20, yPos + 34);
-        doc.text(`Body Temperature: ${temp} °C`, 20, yPos + 46);
-        doc.text(`Blood Pressure: ${bp} mmHg`, 120, yPos + 22);
-        doc.text(`Blood Glucose: ${glucose} mg/dL`, 120, yPos + 34);
-        doc.text(`Health Score: ${healthScore}/100`, 120, yPos + 46);
+        doc.text(`Heart Rate: ${getSafeValue('heartValue', '--')} bpm`, 20, yPos + 22);
+        doc.text(`Oxygen Saturation: ${getSafeValue('spo2Value', '--')} %`, 20, yPos + 34);
+        doc.text(`Body Temperature: ${getSafeValue('tempValue', '--')} °C`, 20, yPos + 46);
+        doc.text(`Blood Pressure: ${getCleanText('bpValue', '--/--')} mmHg`, 120, yPos + 22);
+        doc.text(`Blood Glucose: ${getSafeValue('glucoseValue', '--')} mg/dL`, 120, yPos + 34);
+        doc.text(`Health Score: ${getSafeValue('healthScore', '--')}/100`, 120, yPos + 46);
         
         yPos += 65;
         
-        // ========== 3. ENVIRONMENT DATA (من ESP32) ==========
+        // ========== 3. ENVIRONMENT DATA ==========
         ensureSpace(45);
         doc.setFillColor(240, 255, 240);
         doc.rect(15, yPos, 180, 38, 'F');
@@ -2139,22 +2125,18 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         
-        let roomTemp = getSafeValue('roomTempValue', '--');
-        let humidity = getSafeValue('humidityValue', '--');
-        let motion = getSafeText('motionValue', '--');
-        
-        doc.text(`Room Temperature: ${roomTemp} °C`, 20, yPos + 22);
-        doc.text(`Humidity: ${humidity} %`, 20, yPos + 32);
-        doc.text(`Motion Index: ${motion}`, 120, yPos + 27);
+        doc.text(`Room Temperature: ${getSafeValue('roomTempValue', '--')} °C`, 20, yPos + 22);
+        doc.text(`Humidity: ${getSafeValue('humidityValue', '--')} %`, 20, yPos + 32);
+        doc.text(`Motion Index: ${getCleanText('motionValue', '--')}`, 120, yPos + 27);
         
         yPos += 48;
         
-        // ========== 4. WEEKLY HEALTH REPORT ==========
-        ensureSpace(55);
+        // ========== 4. WEEKLY HEALTH SUMMARY (بدون Status) ==========
+        ensureSpace(50);
         doc.setFillColor(255, 245, 255);
-        doc.rect(15, yPos, 180, 48, 'F');
+        doc.rect(15, yPos, 180, 42, 'F');
         doc.setDrawColor(2, 132, 199);
-        doc.rect(15, yPos, 180, 48);
+        doc.rect(15, yPos, 180, 42);
         
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
@@ -2165,27 +2147,19 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         
-        let avgGlucose = getSafeText('weeklyAvgGlucose', '--');
-        let avgHeart = getSafeText('weeklyAvgHeart', '--');
-        let totalReads = getSafeText('weeklyTotalReads', '0');
-        let weekRange = getSafeText('reportWeekRange', 'Last 7 days');
-        let weeklyComparison = getSafeText('weeklyComparison', '--');
+        doc.text(`Period: ${getCleanText('reportWeekRange', 'Last 7 days')}`, 20, yPos + 22);
+        doc.text(`Average Glucose: ${getSafeValue('weeklyAvgGlucose', '--')} mg/dL`, 20, yPos + 32);
+        doc.text(`Average Heart Rate: ${getSafeValue('weeklyAvgHeart', '--')} bpm`, 20, yPos + 42);
+        doc.text(`Total Readings: ${getCleanText('weeklyTotalReads', '0')}`, 120, yPos + 32);
         
-        doc.text(`Period: ${weekRange}`, 20, yPos + 22);
-        doc.text(`Average Glucose: ${avgGlucose}`, 20, yPos + 32);
-        doc.text(`Average Heart Rate: ${avgHeart}`, 20, yPos + 42);
-        doc.text(`Total Readings: ${totalReads}`, 120, yPos + 32);
-        doc.text(`Status: ${weeklyComparison}`, 120, yPos + 42);
+        yPos += 52;
         
-        yPos += 58;
-        
-        // ========== 5. LABORATORY RESULTS (من Firebase/Doctor) ==========
+        // ========== 5. LABORATORY RESULTS ==========
         ensureSpace(10);
-        
         doc.setFillColor(255, 248, 225);
-        doc.rect(15, yPos, 180, 150, 'F');
+        doc.rect(15, yPos, 180, 155, 'F');
         doc.setDrawColor(2, 132, 199);
-        doc.rect(15, yPos, 180, 150);
+        doc.rect(15, yPos, 180, 155);
         
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
@@ -2197,16 +2171,6 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         
         let rowY = yPos + 22;
         
-        // جلب بيانات المعامل (إذا كانت موجودة في Firebase)
-        const lab_fbg = getSafeValue('lab_fbg', '--');
-        const lab_hba1c = getSafeValue('lab_hba1c', '--');
-        const lab_creatinine = getSafeValue('lab_creatinine', '--');
-        const lab_egfr = getSafeValue('lab_egfr', '--');
-        const lab_alt = getSafeValue('lab_alt', '--');
-        const lab_tsh = getSafeValue('lab_tsh', '--');
-        const lab_uric_acid = getSafeValue('lab_uric_acid', '--');
-        const lab_bun = getSafeValue('lab_bun', '--');
-        
         // Diabetes Profile
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(239, 68, 68);
@@ -2214,9 +2178,9 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         rowY += 5;
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
-        doc.text(`Fasting Blood Glucose: ${lab_fbg} mg/dL (Normal: 70-100)`, 20, rowY);
+        doc.text(`FBG: ${getSafeValue('lab_fbg', '--')} mg/dL (Normal: 70-100)`, 20, rowY);
         rowY += 5;
-        doc.text(`HbA1c: ${lab_hba1c} % (Normal: 4.0-5.6)`, 20, rowY);
+        doc.text(`HbA1c: ${getSafeValue('lab_hba1c', '--')} % (Normal: 4.0-5.6)`, 20, rowY);
         rowY += 8;
         
         // Kidney Function
@@ -2226,13 +2190,13 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         rowY += 5;
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
-        doc.text(`Creatinine: ${lab_creatinine} mg/dL (Normal: 0.6-1.2)`, 20, rowY);
+        doc.text(`Creatinine: ${getSafeValue('lab_creatinine', '--')} mg/dL`, 20, rowY);
         rowY += 5;
-        doc.text(`BUN: ${lab_bun} mg/dL (Normal: 7-20)`, 20, rowY);
+        doc.text(`BUN: ${getSafeValue('lab_bun', '--')} mg/dL`, 20, rowY);
         rowY += 5;
-        doc.text(`eGFR: ${lab_egfr} mL/min (Normal: >60)`, 20, rowY);
+        doc.text(`eGFR: ${getSafeValue('lab_egfr', '--')} mL/min`, 20, rowY);
         rowY += 5;
-        doc.text(`Uric Acid: ${lab_uric_acid} mg/dL (Normal: 3.5-7.2)`, 20, rowY);
+        doc.text(`Uric Acid: ${getSafeValue('lab_uric_acid', '--')} mg/dL`, 20, rowY);
         rowY += 8;
         
         // Liver Function
@@ -2242,7 +2206,13 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         rowY += 5;
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
-        doc.text(`ALT: ${lab_alt} U/L (Normal: 10-40)`, 20, rowY);
+        doc.text(`ALT: ${getSafeValue('lab_alt', '--')} U/L`, 20, rowY);
+        rowY += 5;
+        doc.text(`AST: ${getSafeValue('lab_ast', '--')} U/L`, 20, rowY);
+        rowY += 5;
+        doc.text(`ALP: ${getSafeValue('lab_alp', '--')} U/L`, 20, rowY);
+        rowY += 5;
+        doc.text(`Bilirubin: ${getSafeValue('lab_bilirubin', '--')} mg/dL`, 20, rowY);
         rowY += 8;
         
         // Thyroid Function
@@ -2252,13 +2222,44 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         rowY += 5;
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
-        doc.text(`TSH: ${lab_tsh} µIU/mL (Normal: 0.4-4.0)`, 20, rowY);
+        doc.text(`TSH: ${getSafeValue('lab_tsh', '--')} µIU/mL`, 20, rowY);
+        rowY += 5;
+        doc.text(`T3: ${getSafeValue('lab_t3', '--')} ng/dL`, 20, rowY);
+        rowY += 5;
+        doc.text(`T4: ${getSafeValue('lab_t4', '--')} µg/dL`, 20, rowY);
+        rowY += 8;
         
-        yPos += 160;
+        // Cardiac Markers
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(236, 72, 153);
+        doc.text("Cardiac Markers", 20, rowY);
+        rowY += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Troponin I: ${getSafeValue('lab_troponin', '--')} ng/mL`, 20, rowY);
+        rowY += 5;
+        doc.text(`CK-MB: ${getSafeValue('lab_ckmb', '--')} ng/mL`, 20, rowY);
+        rowY += 5;
+        doc.text(`NT-proBNP: ${getSafeValue('lab_bnp', '--')} pg/mL`, 20, rowY);
+        rowY += 8;
+        
+        // Inflammation
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(139, 92, 246);
+        doc.text("Inflammation Markers", 20, rowY);
+        rowY += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        doc.text(`CRP: ${getSafeValue('lab_crp', '--')} mg/L`, 20, rowY);
+        rowY += 5;
+        doc.text(`ESR: ${getSafeValue('lab_esr', '--')} mm/hr`, 20, rowY);
+        rowY += 5;
+        doc.text(`PCT: ${getSafeValue('lab_pct', '--')} ng/mL`, 20, rowY);
+        
+        yPos += 165;
         
         // ========== 6. DOCTOR'S NOTES ==========
         ensureSpace(70);
-        
         doc.setFillColor(240, 248, 255);
         doc.rect(15, yPos, 180, 60, 'F');
         doc.setDrawColor(2, 132, 199);
@@ -2273,12 +2274,9 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         
-        let doctorDate = getSafeText('doctorNotesDate', 'Not available');
-        let doctorNotesText = getSafeText('doctorNotes', 'No clinical notes available');
-        doctorNotesText = cleanText(doctorNotesText);
+        doc.text(`Last Review: ${getCleanText('doctorNotesDate', 'Not available')}`, 20, yPos + 22);
         
-        doc.text(`Last Review: ${doctorDate}`, 20, yPos + 22);
-        
+        let doctorNotesText = getCleanText('doctorNotes', 'No clinical notes available');
         const splitNotes = doc.splitTextToSize(doctorNotesText, 170);
         let textY = yPos + 32;
         for (let i = 0; i < Math.min(splitNotes.length, 5); i++) {
@@ -2290,7 +2288,6 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         
         // ========== 7. DAILY CHECK-IN ==========
         ensureSpace(45);
-        
         doc.setFillColor(255, 240, 245);
         doc.rect(15, yPos, 180, 38, 'F');
         doc.setDrawColor(2, 132, 199);
@@ -2305,17 +2302,13 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         
-        let streakCount = getSafeValue('streakCount', '0');
-        let lastCheckin = getSafeText('lastCheckinDate', 'Never');
-        
-        doc.text(`Current Streak: ${streakCount} day(s)`, 20, yPos + 24);
-        doc.text(`Last Check-in: ${lastCheckin}`, 20, yPos + 34);
+        doc.text(`Current Streak: ${getSafeValue('streakCount', '0')} day(s)`, 20, yPos + 24);
+        doc.text(`Last Check-in: ${getCleanText('lastCheckinDate', 'Never')}`, 20, yPos + 34);
         
         yPos += 48;
         
         // ========== 8. HEALTH TIP ==========
         ensureSpace(40);
-        
         doc.setFillColor(245, 255, 250);
         doc.rect(15, yPos, 180, 35, 'F');
         doc.setDrawColor(16, 185, 129);
@@ -2330,8 +2323,7 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFont('helvetica', 'italic');
         doc.setTextColor(80, 80, 80);
         
-        let tipText = getSafeText('medicalTipText', 'Stay healthy and active!');
-        tipText = cleanText(tipText);
+        let tipText = getCleanText('medicalTipText', 'Stay healthy and active!');
         const splitTip = doc.splitTextToSize(tipText, 170);
         doc.text(splitTip, 20, yPos + 18);
         
