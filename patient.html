@@ -1990,7 +1990,6 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
         // ========== EXPORT COMPREHENSIVE MEDICAL REPORT (PROFESSIONAL) ==========
 document.getElementById('exportBtn')?.addEventListener('click', async () => {
     try {
-        // إظهار مؤقت تحميل
         const btn = document.getElementById('exportBtn');
         const originalText = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Report...';
@@ -1999,44 +1998,35 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         let yPos = 25;
-        let pageNumber = 1;
-        
-        // دالة لإضافة صفحة جديدة إذا لزم الأمر
-        function checkPageBreak(neededSpace) {
-            if (yPos + neededSpace > 280) {
-                doc.addPage();
-                yPos = 20;
-                pageNumber++;
-                // إضافة رقم الصفحة
-                doc.setFontSize(8);
-                doc.setTextColor(150, 150, 150);
-                doc.text(`Page ${pageNumber}`, 195, 290, { align: 'right' });
-                doc.setTextColor(0, 0, 0);
-                return true;
-            }
-            return false;
-        }
         
         // دالة لتنسيق التاريخ بشكل صحيح
-        function formatDate(dateString) {
-            if (!dateString || dateString === 'Never' || dateString === '--') return 'Not recorded';
+        function formatDate(dateStr) {
+            if (!dateStr || dateStr === 'Never' || dateStr === '--') return 'Not recorded';
             try {
-                // محاولة تحويل التاريخ
-                let date = new Date(dateString);
-                if (isNaN(date.getTime())) {
-                    // إذا كان التاريخ بصيغة مختلفة
-                    const parts = dateString.match(/(\d+)[\/\-](\d+)[\/\-](\d+)/);
+                // تنظيف النص من أي رموز غريبة
+                let cleanStr = dateStr.replace(/[^\d\/\-]/g, '');
+                if (cleanStr.match(/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/)) {
+                    let parts = cleanStr.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
                     if (parts) {
-                        date = new Date(parts[3], parts[2] - 1, parts[1]);
+                        return `${parts[1].padStart(2,'0')}/${parts[2].padStart(2,'0')}/${parts[3]}`;
                     }
                 }
-                if (!isNaN(date.getTime())) {
-                    return date.toLocaleDateString('en-GB');
-                }
-                return dateString;
+                return dateStr;
             } catch(e) {
-                return dateString;
+                return 'Not recorded';
             }
+        }
+        
+        // تنظيف النص من الرموز الغريبة
+        function cleanText(text) {
+            if (!text) return '';
+            // إزالة الرموز الغريبة مثل Ø=ÜÊ وغيرها
+            let cleaned = text.replace(/[^\x20-\x7E\n\r]/g, '');
+            cleaned = cleaned.replace(/Ø[=ÜÊËŠàáâãäåæçèéêëìíîï]/g, '');
+            cleaned = cleaned.replace(/[^\w\s\.\,\:\;\-\/\*\(\)]/g, '');
+            // إصلاح المسافات الزائدة
+            cleaned = cleaned.replace(/\s+/g, ' ');
+            return cleaned.trim();
         }
         
         // ========== HEADER ==========
@@ -2046,22 +2036,21 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.rect(0, 0, 210, 8, 'F');
         
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(28);
+        doc.setFontSize(26);
         doc.setFont('helvetica', 'bold');
         doc.text("HELIOS", 105, 22, { align: 'center' });
         doc.setFontSize(12);
         doc.setFont('helvetica', 'normal');
-        doc.text("Comprehensive Medical Health Report", 105, 33, { align: 'center' });
+        doc.text("Comprehensive Medical Report", 105, 33, { align: 'center' });
         doc.setFontSize(9);
         const now = new Date();
-        const formattedDate = `${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()} - ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
-        doc.text(`Generated: ${formattedDate}`, 105, 40, { align: 'center' });
+        const todayDate = `${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()} - ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+        doc.text(`Generated: ${todayDate}`, 105, 40, { align: 'center' });
         
         yPos = 58;
         doc.setTextColor(0, 0, 0);
         
         // ========== 1. PATIENT INFORMATION ==========
-        checkPageBreak(45);
         doc.setFillColor(240, 248, 255);
         doc.rect(15, yPos, 180, 42, 'F');
         doc.setDrawColor(2, 132, 199);
@@ -2081,18 +2070,15 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         const patientId = document.getElementById('profileId')?.innerText || 'P-10042';
         const patientDob = document.getElementById('profileDob')?.innerText || '15 March 1985';
         const patientPhone = document.getElementById('profilePhone')?.innerText || 'Not provided';
-        const patientEmail = document.getElementById('profileEmail')?.innerText || 'Not provided';
         
-        doc.text(`Name: ${patientName}`, 20, yPos + 20);
-        doc.text(`Patient ID: ${patientId}`, 20, yPos + 30);
-        doc.text(`Date of Birth: ${patientDob}`, 20, yPos + 40);
-        doc.text(`Phone: ${patientPhone}`, 120, yPos + 20);
-        doc.text(`Email: ${patientEmail}`, 120, yPos + 30);
+        doc.text(`Name: ${cleanText(patientName)}`, 20, yPos + 20);
+        doc.text(`Patient ID: ${cleanText(patientId)}`, 20, yPos + 30);
+        doc.text(`Date of Birth: ${cleanText(patientDob)}`, 20, yPos + 40);
+        doc.text(`Phone: ${cleanText(patientPhone)}`, 120, yPos + 25);
         
         yPos += 52;
         
         // ========== 2. CURRENT VITAL SIGNS ==========
-        checkPageBreak(55);
         doc.setFillColor(255, 250, 240);
         doc.rect(15, yPos, 180, 55, 'F');
         doc.setDrawColor(2, 132, 199);
@@ -2101,30 +2087,34 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(2, 132, 199);
-        doc.text("Vital Signs (Current)", 20, yPos + 8);
+        doc.text("Current Vital Signs", 20, yPos + 8);
         
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         
-        const heartRate = document.getElementById('heartValue')?.innerText || '-- bpm';
-        const spo2 = document.getElementById('spo2Value')?.innerText || '-- %';
-        const temp = document.getElementById('tempValue')?.innerText || '-- °C';
-        const bp = document.getElementById('bpValue')?.innerText || '--/-- mmHg';
-        const glucose = document.getElementById('glucoseValue')?.innerText || '-- mg/dL';
-        const healthScore = document.getElementById('healthScore')?.innerText || '--';
+        let heartRate = document.getElementById('heartValue')?.innerText || '-- bpm';
+        let spo2 = document.getElementById('spo2Value')?.innerText || '-- %';
+        let temp = document.getElementById('tempValue')?.innerText || '-- °C';
+        let bp = document.getElementById('bpValue')?.innerText || '--/-- mmHg';
+        let glucose = document.getElementById('glucoseValue')?.innerText || '-- mg/dL';
+        let healthScore = document.getElementById('healthScore')?.innerText || '--';
+        
+        // تنظيف القيم من الأرقام الزائدة
+        heartRate = heartRate.replace(/[^0-9]/g, '') + ' bpm';
+        spo2 = spo2.replace(/[^0-9]/g, '') + ' %';
+        temp = temp.replace(/[^0-9\.]/g, '') + ' °C';
         
         doc.text(`Heart Rate: ${heartRate}`, 20, yPos + 22);
         doc.text(`Oxygen Saturation: ${spo2}`, 20, yPos + 34);
         doc.text(`Body Temperature: ${temp}`, 20, yPos + 46);
-        doc.text(`Blood Pressure: ${bp}`, 120, yPos + 22);
-        doc.text(`Blood Glucose: ${glucose}`, 120, yPos + 34);
-        doc.text(`Health Score: ${healthScore}/100`, 120, yPos + 46);
+        doc.text(`Blood Pressure: ${cleanText(bp)}`, 120, yPos + 22);
+        doc.text(`Blood Glucose: ${cleanText(glucose)}`, 120, yPos + 34);
+        doc.text(`Health Score: ${cleanText(healthScore)}/100`, 120, yPos + 46);
         
         yPos += 65;
         
         // ========== 3. ENVIRONMENT DATA ==========
-        checkPageBreak(40);
         doc.setFillColor(240, 255, 240);
         doc.rect(15, yPos, 180, 38, 'F');
         doc.setDrawColor(2, 132, 199);
@@ -2139,18 +2129,20 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         
-        const roomTemp = document.getElementById('roomTempValue')?.innerText || '-- °C';
-        const humidity = document.getElementById('humidityValue')?.innerText || '-- %';
-        const motion = document.getElementById('motionValue')?.innerText || '-- m/s²';
+        let roomTemp = document.getElementById('roomTempValue')?.innerText || '-- °C';
+        let humidity = document.getElementById('humidityValue')?.innerText || '-- %';
+        let motion = document.getElementById('motionValue')?.innerText || '-- m/s²';
+        
+        roomTemp = roomTemp.replace(/[^0-9\.]/g, '') + ' °C';
+        humidity = humidity.replace(/[^0-9\.]/g, '') + ' %';
         
         doc.text(`Room Temperature: ${roomTemp}`, 20, yPos + 22);
         doc.text(`Humidity: ${humidity}`, 20, yPos + 32);
-        doc.text(`Motion Index: ${motion}`, 120, yPos + 27);
+        doc.text(`Motion Index: ${cleanText(motion)}`, 120, yPos + 27);
         
         yPos += 48;
         
-        // ========== 4. WEEKLY HEALTH REPORT ==========
-        checkPageBreak(50);
+        // ========== 4. WEEKLY HEALTH SUMMARY ==========
         doc.setFillColor(255, 245, 255);
         doc.rect(15, yPos, 180, 48, 'F');
         doc.setDrawColor(2, 132, 199);
@@ -2165,22 +2157,24 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         
-        const avgGlucose = document.getElementById('weeklyAvgGlucose')?.innerText || '-- mg/dL';
-        const avgHeart = document.getElementById('weeklyAvgHeart')?.innerText || '-- bpm';
-        const totalReads = document.getElementById('weeklyTotalReads')?.innerText || '0';
-        const weekRange = document.getElementById('reportWeekRange')?.innerText || 'Last 7 days';
-        const weeklyComparison = document.getElementById('weeklyComparison')?.innerText || '--';
+        let avgGlucose = document.getElementById('weeklyAvgGlucose')?.innerText || '-- mg/dL';
+        let avgHeart = document.getElementById('weeklyAvgHeart')?.innerText || '-- bpm';
+        let totalReads = document.getElementById('weeklyTotalReads')?.innerText || '0';
+        let weekRange = document.getElementById('reportWeekRange')?.innerText || 'Last 7 days';
+        let weeklyComparison = document.getElementById('weeklyComparison')?.innerText || '--';
         
-        doc.text(`Period: ${weekRange}`, 20, yPos + 22);
+        avgGlucose = avgGlucose.replace(/[^0-9]/g, '') + ' mg/dL';
+        avgHeart = avgHeart.replace(/[^0-9]/g, '') + ' bpm';
+        
+        doc.text(`Period: ${cleanText(weekRange)}`, 20, yPos + 22);
         doc.text(`Average Glucose: ${avgGlucose}`, 20, yPos + 32);
         doc.text(`Average Heart Rate: ${avgHeart}`, 20, yPos + 42);
-        doc.text(`Total Readings: ${totalReads}`, 120, yPos + 32);
-        doc.text(`Status: ${weeklyComparison}`, 120, yPos + 42);
+        doc.text(`Total Readings: ${cleanText(totalReads)}`, 120, yPos + 32);
+        doc.text(`Status: ${cleanText(weeklyComparison)}`, 120, yPos + 42);
         
         yPos += 58;
         
         // ========== 5. LABORATORY RESULTS ==========
-        checkPageBreak(70);
         doc.setFillColor(255, 248, 225);
         doc.rect(15, yPos, 180, 68, 'F');
         doc.setDrawColor(2, 132, 199);
@@ -2195,32 +2189,32 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         
-        const fbg = document.getElementById('lab_fbg')?.innerText || '--';
-        const hba1c = document.getElementById('lab_hba1c')?.innerText || '--';
-        const creatinine = document.getElementById('lab_creatinine')?.innerText || '--';
-        const egfr = document.getElementById('lab_egfr')?.innerText || '--';
-        const alt = document.getElementById('lab_alt')?.innerText || '--';
-        const tsh = document.getElementById('lab_tsh')?.innerText || '--';
-        const uricAcid = document.getElementById('lab_uric_acid')?.innerText || '--';
-        const troponin = document.getElementById('lab_troponin')?.innerText || '--';
+        let fbg = document.getElementById('lab_fbg')?.innerText || '--';
+        let hba1c = document.getElementById('lab_hba1c')?.innerText || '--';
+        let creatinine = document.getElementById('lab_creatinine')?.innerText || '--';
+        let egfr = document.getElementById('lab_egfr')?.innerText || '--';
+        let alt = document.getElementById('lab_alt')?.innerText || '--';
+        let tsh = document.getElementById('lab_tsh')?.innerText || '--';
+        
+        fbg = fbg.replace(/[^0-9\.]/g, '');
+        hba1c = hba1c.replace(/[^0-9\.]/g, '');
+        creatinine = creatinine.replace(/[^0-9\.]/g, '');
+        alt = alt.replace(/[^0-9\.]/g, '');
         
         doc.text(`Fasting Blood Glucose: ${fbg} mg/dL`, 20, yPos + 22);
         doc.text(`HbA1c: ${hba1c} %`, 20, yPos + 32);
         doc.text(`Creatinine: ${creatinine} mg/dL`, 20, yPos + 42);
-        doc.text(`eGFR: ${egfr} mL/min`, 20, yPos + 52);
+        doc.text(`eGFR: ${cleanText(egfr)} mL/min`, 20, yPos + 52);
         doc.text(`ALT (SGPT): ${alt} U/L`, 20, yPos + 62);
-        doc.text(`TSH: ${tsh} µIU/mL`, 120, yPos + 22);
-        doc.text(`Uric Acid: ${uricAcid} mg/dL`, 120, yPos + 32);
-        doc.text(`Troponin I: ${troponin} ng/mL`, 120, yPos + 42);
+        doc.text(`TSH: ${cleanText(tsh)} µIU/mL`, 120, yPos + 32);
         
         yPos += 78;
         
         // ========== 6. DOCTOR'S NOTES ==========
-        checkPageBreak(65);
         doc.setFillColor(240, 248, 255);
-        doc.rect(15, yPos, 180, 62, 'F');
+        doc.rect(15, yPos, 180, 55, 'F');
         doc.setDrawColor(2, 132, 199);
-        doc.rect(15, yPos, 180, 62);
+        doc.rect(15, yPos, 180, 55);
         
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
@@ -2231,30 +2225,36 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         
-        const doctorDate = document.getElementById('doctorNotesDate')?.innerText || 'Not available';
-        const doctorNotesDiv = document.getElementById('doctorNotes');
+        let doctorDate = document.getElementById('doctorNotesDate')?.innerText || 'Not available';
         let doctorNotesText = 'No clinical notes available';
+        const doctorNotesDiv = document.getElementById('doctorNotes');
         if (doctorNotesDiv) {
             doctorNotesText = doctorNotesDiv.innerText || doctorNotesDiv.textContent;
-            doctorNotesText = doctorNotesText.replace(/Clinical Summary:/g, 'Clinical Summary:');
-            doctorNotesText = doctorNotesText.replace(/Recommendations:/g, 'Recommendations:');
-            doctorNotesText = doctorNotesText.replace(/Next Appointment:/g, 'Next Appointment:');
+            doctorNotesText = cleanText(doctorNotesText);
+            // تنظيف النص من التكرارات
+            doctorNotesText = doctorNotesText.replace(/Clinical Summary: Clinical Summary:/g, 'Clinical Summary:');
+            doctorNotesText = doctorNotesText.replace(/Recommendations: Recommendations:/g, 'Recommendations:');
         }
         
         doc.text(`Last Review: ${formatDate(doctorDate)}`, 20, yPos + 22);
         
-        // تقسيم النص الطويل
-        const splitNotes = doc.splitTextToSize(doctorNotesText.substring(0, 400), 170);
+        const splitNotes = doc.splitTextToSize(doctorNotesText, 170);
         let textY = yPos + 32;
-        for (let i = 0; i < splitNotes.length && textY < 270; i++) {
-            doc.text(splitNotes[i], 20, textY);
-            textY += 5;
+        for (let i = 0; i < Math.min(splitNotes.length, 6); i++) {
+            if (textY < 270) {
+                doc.text(splitNotes[i], 20, textY);
+                textY += 5;
+            }
         }
         
-        yPos = Math.max(textY + 5, yPos + 72);
+        yPos = Math.max(textY + 8, yPos + 65);
         
         // ========== 7. DAILY CHECK-IN ==========
-        checkPageBreak(40);
+        if (yPos > 250) {
+            doc.addPage();
+            yPos = 20;
+        }
+        
         doc.setFillColor(255, 240, 245);
         doc.rect(15, yPos, 180, 38, 'F');
         doc.setDrawColor(2, 132, 199);
@@ -2269,16 +2269,20 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         
-        const streakCount = document.getElementById('streakCount')?.innerText || '0';
-        const lastCheckin = document.getElementById('lastCheckinDate')?.innerText || 'Never';
+        let streakCount = document.getElementById('streakCount')?.innerText || '0';
+        let lastCheckin = document.getElementById('lastCheckinDate')?.innerText || 'Never';
         
-        doc.text(`Current Streak: ${streakCount} day(s)`, 20, yPos + 24);
+        doc.text(`Current Streak: ${cleanText(streakCount)} day(s)`, 20, yPos + 24);
         doc.text(`Last Check-in: ${formatDate(lastCheckin)}`, 20, yPos + 34);
         
         yPos += 48;
         
-        // ========== 8. MEDICAL TIPS ==========
-        checkPageBreak(35);
+        // ========== 8. HEALTH TIP ==========
+        if (yPos > 260) {
+            doc.addPage();
+            yPos = 20;
+        }
+        
         doc.setFillColor(245, 255, 250);
         doc.rect(15, yPos, 180, 32, 'F');
         doc.setDrawColor(16, 185, 129);
@@ -2287,13 +2291,14 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.setFontSize(11);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(16, 185, 129);
-        doc.text("Health Tip", 20, yPos + 7);
+        doc.text("Health Tip of the Day", 20, yPos + 7);
         
         doc.setFontSize(9);
         doc.setFont('helvetica', 'italic');
         doc.setTextColor(80, 80, 80);
         
-        const tipText = document.getElementById('medicalTipText')?.innerText || 'Stay healthy!';
+        let tipText = document.getElementById('medicalTipText')?.innerText || 'Stay healthy and active!';
+        tipText = cleanText(tipText);
         const splitTip = doc.splitTextToSize(tipText, 170);
         doc.text(splitTip, 20, yPos + 18);
         
@@ -2306,31 +2311,33 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         }
         
         doc.setFillColor(240, 240, 240);
-        doc.rect(15, yPos, 180, 22, 'F');
+        doc.rect(15, yPos, 180, 20, 'F');
         doc.setFontSize(8);
         doc.setTextColor(100, 100, 100);
         doc.setFont('helvetica', 'normal');
         doc.text("This report is generated automatically by HELIOS Medical System.", 105, yPos + 7, { align: 'center' });
         doc.text("For medical emergencies, please contact your healthcare provider immediately.", 105, yPos + 15, { align: 'center' });
         
-        // ========== إضافة رقم الصفحة في الصفحة الأولى ==========
-        doc.setFontSize(8);
-        doc.setTextColor(150, 150, 150);
-        doc.text("Page 1", 195, 290, { align: 'right' });
+        // ========== PAGE NUMBERS ==========
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text(`Page ${i} of ${pageCount}`, 195, 290, { align: 'right' });
+        }
         
         // حفظ الملف
-        const fileName = `HELIOS_Medical_Report_${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')}.pdf`;
+        const fileName = `HELIOS_Report_${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')}.pdf`;
         doc.save(fileName);
         
-        // إعادة الزر إلى حالته الطبيعية
         btn.innerHTML = originalText;
         btn.disabled = false;
         
-        // إظهار إشعار نجاح
         if (typeof showNotification === 'function') {
-            showNotification('✅ Medical report exported successfully!', 'success');
+            showNotification('Medical report exported successfully!', 'success');
         } else {
-            alert('✅ Medical report exported successfully!');
+            alert('Medical report exported successfully!');
         }
         
     } catch (error) {
@@ -2338,7 +2345,7 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         const btn = document.getElementById('exportBtn');
         btn.innerHTML = '<i class="fas fa-download"></i> Export Comprehensive Report';
         btn.disabled = false;
-        alert('❌ Error generating report. Please try again.');
+        alert('Error generating report. Please try again.');
     }
 });
 
