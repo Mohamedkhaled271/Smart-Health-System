@@ -1106,3 +1106,13 @@ td {
             color: var(--active-color);
             font-weight: 600;
         }
+/* منع ظهور النص عند الضغط على الروابط */
+a[href="#"]:focus,
+a[href="javascript:void(0)"]:focus {
+    outline: none;
+}
+
+/* إزالة أي نص يظهر في شريط الحالة */
+.menu-item {
+    cursor: pointer;
+}
