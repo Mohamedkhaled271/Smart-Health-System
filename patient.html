@@ -514,6 +514,108 @@
                         <div class="card-indicator" id="tempIndicator" style="font-weight:600;">Normal</div>
                     </div>
                 </div>
+                <!-- ========== SMART HEALTH CARD - AI-POWERED INSIGHTS ========== -->
+<div class="vital-card" style="background: linear-gradient(135deg, var(--surface), rgba(139,92,246,0.05)); border: 1px solid rgba(139,92,246,0.2); margin-bottom: 1.5rem;">
+    <div class="vital-header">
+        <div style="background: linear-gradient(135deg, #8b5cf6, #c084fc); width: 45px; height: 45px; border-radius: 25px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(139,92,246,0.3);">
+            <i class="fas fa-microchip" style="color: white; font-size: 1.3rem;"></i>
+        </div>
+        <div>
+            <h3 style="font-size: 1rem;">Smart Health Monitor</h3>
+            <small style="color: var(--text-secondary); font-size: 0.65rem;"><i class="fas fa-brain"></i> AI-Powered Insights</small>
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 0.8rem 0;">
+        <div style="text-align: center;">
+            <i class="fas fa-chart-line" style="color: #10b981; font-size: 1rem;"></i>
+            <div style="font-size: 0.55rem; color: var(--text-secondary); margin-top: 4px;">TREND</div>
+            <div style="font-weight: 700; font-size: 0.8rem;" id="smartTrend">Stable 📈</div>
+        </div>
+        <div style="text-align: center;">
+            <i class="fas fa-clock" style="color: #f59e0b; font-size: 1rem;"></i>
+            <div style="font-size: 0.55rem; color: var(--text-secondary); margin-top: 4px;">LAST CHECK</div>
+            <div style="font-weight: 700; font-size: 0.8rem;" id="smartLastCheck">--:--</div>
+        </div>
+        <div style="text-align: center;">
+            <i class="fas fa-star" style="color: #8b5cf6; font-size: 1rem;"></i>
+            <div style="font-size: 0.55rem; color: var(--text-secondary); margin-top: 4px;">HEALTH SCORE</div>
+            <div style="font-weight: 700; font-size: 0.8rem;" id="smartScore">--</div>
+        </div>
+    </div>
+    
+    <div style="background: rgba(139,92,246,0.08); border-radius: 16px; padding: 8px 10px; margin: 0.5rem 0;">
+        <p style="font-size: 0.7rem; line-height: 1.4; margin: 0;" id="smartMessage">
+            <i class="fas fa-circle" style="font-size: 0.4rem; color: #10b981; vertical-align: middle;"></i>
+            All vitals are within normal range. Great job maintaining your health!
+        </p>
+    </div>
+    
+    <button onclick="document.querySelector('[data-page=\"ai-prediction\"]')?.click()" style="width: 100%; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border: none; border-radius: 30px; padding: 7px; color: white; font-size: 0.65rem; cursor: pointer; margin-top: 8px; transition: all 0.3s; font-weight: 500;">
+        <i class="fas fa-chart-pie"></i> View Full AI Analysis →
+    </button>
+</div>
+
+<style>
+    .vital-card button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(139,92,246,0.4);
+    }
+    @media (max-width: 768px) {
+        .vital-card .vital-header h3 { font-size: 0.8rem !important; }
+        .vital-card .vital-header small { font-size: 0.55rem !important; }
+    }
+</style>
+
+<script>
+(function updateSmartCard() {
+    function refreshSmartCard() {
+        const heartEl = document.getElementById('heartValue');
+        const glucoseEl = document.getElementById('glucoseValue');
+        const spo2El = document.getElementById('spo2Value');
+        
+        let heart = 75, glucose = 95, spo2 = 97;
+        if (heartEl) { let m = heartEl.innerText.match(/(\d+)/); if (m) heart = parseInt(m[1]); }
+        if (glucoseEl) { let m = glucoseEl.innerText.match(/(\d+)/); if (m) glucose = parseInt(m[1]); }
+        if (spo2El) { let m = spo2El.innerText.match(/(\d+)/); if (m) spo2 = parseInt(m[1]); }
+        
+        const now = new Date();
+        const lastCheck = document.getElementById('smartLastCheck');
+        if (lastCheck) lastCheck.innerHTML = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        
+        let trend = 'Stable 📈', trendColor = '#10b981';
+        if (glucose > 140) { trend = 'High ⚠️'; trendColor = '#ef4444'; }
+        else if (glucose < 80) { trend = 'Low 📉'; trendColor = '#f59e0b'; }
+        
+        const trendEl = document.getElementById('smartTrend');
+        if (trendEl) { trendEl.innerHTML = trend; trendEl.style.color = trendColor; }
+        
+        let message = '';
+        if (glucose > 140) message = '⚠️ Your glucose is elevated. Consider reducing sugar intake.';
+        else if (glucose < 80) message = '⚠️ Your glucose is low. Have a healthy snack.';
+        else if (spo2 < 95) message = '⚠️ Oxygen levels are low. Try deep breathing exercises.';
+        else if (heart > 100) message = '⚠️ Heart rate is elevated. Take a moment to relax.';
+        else if (heart < 60) message = 'ℹ️ Heart rate is below average. Monitor if unusual.';
+        else message = '✅ All vitals are normal. Keep up your healthy lifestyle!';
+        
+        const msgEl = document.getElementById('smartMessage');
+        if (msgEl) msgEl.innerHTML = `<i class="fas fa-circle" style="font-size: 0.4rem; color: ${trendColor}; vertical-align: middle;"></i> ${message}`;
+        
+        let score = 100;
+        if (glucose > 140 || glucose < 80) score -= 25;
+        if (spo2 < 95) score -= 20;
+        if (heart > 100 || heart < 60) score -= 15;
+        score = Math.max(0, Math.min(100, score));
+        
+        const scoreEl = document.getElementById('smartScore');
+        if (scoreEl) { scoreEl.innerHTML = score; scoreEl.style.color = score >= 80 ? '#10b981' : (score >= 60 ? '#f59e0b' : '#ef4444'); }
+    }
+    
+    refreshSmartCard();
+    setInterval(refreshSmartCard, 5000);
+})();
+</script>
+<!-- ========== END SMART HEALTH CARD ========== -->
 
                 <!-- Environment Data -->
                 <div class="env-grid">
