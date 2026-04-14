@@ -4722,119 +4722,225 @@ function initSupportPage() {
     
 })();
 </script>
-<!-- ========== FLEXIBLE MOBILE VIEW - LIKE PC BUT ADAPTIVE ========== -->
-<script>
-(function() {
-    "use strict";
-    
-    console.log("🟢 Setting up responsive mobile view...");
-    
-    // تعديل viewport للسماح بالتكبير والتصغير
-    let viewport = document.querySelector('meta[name="viewport"]');
-    if (viewport) {
-        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes');
+<!-- ============================================================== -->   
+                <!-- ========== RESPONSIVE DESIGN - PERFECT ON ALL SCREENS ========== -->
+<style>
+/* تحسينات عامة للعرض على جميع الأجهزة */
+* {
+    box-sizing: border-box;
+}
+
+/* ======== الشاشات الكبيرة (لاب توب / كمبيوتر) ======== */
+@media (min-width: 1200px) {
+    .vitals-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 1.5rem !important;
+    }
+    .env-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 1rem !important;
+    }
+    .charts-row {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1.5rem !important;
+    }
+    .vital-value {
+        font-size: 2.3rem !important;
+    }
+    .gauge-container {
+        height: 140px !important;
+    }
+}
+
+/* ======== الشاشات المتوسطة (تابلت) ======== */
+@media (min-width: 769px) and (max-width: 1199px) {
+    .vitals-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 1rem !important;
+    }
+    .env-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0.8rem !important;
+    }
+    .charts-row {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1rem !important;
+    }
+    .vital-value {
+        font-size: 1.8rem !important;
+    }
+    .gauge-container {
+        height: 110px !important;
+    }
+    .vital-header h3 {
+        font-size: 0.9rem !important;
+    }
+}
+
+/* ======== الشاشات الصغيرة (موبايل) ======== */
+@media (max-width: 768px) {
+    .vitals-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 0.6rem !important;
+    }
+    .env-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 0.5rem !important;
+    }
+    .charts-row {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.6rem !important;
     }
     
-    // إضافة CSS الديناميكي
-    const style = document.createElement('style');
-    style.textContent = `
-        /* تثبيت عرض الشبكات على جميع الشاشات */
-        .vitals-grid {
-            display: grid !important;
-            grid-template-columns: repeat(3, minmax(140px, 1fr)) !important;
-            gap: 0.8rem !important;
-        }
-        
-        .env-grid {
-            display: grid !important;
-            grid-template-columns: repeat(4, minmax(100px, 1fr)) !important;
-            gap: 0.5rem !important;
-        }
-        
-        .charts-row {
-            display: grid !important;
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 0.8rem !important;
-        }
-        
-        /* تحسين حجم الكروت على الموبايل */
-        .vital-card, .stat-card, .chart-card {
-            padding: 0.8rem !important;
-        }
-        
-        .vital-value {
-            font-size: 1.5rem !important;
-        }
-        
-        .vital-header h3 {
-            font-size: 0.85rem !important;
-        }
-        
-        .vital-header i {
-            font-size: 1.5rem !important;
-        }
-        
-        .gauge-container {
-            height: 90px !important;
-        }
-        
-        .stat-value {
-            font-size: 1.3rem !important;
-        }
-        
-        /* السماح بالتمرير الأفقي إذا لزم الأمر */
-        .main-content {
-            overflow-x: auto !important;
-            padding: 0.8rem !important;
-        }
-        
-        /* تحسين الـ sidebar على الموبايل */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 70px !important;
-                position: fixed !important;
-                z-index: 1000 !important;
-                height: 100vh !important;
-            }
-            .sidebar span {
-                display: none !important;
-            }
-            .main-content {
-                margin-left: 70px !important;
-                width: calc(100% - 70px) !important;
-            }
-            .sidebar:hover {
-                width: 250px !important;
-            }
-            .sidebar:hover span {
-                display: inline !important;
-            }
-        }
-        
-        /* للأجهزة الصغيرة جداً */
-        @media (max-width: 550px) {
-            .vitals-grid {
-                grid-template-columns: repeat(3, minmax(120px, 1fr)) !important;
-                gap: 0.5rem !important;
-            }
-            .env-grid {
-                grid-template-columns: repeat(4, minmax(80px, 1fr)) !important;
-                gap: 0.3rem !important;
-            }
-            .vital-value {
-                font-size: 1.2rem !important;
-            }
-            .vital-header h3 {
-                font-size: 0.7rem !important;
-            }
-        }
-    `;
-    document.head.appendChild(style);
+    /* تحسين حجم الكروت */
+    .vital-card, .stat-card, .chart-card {
+        padding: 0.6rem !important;
+    }
+    .vital-value {
+        font-size: 1.2rem !important;
+    }
+    .vital-header h3 {
+        font-size: 0.7rem !important;
+        margin: 0 !important;
+    }
+    .vital-header i {
+        font-size: 1.2rem !important;
+    }
+    .gauge-container {
+        height: 75px !important;
+        margin: 0.2rem 0 !important;
+    }
+    .stat-value {
+        font-size: 1.1rem !important;
+    }
+    .stat-title {
+        font-size: 0.6rem !important;
+    }
     
-    console.log("✅ Responsive view active - 3 cards per row on mobile");
+    /* تحسين الـ Sidebar */
+    .sidebar {
+        width: 60px !important;
+        position: fixed !important;
+        z-index: 1000 !important;
+    }
+    .sidebar span {
+        display: none !important;
+    }
+    .main-content {
+        margin-left: 60px !important;
+        width: calc(100% - 60px) !important;
+        padding: 0.5rem !important;
+    }
+    
+    /* السماح بالتمرير الأفقي */
+    .main-content {
+        overflow-x: auto !important;
+    }
+    
+    /* تحسين الخطوط */
+    .time-clock {
+        font-size: 0.9rem !important;
+        padding: 0.3rem 0.8rem !important;
+    }
+    .live-indicator {
+        font-size: 0.65rem !important;
+        padding: 0.3rem 0.8rem !important;
+    }
+    
+    /* تحسين أزرار الطوارئ */
+    #emergencySosBtn {
+        font-size: 0.8rem !important;
+        padding: 0.7rem !important;
+    }
+    #emergencySosBtn span {
+        font-size: 0.7rem !important;
+    }
+    
+    /* تحسين قسم المعامل */
+    .lab-results-section .vital-card {
+        padding: 0.8rem !important;
+    }
+    .lab-results-section h2 {
+        font-size: 1.2rem !important;
+    }
+    .lab-results-section h3 {
+        font-size: 0.9rem !important;
+    }
+    .lab-results-section .input-group label {
+        font-size: 0.65rem !important;
+    }
+}
+
+/* ======== الشاشات الصغيرة جداً (موبايل صغير) ======== */
+@media (max-width: 480px) {
+    .vitals-grid {
+        gap: 0.4rem !important;
+    }
+    .vital-value {
+        font-size: 1rem !important;
+    }
+    .vital-header h3 {
+        font-size: 0.6rem !important;
+    }
+    .vital-header i {
+        font-size: 1rem !important;
+    }
+    .gauge-container {
+        height: 60px !important;
+    }
+    .stat-value {
+        font-size: 0.9rem !important;
+    }
+    
+    /* تصغير الـ Sidebar أكثر */
+    .sidebar {
+        width: 50px !important;
+    }
+    .main-content {
+        margin-left: 50px !important;
+        width: calc(100% - 50px) !important;
+    }
+}
+
+/* تحسين التمرير */
+::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+}
+::-webkit-scrollbar-track {
+    background: var(--border);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+}
+</style>
+
+<script>
+// ========== إضافة كلاس responsive للجسم ==========
+(function() {
+    // إضافة كلاس responsive للـ body
+    document.body.classList.add('responsive-active');
+    
+    // مراقبة تغيير حجم الشاشة
+    window.addEventListener('resize', function() {
+        console.log("Screen size changed: " + window.innerWidth + "px");
+    });
+    
+    console.log("✅ Responsive design active - Screen width: " + window.innerWidth + "px");
 })();
 </script>
-<!-- ================================================== -->
+<!-- ============================================================== -->
 
 </body>
 </html>
