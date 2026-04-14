@@ -2,7 +2,7 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
     <title>HELIOS · Medical Dashboard · Real-time IoT Vitals</title>
     <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007bff'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E">
     <!-- Font Awesome 6 -->
@@ -438,6 +438,37 @@
         .indicator-normal { color: #10b981; }
         .indicator-warning { color: #f59e0b; }
         .indicator-danger { color: #ef4444; }
+        /* ========== FORCE FULL DASHBOARD ON MOBILE ========== */
+@media (max-width: 1200px) {
+    .vitals-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 0.8rem !important;
+        overflow-x: auto !important;
+    }
+    .env-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0.5rem !important;
+        overflow-x: auto !important;
+    }
+    .charts-row {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.8rem !important;
+        overflow-x: auto !important;
+    }
+    .main-content {
+        overflow-x: auto !important;
+    }
+    body {
+        min-width: 1000px !important;
+        overflow-x: auto !important;
+    }
+    .vital-card, .stat-card, .chart-card {
+        min-width: 160px !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -4722,7 +4753,39 @@ function initSupportPage() {
     
 })();
 </script>
-<!-- ============================================================== -->            
+<!-- ============================================================== -->
+                <!-- ========== MOBILE FORCE DESKTOP VIEW ========== -->
+<script>
+(function() {
+    function forceDesktopView() {
+        let viewport = document.querySelector('meta[name="viewport"]');
+        if (viewport) {
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0');
+        }
+        const style = document.createElement('style');
+        style.textContent = `
+            @media (max-width: 1200px) {
+                .vitals-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; overflow-x: auto !important; }
+                .env-grid { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; overflow-x: auto !important; }
+                .charts-row { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; overflow-x: auto !important; }
+                body { min-width: 1000px !important; overflow-x: auto !important; }
+                .vital-card { min-width: 160px !important; }
+            }
+        `;
+        document.head.appendChild(style);
+        console.log("✅ Mobile forced to desktop view");
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', forceDesktopView);
+    } else {
+        forceDesktopView();
+    }
+})();
+</script>
+<!-- ============================================== -->
+
+</body>
+</html>
 
 </body>
 </html>
