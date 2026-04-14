@@ -219,15 +219,23 @@
 <body>
 <div class="app-container">
     <aside class="sidebar">
-        <div class="logo"><i class="fas fa-user-md"></i><span>HELIOS MD</span></div>
-        <div class="menu-item active" data-page="editLab"><i class="fas fa-flask"></i><span>Edit Lab Data</span></div>
-        <div class="menu-item" data-page="clinicalNotes"><i class="fas fa-notes-medical"></i><span>Clinical Notes</span></div>
-        <div class="menu-item" data-page="preview"><i class="fas fa-eye"></i><span>Patient Preview</span></div>
-        <div class="menu-item" data-page="syncStatus"><i class="fas fa-cloud-upload-alt"></i><span>Sync Status</span></div>
-        <div style="margin-top: 2rem; padding: 1rem;">
-            <button id="themeToggle" class="btn-outline" style="width:100%"><i class="fas fa-moon"></i> Dark mode</button>
-        </div>
-    </aside>
+    <div class="logo"><i class="fas fa-user-md"></i><span>HELIOS DR</span></div>
+    
+    <div class="menu-item active" data-page="editLab"><i class="fas fa-flask"></i><span>Edit Lab Data</span></div>
+    <div class="menu-item" data-page="clinicalNotes"><i class="fas fa-notes-medical"></i><span>Clinical Notes</span></div>
+    <div class="menu-item" data-page="preview"><i class="fas fa-eye"></i><span>Patient Preview</span></div>
+    <div class="menu-item" data-page="syncStatus"><i class="fas fa-cloud-upload-alt"></i><span>Sync Status</span></div>
+    
+    <div style="margin-top: 2rem; padding: 1rem;">
+        <button id="themeToggle" class="btn-outline" style="width:100%"><i class="fas fa-moon"></i> Dark mode</button>
+    </div>
+    
+    <div style="margin-top: 1rem; padding: 1rem;">
+        <button id="logoutBtn" class="btn-outline" style="width:100%; color: #ef4444; border-color: #ef4444;">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+</aside>
 
     <main class="main-content">
         <div class="top-bar">
@@ -666,6 +674,28 @@ function convertInputNumbers() {
     
     console.log("✅ Numbers converter active for Doctor Portal");
 })();
+    // ========== LOGOUT BUTTON ==========
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to logout?')) {
+            // تسجيل الخروج من Firebase
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().signOut().then(() => {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    window.location.href = 'index.html';
+                }).catch(() => {
+                    window.location.href = 'index.html';
+                });
+            } else {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = 'index.html';
+            }
+        }
+    });
+}
 </script>
 </body>
 </html>
