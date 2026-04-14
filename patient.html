@@ -514,108 +514,217 @@
                         <div class="card-indicator" id="tempIndicator" style="font-weight:600;">Normal</div>
                     </div>
                 </div>
-                <!-- ========== SMART HEALTH CARD - AI-POWERED INSIGHTS ========== -->
-<div class="vital-card" style="background: linear-gradient(135deg, var(--surface), rgba(139,92,246,0.05)); border: 1px solid rgba(139,92,246,0.2); margin-bottom: 1.5rem;">
+                <!-- ========== HEALTH INSIGHTS & MOTIVATION CARD ========== -->
+<div class="vital-card" style="background: linear-gradient(135deg, var(--surface), rgba(16,185,129,0.03)); border: 1px solid rgba(16,185,129,0.2);">
     <div class="vital-header">
-        <div style="background: linear-gradient(135deg, #8b5cf6, #c084fc); width: 45px; height: 45px; border-radius: 25px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(139,92,246,0.3);">
-            <i class="fas fa-microchip" style="color: white; font-size: 1.3rem;"></i>
+        <div style="background: linear-gradient(135deg, #10b981, #059669); width: 42px; height: 42px; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16,185,129,0.25);">
+            <i class="fas fa-spa" style="color: white; font-size: 1.2rem;"></i>
         </div>
         <div>
-            <h3 style="font-size: 1rem;">Smart Health Monitor</h3>
-            <small style="color: var(--text-secondary); font-size: 0.65rem;"><i class="fas fa-brain"></i> AI-Powered Insights</small>
+            <h3 style="font-size: 0.95rem; font-weight: 600;">Wellness Insights</h3>
+            <small style="color: var(--text-secondary); font-size: 0.6rem;"><i class="fas fa-chart-line"></i> Real-time health coaching</small>
         </div>
     </div>
     
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 0.8rem 0;">
-        <div style="text-align: center;">
-            <i class="fas fa-chart-line" style="color: #10b981; font-size: 1rem;"></i>
-            <div style="font-size: 0.55rem; color: var(--text-secondary); margin-top: 4px;">TREND</div>
-            <div style="font-weight: 700; font-size: 0.8rem;" id="smartTrend">Stable 📈</div>
-        </div>
-        <div style="text-align: center;">
-            <i class="fas fa-clock" style="color: #f59e0b; font-size: 1rem;"></i>
-            <div style="font-size: 0.55rem; color: var(--text-secondary); margin-top: 4px;">LAST CHECK</div>
-            <div style="font-weight: 700; font-size: 0.8rem;" id="smartLastCheck">--:--</div>
-        </div>
-        <div style="text-align: center;">
-            <i class="fas fa-star" style="color: #8b5cf6; font-size: 1rem;"></i>
-            <div style="font-size: 0.55rem; color: var(--text-secondary); margin-top: 4px;">HEALTH SCORE</div>
-            <div style="font-weight: 700; font-size: 0.8rem;" id="smartScore">--</div>
+    <!-- النصيحة الذكية -->
+    <div id="smartWellnessTip" style="background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(6,182,212,0.04)); border-radius: 18px; padding: 12px 14px; margin: 0.8rem 0; border-left: 3px solid #10b981;">
+        <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <i class="fas fa-brain" style="color: #10b981; font-size: 1rem; margin-top: 2px;"></i>
+            <p style="font-size: 0.7rem; line-height: 1.45; margin: 0; flex: 1;" id="wellnessTipMessage">
+                Loading personalized health insight...
+            </p>
         </div>
     </div>
     
-    <div style="background: rgba(139,92,246,0.08); border-radius: 16px; padding: 8px 10px; margin: 0.5rem 0;">
-        <p style="font-size: 0.7rem; line-height: 1.4; margin: 0;" id="smartMessage">
-            <i class="fas fa-circle" style="font-size: 0.4rem; color: #10b981; vertical-align: middle;"></i>
-            All vitals are within normal range. Great job maintaining your health!
-        </p>
+    <!-- 3 مقاييس محفزة -->
+    <div style="display: flex; gap: 0.8rem; margin: 0.8rem 0;">
+        <div style="flex: 1; background: rgba(16,185,129,0.08); border-radius: 16px; padding: 8px 6px; text-align: center;">
+            <i class="fas fa-shoe-prints" style="color: #10b981; font-size: 1rem;"></i>
+            <div style="font-size: 0.5rem; color: var(--text-secondary); margin-top: 4px;">STEPS</div>
+            <div style="font-weight: 700; font-size: 0.85rem;" id="wellnessSteps">--</div>
+        </div>
+        <div style="flex: 1; background: rgba(6,182,212,0.08); border-radius: 16px; padding: 8px 6px; text-align: center;">
+            <i class="fas fa-fire" style="color: #06b6d4; font-size: 1rem;"></i>
+            <div style="font-size: 0.5rem; color: var(--text-secondary); margin-top: 4px;">CALORIES</div>
+            <div style="font-weight: 700; font-size: 0.85rem;" id="wellnessCalories">--</div>
+        </div>
+        <div style="flex: 1; background: rgba(139,92,246,0.08); border-radius: 16px; padding: 8px 6px; text-align: center;">
+            <i class="fas fa-calendar-check" style="color: #8b5cf6; font-size: 1rem;"></i>
+            <div style="font-size: 0.5rem; color: var(--text-secondary); margin-top: 4px;">STREAK</div>
+            <div style="font-weight: 700; font-size: 0.85rem;" id="wellnessStreak">--</div>
+        </div>
     </div>
     
-    <button onclick="document.querySelector('[data-page=\"ai-prediction\"]')?.click()" style="width: 100%; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border: none; border-radius: 30px; padding: 7px; color: white; font-size: 0.65rem; cursor: pointer; margin-top: 8px; transition: all 0.3s; font-weight: 500;">
-        <i class="fas fa-chart-pie"></i> View Full AI Analysis →
+    <!-- زر تحديث -->
+    <button id="refreshWellnessBtn" style="width: 100%; background: transparent; border: 1px solid rgba(16,185,129,0.4); border-radius: 30px; padding: 7px; color: #10b981; font-size: 0.6rem; cursor: pointer; transition: all 0.3s; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px;">
+        <i class="fas fa-sync-alt" style="font-size: 0.55rem;"></i> New Insight
     </button>
 </div>
 
 <style>
-    .vital-card button:hover {
+    #refreshWellnessBtn:hover {
+        background: rgba(16,185,129,0.1);
+        border-color: #10b981;
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(139,92,246,0.4);
-    }
-    @media (max-width: 768px) {
-        .vital-card .vital-header h3 { font-size: 0.8rem !important; }
-        .vital-card .vital-header small { font-size: 0.55rem !important; }
     }
 </style>
 
 <script>
-(function updateSmartCard() {
-    function refreshSmartCard() {
+// ========== PROFESSIONAL WELLNESS INSIGHTS ==========
+(function() {
+    "use strict";
+    
+    // قاعدة بيانات النصائح الاحترافية
+    const wellnessDatabase = {
+        tips: [
+            { text: "💧 Hydration boosts metabolism. Aim for 8 glasses daily.", category: "hydration", priority: "info" },
+            { text: "🚶‍♂️ A 10-minute walk after meals reduces blood sugar spikes.", category: "activity", priority: "glucose" },
+            { text: "😴 Quality sleep (7-8 hrs) lowers cortisol and improves immunity.", category: "sleep", priority: "info" },
+            { text: "🥗 Leafy greens are rich in magnesium, essential for heart rhythm.", category: "nutrition", priority: "heart" },
+            { text: "🧘 5 minutes of deep breathing lowers blood pressure naturally.", category: "mindfulness", priority: "bp" },
+            { text: "🍎 Fiber-rich foods slow glucose absorption. Try oats or apples.", category: "nutrition", priority: "glucose" },
+            { text: "🏃‍♂️ 150 minutes of weekly exercise reduces heart disease risk by 35%.", category: "activity", priority: "heart" },
+            { text: "💊 Set medication reminders. Consistency saves lives.", category: "medication", priority: "info" },
+            { text: "🌿 Green tea contains EGCG, which may improve insulin sensitivity.", category: "nutrition", priority: "glucose" },
+            { text: "🎵 Music therapy reduces anxiety and lowers heart rate.", category: "mindfulness", priority: "heart" },
+            { text: "☀️ Morning sunlight regulates circadian rhythm for better sleep.", category: "wellness", priority: "info" },
+            { text: "📝 Tracking your vitals helps detect patterns early.", category: "tracking", priority: "info" },
+            { text: "🤝 Strong social connections increase longevity by 50%.", category: "mental", priority: "info" },
+            { text: "🩸 Monitor your HbA1c every 3 months for diabetes control.", category: "medical", priority: "glucose" },
+            { text: "❤️ Laughter improves blood vessel function for 24 hours.", category: "mental", priority: "heart" }
+        ],
+        
+        // نصائح ذكية حسب الحالة
+        getSmartTip: function(glucose, bpSystolic, heartRate, spo2) {
+            // مشاكل حرجة أولاً
+            if (glucose > 180) return "🚨 Critical: Your glucose is very high. Contact your doctor immediately if this persists.";
+            if (glucose > 140) return "⚠️ Your glucose is elevated. A 15-minute walk can help reduce it naturally.";
+            if (glucose < 70) return "⚠️ Low glucose detected. Eat 15g of fast-acting carbs (juice, dates, or glucose tablets).";
+            if (bpSystolic > 160) return "⚠️ Blood pressure is high. Practice slow breathing (5 sec inhale, 5 sec exhale) for 5 minutes.";
+            if (bpSystolic > 140) return "📊 Blood pressure is elevated. Reduce sodium intake and stay hydrated.";
+            if (heartRate > 110) return "❤️ Heart rate elevated. Sit down, breathe deeply, and relax for 10 minutes.";
+            if (heartRate < 55) return "💪 Heart rate is athletic range. Great cardiovascular fitness! Keep it up.";
+            if (spo2 < 94) return "🌬️ Oxygen level low. Practice deep breathing exercises immediately.";
+            
+            // نصائح عادية
+            const goodTips = this.tips.filter(t => t.priority === "info");
+            const randomTip = goodTips[Math.floor(Math.random() * goodTips.length)];
+            return randomTip.text;
+        }
+    };
+    
+    // تحديث البيانات
+    function updateWellnessData() {
+        // قراءة القيم الحالية
         const heartEl = document.getElementById('heartValue');
         const glucoseEl = document.getElementById('glucoseValue');
+        const bpEl = document.getElementById('bpValue');
         const spo2El = document.getElementById('spo2Value');
         
-        let heart = 75, glucose = 95, spo2 = 97;
-        if (heartEl) { let m = heartEl.innerText.match(/(\d+)/); if (m) heart = parseInt(m[1]); }
-        if (glucoseEl) { let m = glucoseEl.innerText.match(/(\d+)/); if (m) glucose = parseInt(m[1]); }
-        if (spo2El) { let m = spo2El.innerText.match(/(\d+)/); if (m) spo2 = parseInt(m[1]); }
+        let heart = 72, glucose = 95, bpSystolic = 118, spo2 = 98;
         
+        if (heartEl) {
+            const match = heartEl.innerText.match(/(\d+)/);
+            if (match) heart = parseInt(match[1]);
+        }
+        
+        if (glucoseEl) {
+            const match = glucoseEl.innerText.match(/(\d+)/);
+            if (match) glucose = parseInt(match[1]);
+        }
+        
+        if (bpEl) {
+            const match = bpEl.innerText.match(/(\d+)\/(\d+)/);
+            if (match) bpSystolic = parseInt(match[1]);
+        }
+        
+        if (spo2El) {
+            const match = spo2El.innerText.match(/(\d+)/);
+            if (match) spo2 = parseInt(match[1]);
+        }
+        
+        // تحديث النصيحة
+        const tipMessage = document.getElementById('wellnessTipMessage');
+        if (tipMessage) {
+            tipMessage.innerHTML = wellnessDatabase.getSmartTip(glucose, bpSystolic, heart, spo2);
+        }
+        
+        // تحديث الإحصائيات (محاكاة ذكية)
+        const stepsEl = document.getElementById('wellnessSteps');
+        const caloriesEl = document.getElementById('wellnessCalories');
+        const streakEl = document.getElementById('wellnessStreak');
+        
+        // حساب الخطوات بناءً على الوقت الحالي (تحفيز حقيقي)
         const now = new Date();
-        const lastCheck = document.getElementById('smartLastCheck');
-        if (lastCheck) lastCheck.innerHTML = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        const hour = now.getHours();
+        let baseSteps = 0;
         
-        let trend = 'Stable 📈', trendColor = '#10b981';
-        if (glucose > 140) { trend = 'High ⚠️'; trendColor = '#ef4444'; }
-        else if (glucose < 80) { trend = 'Low 📉'; trendColor = '#f59e0b'; }
+        if (hour < 9) baseSteps = Math.floor(Math.random() * 1500) + 500;
+        else if (hour < 12) baseSteps = Math.floor(Math.random() * 3000) + 1500;
+        else if (hour < 15) baseSteps = Math.floor(Math.random() * 4500) + 3000;
+        else if (hour < 18) baseSteps = Math.floor(Math.random() * 6000) + 4500;
+        else baseSteps = Math.floor(Math.random() * 7500) + 6000;
         
-        const trendEl = document.getElementById('smartTrend');
-        if (trendEl) { trendEl.innerHTML = trend; trendEl.style.color = trendColor; }
+        if (stepsEl) stepsEl.innerHTML = baseSteps.toLocaleString();
+        if (caloriesEl) caloriesEl.innerHTML = Math.floor(baseSteps * 0.04).toLocaleString();
         
-        let message = '';
-        if (glucose > 140) message = '⚠️ Your glucose is elevated. Consider reducing sugar intake.';
-        else if (glucose < 80) message = '⚠️ Your glucose is low. Have a healthy snack.';
-        else if (spo2 < 95) message = '⚠️ Oxygen levels are low. Try deep breathing exercises.';
-        else if (heart > 100) message = '⚠️ Heart rate is elevated. Take a moment to relax.';
-        else if (heart < 60) message = 'ℹ️ Heart rate is below average. Monitor if unusual.';
-        else message = '✅ All vitals are normal. Keep up your healthy lifestyle!';
+        // Streak محاكى (يتم حفظه في localStorage)
+        let streak = localStorage.getItem('healthStreak');
+        const lastDate = localStorage.getItem('lastActiveDate');
+        const today = new Date().toDateString();
         
-        const msgEl = document.getElementById('smartMessage');
-        if (msgEl) msgEl.innerHTML = `<i class="fas fa-circle" style="font-size: 0.4rem; color: ${trendColor}; vertical-align: middle;"></i> ${message}`;
+        if (!streak) streak = 1;
+        if (lastDate !== today) {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            if (lastDate === yesterday.toDateString()) {
+                streak = parseInt(streak) + 1;
+            } else if (lastDate !== today) {
+                streak = 1;
+            }
+            localStorage.setItem('healthStreak', streak);
+            localStorage.setItem('lastActiveDate', today);
+        }
         
-        let score = 100;
-        if (glucose > 140 || glucose < 80) score -= 25;
-        if (spo2 < 95) score -= 20;
-        if (heart > 100 || heart < 60) score -= 15;
-        score = Math.max(0, Math.min(100, score));
-        
-        const scoreEl = document.getElementById('smartScore');
-        if (scoreEl) { scoreEl.innerHTML = score; scoreEl.style.color = score >= 80 ? '#10b981' : (score >= 60 ? '#f59e0b' : '#ef4444'); }
+        if (streakEl) streakEl.innerHTML = streak;
     }
     
-    refreshSmartCard();
-    setInterval(refreshSmartCard, 5000);
+    // زر التحديث
+    const refreshBtn = document.getElementById('refreshWellnessBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            updateWellnessData();
+            this.style.transform = 'scale(0.96)';
+            setTimeout(() => { this.style.transform = ''; }, 200);
+            
+            // تأثير اهتزاز لطيف للأيقونة
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.style.transform = 'rotate(180deg)';
+                setTimeout(() => { icon.style.transform = ''; }, 300);
+            }
+        });
+    }
+    
+    // تحديث أولي
+    updateWellnessData();
+    
+    // تحديث كل 30 ثانية
+    setInterval(updateWellnessData, 30000);
+    
+    // تحديث عند تغيير البيانات من Firebase
+    const originalUpdateUICareSync = window.updateUICareSync;
+    if (originalUpdateUICareSync) {
+        window.updateUICareSync = function(vitals) {
+            originalUpdateUICareSync(vitals);
+            setTimeout(updateWellnessData, 100);
+        };
+    }
+    
+    console.log("✅ Wellness Insights Card initialized");
 })();
 </script>
-<!-- ========== END SMART HEALTH CARD ========== -->
+<!-- ========== END WELLNESS INSIGHTS CARD ========== -->
 
                 <!-- Environment Data -->
                 <div class="env-grid">
