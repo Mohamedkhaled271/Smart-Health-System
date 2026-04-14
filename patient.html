@@ -4727,7 +4727,7 @@ function initSupportPage() {
 
 
 
-                <!-- ========== PROFESSIONAL RESPONSIVE SIDEBAR - PERFECT FOR ALL SCREENS ========== -->
+               <!-- ========== PERFECT SIDEBAR - SOLUTIONS FOR ALL SCREENS ========== -->
 <style>
 /* ======== RESET & BASE ======== */
 * {
@@ -4747,7 +4747,7 @@ body {
     position: relative;
 }
 
-/* ======== SIDEBAR - PROFESSIONAL ======== */
+/* ======== SIDEBAR - الحل المثالي ======== */
 .sidebar {
     width: 280px;
     background: var(--surface-glass);
@@ -4761,21 +4761,10 @@ body {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
     overflow-x: hidden;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
 }
 
-/* تخصيص شريط التمرير للشريط الجانبي */
-.sidebar::-webkit-scrollbar {
-    width: 4px;
-}
-.sidebar::-webkit-scrollbar-track {
-    background: var(--border);
-}
-.sidebar::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 4px;
-}
-
-/* ======== MAIN CONTENT ======== */
+/* ======== MAIN CONTENT - يأخذ المساحة المتبقية ======== */
 .main-content {
     flex: 1;
     margin-left: 280px;
@@ -4783,22 +4772,29 @@ body {
     padding: 1.5rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-x: auto;
+    min-height: 100vh;
 }
 
-/* ======== SIDEBAR COLLAPSED STATE ======== */
+/* ======== SIDEBAR COLLAPSED - وضع التصغير ======== */
 .sidebar.collapsed {
-    width: 80px;
+    width: 70px;
 }
 
 .sidebar.collapsed .logo-area span,
 .sidebar.collapsed .menu-item span {
     display: none;
     opacity: 0;
+    visibility: hidden;
 }
 
 .sidebar.collapsed .logo-area {
     justify-content: center;
-    padding: 1.8rem 0;
+    padding: 1.5rem 0;
+}
+
+.sidebar.collapsed .logo-area i {
+    font-size: 1.8rem;
+    margin: 0;
 }
 
 .sidebar.collapsed .menu-item {
@@ -4812,9 +4808,13 @@ body {
     font-size: 1.3rem;
 }
 
+.sidebar.collapsed .menu-item i + span {
+    display: none;
+}
+
 .sidebar.collapsed + .main-content {
-    margin-left: 80px;
-    width: calc(100% - 80px);
+    margin-left: 70px;
+    width: calc(100% - 70px);
 }
 
 /* ======== زر التصغير ======== */
@@ -4837,7 +4837,7 @@ body {
     background: var(--border);
 }
 
-/* ======== إزالة الفراغات الزائدة ======== */
+/* ======== إزالة الفراغات ======== */
 .stats-grid,
 .vitals-grid,
 .env-grid,
@@ -4854,10 +4854,29 @@ body {
     margin: 0;
 }
 
-/* ======== RESPONSIVE BREAKPOINTS - مثالي لكل الشاشات ======== */
+/* ======== RESPONSIVE - الحل المثالي لجميع الشاشات ======== */
 
-/* لاب توب / كمبيوتر (1200px - 1400px) */
-@media (min-width: 1200px) and (max-width: 1400px) {
+/* كمبيوتر كبير (1400px+) */
+@media (min-width: 1400px) {
+    .sidebar {
+        width: 300px;
+    }
+    .main-content {
+        margin-left: 300px;
+        width: calc(100% - 300px);
+        padding: 2rem;
+    }
+    .sidebar.collapsed {
+        width: 80px;
+    }
+    .sidebar.collapsed + .main-content {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+    }
+}
+
+/* لاب توب / كمبيوتر (1200px - 1399px) */
+@media (min-width: 1200px) and (max-width: 1399px) {
     .sidebar {
         width: 260px;
     }
@@ -4869,39 +4888,10 @@ body {
     .vital-value {
         font-size: 1.8rem !important;
     }
-    .gauge-container {
-        height: 110px !important;
-    }
 }
 
 /* لاب توب صغير / تابلت كبير (992px - 1199px) */
 @media (min-width: 992px) and (max-width: 1199px) {
-    .sidebar {
-        width: 80px;
-    }
-    .sidebar .logo-area span,
-    .sidebar .menu-item span {
-        display: none;
-    }
-    .sidebar .menu-item {
-        justify-content: center;
-        padding: 0.9rem 0;
-    }
-    .main-content {
-        margin-left: 80px;
-        width: calc(100% - 80px);
-        padding: 1rem;
-    }
-    .vital-value {
-        font-size: 1.5rem !important;
-    }
-    .gauge-container {
-        height: 95px !important;
-    }
-}
-
-/* تابلت (768px - 991px) */
-@media (min-width: 768px) and (max-width: 991px) {
     .sidebar {
         width: 70px;
     }
@@ -4909,13 +4899,54 @@ body {
     .sidebar .menu-item span {
         display: none;
     }
+    .sidebar .logo-area {
+        justify-content: center;
+        padding: 1.5rem 0;
+    }
     .sidebar .menu-item {
         justify-content: center;
-        padding: 0.8rem 0;
+        padding: 0.9rem 0;
     }
     .main-content {
         margin-left: 70px;
         width: calc(100% - 70px);
+        padding: 1rem;
+    }
+    .vital-value {
+        font-size: 1.5rem !important;
+    }
+    .gauge-container {
+        height: 100px !important;
+    }
+}
+
+/* تابلت (768px - 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+    .sidebar {
+        width: 60px;
+    }
+    .sidebar .logo-area span,
+    .sidebar .menu-item span {
+        display: none;
+    }
+    .sidebar .logo-area {
+        justify-content: center;
+        padding: 1.2rem 0;
+    }
+    .sidebar .logo-area i {
+        font-size: 1.5rem;
+    }
+    .sidebar .menu-item {
+        justify-content: center;
+        padding: 0.8rem 0;
+        margin: 4px 6px;
+    }
+    .sidebar .menu-item i {
+        font-size: 1.2rem;
+    }
+    .main-content {
+        margin-left: 60px;
+        width: calc(100% - 60px);
         padding: 0.8rem;
     }
     .vitals-grid {
@@ -4935,25 +4966,33 @@ body {
     }
 }
 
-/* موبايل كبير (480px - 767px) */
-@media (min-width: 480px) and (max-width: 767px) {
+/* موبايل كبير (481px - 767px) */
+@media (min-width: 481px) and (max-width: 767px) {
     .sidebar {
-        width: 60px;
+        width: 55px;
     }
     .sidebar .logo-area span,
     .sidebar .menu-item span {
         display: none;
     }
+    .sidebar .logo-area {
+        justify-content: center;
+        padding: 1rem 0;
+    }
+    .sidebar .logo-area i {
+        font-size: 1.3rem;
+    }
     .sidebar .menu-item {
         justify-content: center;
         padding: 0.7rem 0;
+        margin: 4px 4px;
     }
     .sidebar .menu-item i {
         font-size: 1.1rem;
     }
     .main-content {
-        margin-left: 60px;
-        width: calc(100% - 60px);
+        margin-left: 55px;
+        width: calc(100% - 55px);
         padding: 0.6rem;
     }
     .vitals-grid {
@@ -4963,10 +5002,10 @@ body {
         font-size: 1rem !important;
     }
     .gauge-container {
-        height: 65px !important;
+        height: 70px !important;
     }
     .vital-header h3 {
-        font-size: 0.6rem !important;
+        font-size: 0.65rem !important;
     }
     .vital-header i {
         font-size: 1rem !important;
@@ -4976,64 +5015,135 @@ body {
     }
 }
 
-/* موبايل صغير (أقل من 480px) */
-@media (max-width: 479px) {
+/* موبايل صغير (أقل من 480px) - الأهم! */
+@media (max-width: 480px) {
+    /* الشريط الجانبي يتحول إلى شريط منسدل (Drawer) */
     .sidebar {
-        width: 55px;
+        width: 85% !important;
+        max-width: 280px;
+        transform: translateX(-100%);
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 2000;
+        box-shadow: none;
     }
+    
+    .sidebar.open {
+        transform: translateX(0);
+        box-shadow: 2px 0 20px rgba(0,0,0,0.2);
+    }
+    
     .sidebar .logo-area span,
     .sidebar .menu-item span {
-        display: none;
+        display: inline-block !important;
     }
+    
     .sidebar .logo-area {
-        padding: 1rem 0;
+        justify-content: flex-start;
+        padding: 1.5rem;
     }
-    .sidebar .logo-area i {
-        font-size: 1.3rem;
-    }
+    
     .sidebar .menu-item {
-        justify-content: center;
-        padding: 0.6rem 0;
-        margin: 4px 0;
+        justify-content: flex-start;
+        padding: 0.9rem 1.5rem;
+        margin: 6px 12px;
     }
+    
     .sidebar .menu-item i {
-        font-size: 1rem;
+        width: 26px;
+        margin-right: 14px;
     }
+    
+    /* زر فتح القائمة */
+    .menu-toggle-btn {
+        display: flex !important;
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        z-index: 1500;
+        background: var(--primary-gradient);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        border: none;
+        transition: all 0.3s;
+    }
+    
+    .menu-toggle-btn:hover {
+        transform: scale(1.05);
+    }
+    
+    /* المحتوى الرئيسي يأخذ كل الشاشة */
     .main-content {
-        margin-left: 55px;
-        width: calc(100% - 55px);
+        margin-left: 0 !important;
+        width: 100% !important;
         padding: 0.5rem;
     }
+    
+    /* overlay عند فتح القائمة */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1999;
+        display: none;
+    }
+    
+    .sidebar-overlay.active {
+        display: block;
+    }
+    
+    /* تحسين باقي العناصر */
     .vitals-grid {
         gap: 0.3rem !important;
     }
     .vital-value {
-        font-size: 0.85rem !important;
+        font-size: 0.9rem !important;
     }
     .gauge-container {
-        height: 55px !important;
+        height: 60px !important;
     }
     .vital-header h3 {
-        font-size: 0.55rem !important;
+        font-size: 0.6rem !important;
     }
     .vital-header i {
-        font-size: 0.85rem !important;
+        font-size: 0.9rem !important;
     }
     .stat-value {
-        font-size: 0.8rem !important;
+        font-size: 0.85rem !important;
     }
     .stat-title {
-        font-size: 0.5rem !important;
+        font-size: 0.55rem !important;
     }
 }
 
-/* ======== تحسين التمرير الأفقي ======== */
-.main-content {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+/* زر فتح القائمة - يظهر فقط على الموبايل */
+.menu-toggle-btn {
+    display: none;
 }
 
-/* تخصيص شريط التمرير الأفقي */
+/* تخصيص شريط التمرير */
+.sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+.sidebar::-webkit-scrollbar-track {
+    background: var(--border);
+}
+.sidebar::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+}
+
 .main-content::-webkit-scrollbar {
     height: 5px;
 }
@@ -5045,40 +5155,59 @@ body {
     background: var(--primary);
     border-radius: 10px;
 }
-
-/* ======== إخفاء الشريط الجانبي تماماً على الشاشات الصغيرة جداً (اختياري) ======== */
-/* يمكن تفعيل هذا إذا أردت إخفاء الشريط تماماً على الموبايل */
-/*
-@media (max-width: 480px) {
-    .sidebar {
-        transform: translateX(-100%);
-        width: 80%;
-    }
-    .sidebar.open {
-        transform: translateX(0);
-    }
-    .main-content {
-        margin-left: 0;
-        width: 100%;
-    }
-    .menu-toggle {
-        display: block;
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 1001;
-    }
-}
-*/
 </style>
 
 <script>
-// ========== SIDEBAR CONTROLLER - PERFECT FOR ALL SCREENS ==========
+// ========== PERFECT SIDEBAR CONTROLLER ==========
 (function() {
     "use strict";
     
     const sidebar = document.getElementById('sidebar');
     const collapseBtn = document.getElementById('collapseSidebar');
+    
+    // إنشاء زر فتح القائمة للموبايل
+    function createMenuToggleButton() {
+        if (document.querySelector('.menu-toggle-btn')) return;
+        
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'menu-toggle-btn';
+        toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        toggleBtn.setAttribute('aria-label', 'Open menu');
+        document.body.appendChild(toggleBtn);
+        
+        // إنشاء overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        document.body.appendChild(overlay);
+        
+        // فتح القائمة
+        toggleBtn.addEventListener('click', function() {
+            sidebar.classList.add('open');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        
+        // إغلاق القائمة
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+        
+        // إغلاق القائمة عند الضغط على رابط
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                if (window.innerWidth <= 480) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+        
+        return toggleBtn;
+    }
     
     // حفظ حالة الشريط
     function saveSidebarState(isCollapsed) {
@@ -5087,6 +5216,7 @@ body {
     
     // استعادة حالة الشريط
     function loadSidebarState() {
+        if (window.innerWidth <= 480) return false;
         const saved = localStorage.getItem('sidebarCollapsed');
         if (saved === 'true' && sidebar) {
             sidebar.classList.add('collapsed');
@@ -5111,18 +5241,14 @@ body {
         }
     }
     
-    // تبديل حالة الشريط
+    // تبديل حالة الشريط (للشاشات الكبيرة)
     function toggleSidebar() {
         if (!sidebar) return;
+        if (window.innerWidth <= 480) return;
+        
         const isCollapsed = sidebar.classList.toggle('collapsed');
         updateButtonIcon(isCollapsed);
         saveSidebarState(isCollapsed);
-        
-        // إضافة تأثير بصري
-        sidebar.style.transition = 'all 0.3s ease';
-        setTimeout(() => {
-            sidebar.style.transition = '';
-        }, 300);
     }
     
     // ربط حدث الزر
@@ -5138,30 +5264,35 @@ body {
         if (!sidebar) return;
         const width = window.innerWidth;
         
-        // على الشاشات المتوسطة والصغيرة، نضمن أن الشريط مصغر
-        if (width <= 992) {
-            if (!sidebar.classList.contains('collapsed')) {
-                sidebar.classList.add('collapsed');
-                updateButtonIcon(true);
-                saveSidebarState(true);
-            }
-        }
-        // على الشاشات الكبيرة، نستعيد الحالة المحفوظة
-        else if (width > 992) {
+        if (width <= 480) {
+            // وضع الموبايل - قائمة منسدلة
+            sidebar.classList.remove('collapsed');
+            // إظهار زر القائمة
+            createMenuToggleButton();
+        } else {
+            // وضع الكمبيوتر والتابلت
+            // إزالة الـ open إذا كان موجود
+            sidebar.classList.remove('open');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (overlay) overlay.classList.remove('active');
+            document.body.style.overflow = '';
+            
+            // استعادة حالة التصغير
             const saved = localStorage.getItem('sidebarCollapsed');
             if (saved === 'true') {
-                // يبقى مصغر إذا كان المستخدم يفضل ذلك
+                sidebar.classList.add('collapsed');
+                updateButtonIcon(true);
             } else if (saved === 'false') {
                 sidebar.classList.remove('collapsed');
                 updateButtonIcon(false);
             }
         }
         
-        console.log(`📱 Screen: ${width}px | Sidebar: ${sidebar.classList.contains('collapsed') ? 'mini' : 'full'}`);
+        console.log(`📱 Screen: ${width}px | Mode: ${width <= 480 ? 'Mobile (Drawer)' : (sidebar.classList.contains('collapsed') ? 'Mini Sidebar' : 'Full Sidebar')}`);
     }
     
     // عند تحميل الصفحة
-    autoAdjustSidebar();
+    setTimeout(autoAdjustSidebar, 100);
     
     // عند تغيير حجم الشاشة
     let resizeTimer;
@@ -5170,8 +5301,10 @@ body {
         resizeTimer = setTimeout(autoAdjustSidebar, 150);
     });
     
-    console.log("✅ Professional Sidebar Controller Active");
+    console.log("✅ Perfect Sidebar Controller Active - حل جميع مشاكل الشريط الجانبي");
 })();
+</script>
+<!-- ============================================================== -->
 </script>
 <!-- ============================================================== -->
 
