@@ -5939,7 +5939,8 @@ function initSupportPage() {
 
 
                 <!-- ============================================================== -->
-<!-- ========== PERFECT RESPONSIVE SYSTEM - FIXED SIDEBAR ========== -->
+/* ============================================================== */
+/* ========== PERFECT RESPONSIVE SYSTEM - FIXED SIDEBAR ========== */
 <style>
 /* ======== RESET & BASE ======== */
 * {
@@ -6020,6 +6021,7 @@ body {
     width: 80px;
 }
 
+/* في وضع التصغير، إخفاء الأسماء وإبقاء الأيقونات فقط */
 .sidebar.collapsed .logo-area span,
 .sidebar.collapsed .menu-item span {
     display: none;
@@ -6039,6 +6041,31 @@ body {
 .sidebar.collapsed .menu-item i {
     margin: 0;
     font-size: 1.3rem;
+}
+
+/* في الوضع العادي، عرض الأسماء فقط (إخفاء الأيقونات) */
+.sidebar:not(.collapsed) .menu-item i {
+    display: none !important;
+}
+
+.sidebar:not(.collapsed) .menu-item {
+    justify-content: flex-start;
+    padding: 0.9rem 1.5rem;
+}
+
+.sidebar:not(.collapsed) .menu-item span {
+    display: inline;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* تعديل الـ logo-area في الوضع العادي */
+.sidebar:not(.collapsed) .logo-area i {
+    display: inline-block !important;
+}
+
+.sidebar:not(.collapsed) .logo-area span {
+    display: inline;
 }
 
 /* ======== زر التصغير (للشاشات الكبيرة) ======== */
@@ -6122,7 +6149,6 @@ canvas {
 
 /* ======== RESPONSIVE - للشاشات الكبيرة (لاب توب وكمبيوتر) ======== */
 @media (min-width: 769px) {
-    /* الوضع الطبيعي */
     .sidebar:not(.collapsed) ~ .main-content,
     .sidebar:not(.collapsed) + .main-content {
         margin-left: 280px;
@@ -6149,12 +6175,10 @@ canvas {
 
 /* ======== RESPONSIVE - للشاشات الصغيرة (موبايل) ======== */
 @media (max-width: 768px) {
-    /* إظهار زر القائمة */
     .mobile-menu-btn {
         display: flex;
     }
     
-    /* الشريط الجانبي مخفي افتراضياً */
     .sidebar {
         position: fixed;
         left: -280px;
@@ -6164,25 +6188,30 @@ canvas {
         box-shadow: none;
     }
     
-    /* عندما يكون الشريط مفتوحاً */
     .sidebar.mobile-open {
         left: 0;
         box-shadow: 5px 0 25px rgba(0,0,0,0.2);
     }
     
-    /* المحتوى الرئيسي يأخذ العرض الكامل */
+    /* على الموبايل، إظهار الأيقونات والأسماء معاً */
+    .sidebar .menu-item i {
+        display: inline-block !important;
+    }
+    
+    .sidebar .menu-item span {
+        display: inline !important;
+    }
+    
     .main-content {
         margin-left: 0 !important;
         padding: 0.8rem;
         padding-top: 70px;
     }
     
-    /* إخفاء زر التصغير في الموبايل */
     .collapse-btn {
         display: none;
     }
     
-    /* تحسين حجم الخطوط والعناصر */
     .vital-value { font-size: 1.2rem !important; }
     .gauge-container { min-height: 80px !important; }
     .vital-header h3 { font-size: 0.75rem; }
@@ -6306,10 +6335,8 @@ pre, code, .alert-item, .faq-item {
         if (!sidebar) return;
         sidebar.classList.toggle('mobile-open');
         
-        // تغيير أيقونة الزر
         if (sidebar.classList.contains('mobile-open')) {
             mobileMenuBtn.innerHTML = '<i class="fas fa-times"></i>';
-            // منع التمرير في الخلفية
             document.body.style.overflow = 'hidden';
         } else {
             mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
@@ -6438,9 +6465,12 @@ pre, code, .alert-item, .faq-item {
     pages.forEach(page => observer.observe(page, { attributes: true }));
     
     console.log("✅ Perfect Responsive System Active");
-    console.log("   - Desktop: Fixed sidebar, always visible while scrolling");
-    console.log("   - Mobile: Menu button (☰) opens sidebar when clicked");
+    console.log("   - Desktop: Sidebar shows NAMES only (icons hidden)");
+    console.log("   - Desktop Collapsed: Shows ICONS only");
+    console.log("   - Mobile: Shows both icons and names");
 })();
+</script>
+<!-- ============================================================== -->
 
      // ========== VOICE COMMANDS SYSTEM ==========
 (function() {
