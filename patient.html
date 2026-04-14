@@ -4728,7 +4728,7 @@ function initSupportPage() {
 
 
                 <!-- ============================================================== -->
-<!-- ========== SUPER RESPONSIVE SYSTEM - NO HORIZONTAL SCROLL ========== -->
+<!-- ========== PERFECT RESPONSIVE SYSTEM - FIXED SIDEBAR ========== -->
 <style>
 /* ======== RESET & BASE ======== */
 * {
@@ -4738,7 +4738,7 @@ function initSupportPage() {
 }
 
 body {
-    overflow-x: hidden !important; /* منع أي شريط تمرير أفقي من الجسم */
+    overflow-x: hidden !important;
     width: 100%;
     position: relative;
     background: var(--bg);
@@ -4752,39 +4752,85 @@ body {
     min-height: 100vh;
 }
 
-/* ======== SIDEBAR ======== */
+/* ======== زر القائمة للموبايل (يظهر فقط في الشاشات الصغيرة) ======== */
+.mobile-menu-btn {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1100;
+    background: var(--primary-gradient);
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-btn:hover {
+    transform: scale(1.05);
+}
+
+/* ======== SIDEBAR - ثابت دائماً على الشاشات الكبيرة ======== */
 .sidebar {
     width: 280px;
     background: var(--surface-glass);
     backdrop-filter: blur(12px);
     border-right: 1px solid var(--border);
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
     height: 100vh;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
     overflow-x: hidden;
-    flex-shrink: 0;
+    z-index: 1000;
 }
 
-/* ======== MAIN CONTENT - بدون أي overflow-x ======== */
+/* ======== MAIN CONTENT - يبدأ بجانب الشريط ======== */
 .main-content {
     flex: 1;
-    min-width: 0; /* مهم جدًا لمنع overflow */
+    min-width: 0;
     width: 100%;
     padding: 1.5rem;
-    overflow-x: hidden !important; /* إخفاء أي شريط تمرير أفقي */
+    overflow-x: hidden !important;
     transition: all 0.3s ease;
+    margin-left: 280px;
 }
 
-/* ======== SIDEBAR COLLAPSED ======== */
-.sidebar.collapsed { width: 80px; }
-.sidebar.collapsed .logo-area span,
-.sidebar.collapsed .menu-item span { display: none; }
-.sidebar.collapsed .logo-area { justify-content: center; padding: 1.8rem 0; }
-.sidebar.collapsed .menu-item { justify-content: center; padding: 0.9rem 0; margin: 6px 8px; }
-.sidebar.collapsed .menu-item i { margin: 0; font-size: 1.3rem; }
+/* ======== SIDEBAR COLLAPSED (وضع التصغير) ======== */
+.sidebar.collapsed {
+    width: 80px;
+}
 
+.sidebar.collapsed .logo-area span,
+.sidebar.collapsed .menu-item span {
+    display: none;
+}
+
+.sidebar.collapsed .logo-area {
+    justify-content: center;
+    padding: 1.8rem 0;
+}
+
+.sidebar.collapsed .menu-item {
+    justify-content: center;
+    padding: 0.9rem 0;
+    margin: 6px 8px;
+}
+
+.sidebar.collapsed .menu-item i {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+/* ======== زر التصغير (للشاشات الكبيرة) ======== */
 .collapse-btn {
     background: transparent;
     border: none;
@@ -4800,7 +4846,10 @@ body {
     justify-content: center;
     flex-shrink: 0;
 }
-.collapse-btn:hover { background: var(--border); }
+
+.collapse-btn:hover {
+    background: var(--border);
+}
 
 /* ======== حاويات رئيسية تتكيف تلقائياً ======== */
 .stats-grid,
@@ -4813,7 +4862,6 @@ body {
     margin: 0 0 1.5rem 0 !important;
 }
 
-/* توزيع الأعمدة بشكل ديناميكي ومثالي */
 .stats-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
 .vitals-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
 .env-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
@@ -4825,7 +4873,7 @@ body {
 .chart-card,
 .env-card {
     width: 100%;
-    min-width: 0; /* مهم جدًا */
+    min-width: 0;
     margin: 0;
     overflow: hidden;
 }
@@ -4861,78 +4909,69 @@ canvas {
     height: auto !important;
 }
 
-/* ======== معالجة قسم المعامل (Lab Results) ======== */
-.lab-results-section .vital-card {
-    padding: 1rem;
+/* ======== RESPONSIVE - للشاشات الكبيرة (لاب توب وكمبيوتر) ======== */
+@media (min-width: 769px) {
+    /* الوضع الطبيعي */
+    .sidebar:not(.collapsed) ~ .main-content,
+    .sidebar:not(.collapsed) + .main-content {
+        margin-left: 280px;
+    }
+    
+    .sidebar.collapsed ~ .main-content,
+    .sidebar.collapsed + .main-content {
+        margin-left: 80px;
+    }
 }
 
-.lab-results-section [style*="display: grid"] {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
-    gap: 1rem;
-}
-
-/* ======== RESPONSIVE MEDIA QUERIES - مثالية لجميع الشاشات ======== */
-
-/* شاشات كبيرة جداً (1600px+) */
-@media (min-width: 1600px) {
-    .main-content { padding: 2rem; }
-    .vital-value { font-size: 2.5rem !important; }
-    .gauge-container { min-height: 140px !important; }
-    .stats-grid { gap: 1.8rem; }
-    .vitals-grid { gap: 1.8rem; }
-}
-
-/* شاشات كمبيوتر (1200px - 1599px) */
-@media (min-width: 1200px) and (max-width: 1599px) {
-    .main-content { padding: 1.5rem; }
-    .vital-value { font-size: 2rem !important; }
-    .gauge-container { min-height: 120px !important; }
-}
-
-/* لاب توب (992px - 1199px) */
-@media (min-width: 992px) and (max-width: 1199px) {
-    .main-content { padding: 1.2rem; }
-    .vital-value { font-size: 1.7rem !important; }
-    .gauge-container { min-height: 105px !important; }
-    .vital-header h3 { font-size: 0.9rem; }
-    .stats-grid { gap: 1rem; }
-    .vitals-grid { gap: 1rem; }
-}
-
-/* تابلت (768px - 991px) */
-@media (min-width: 768px) and (max-width: 991px) {
+/* ======== RESPONSIVE - للشاشات المتوسطة (تابلت) ======== */
+@media (min-width: 769px) and (max-width: 991px) {
     .sidebar { width: 220px; }
+    .sidebar:not(.collapsed) ~ .main-content,
+    .sidebar:not(.collapsed) + .main-content { margin-left: 220px; }
+    .sidebar.collapsed { width: 70px; }
+    .sidebar.collapsed ~ .main-content,
+    .sidebar.collapsed + .main-content { margin-left: 70px; }
     .main-content { padding: 1rem; }
     .vital-value { font-size: 1.4rem !important; }
     .gauge-container { min-height: 95px !important; }
-    .vital-header h3 { font-size: 0.8rem; }
-    .vital-header i { font-size: 1.4rem; }
-    .stats-grid { gap: 0.8rem; }
-    .vitals-grid { gap: 0.8rem; }
-    .env-grid { gap: 0.6rem; }
 }
 
-/* موبايل (481px - 767px) */
-@media (min-width: 481px) and (max-width: 767px) {
-    .app-wrapper { flex-direction: column; }
-    .sidebar {
-        position: sticky;
-        top: 0;
-        width: 100%;
-        height: auto;
-        max-height: 55px;
-        overflow: hidden;
-        transition: max-height 0.3s ease;
-        z-index: 100;
+/* ======== RESPONSIVE - للشاشات الصغيرة (موبايل) ======== */
+@media (max-width: 768px) {
+    /* إظهار زر القائمة */
+    .mobile-menu-btn {
+        display: flex;
     }
-    .sidebar:hover { max-height: 350px; overflow-y: auto; }
-    .sidebar .logo-area { padding: 0.7rem 1rem; justify-content: space-between; }
-    .sidebar .logo-area span { display: inline !important; }
-    .sidebar .menu-item { padding: 0.6rem 1rem; margin: 2px 8px; }
-    .sidebar .menu-item span { display: inline !important; }
-    .collapse-btn { display: none; }
     
-    .main-content { padding: 0.8rem; }
+    /* الشريط الجانبي مخفي افتراضياً */
+    .sidebar {
+        position: fixed;
+        left: -280px;
+        width: 280px;
+        height: 100vh;
+        transition: left 0.3s ease;
+        box-shadow: none;
+    }
+    
+    /* عندما يكون الشريط مفتوحاً */
+    .sidebar.mobile-open {
+        left: 0;
+        box-shadow: 5px 0 25px rgba(0,0,0,0.2);
+    }
+    
+    /* المحتوى الرئيسي يأخذ العرض الكامل */
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0.8rem;
+        padding-top: 70px;
+    }
+    
+    /* إخفاء زر التصغير في الموبايل */
+    .collapse-btn {
+        display: none;
+    }
+    
+    /* تحسين حجم الخطوط والعناصر */
     .vital-value { font-size: 1.2rem !important; }
     .gauge-container { min-height: 80px !important; }
     .vital-header h3 { font-size: 0.75rem; }
@@ -4944,49 +4983,30 @@ canvas {
     .env-value { font-size: 0.9rem; }
 }
 
-/* موبايل صغير جداً (أقل من 480px) */
+/* موبايل صغير جداً */
 @media (max-width: 480px) {
-    .app-wrapper { flex-direction: column; }
-    .sidebar {
-        position: sticky;
-        top: 0;
-        width: 100%;
-        height: auto;
-        max-height: 50px;
-        overflow: hidden;
-        transition: max-height 0.3s ease;
-        z-index: 100;
+    .sidebar.mobile-open {
+        width: 260px;
     }
-    .sidebar:hover { max-height: 320px; overflow-y: auto; }
-    .sidebar .logo-area { padding: 0.5rem 0.8rem; justify-content: space-between; }
-    .sidebar .logo-area span { display: inline !important; font-size: 1rem; }
-    .sidebar .logo-area i { font-size: 1.2rem; }
-    .sidebar .menu-item { padding: 0.4rem 0.7rem; margin: 2px 5px; }
-    .sidebar .menu-item span { display: inline !important; font-size: 0.8rem; }
-    .sidebar .menu-item i { font-size: 0.9rem; width: 24px; }
-    .collapse-btn { display: none; }
-    
-    .main-content { padding: 0.6rem; }
+    .main-content { padding: 0.6rem; padding-top: 65px; }
+    .mobile-menu-btn {
+        width: 40px;
+        height: 40px;
+        top: 10px;
+        left: 10px;
+        font-size: 1.1rem;
+    }
     .vital-card, .stat-card, .chart-card { padding: 0.7rem !important; }
     .vital-value { font-size: 1rem !important; }
     .gauge-container { min-height: 65px !important; }
-    .vital-header h3 { font-size: 0.65rem; }
-    .vital-header i { font-size: 1rem; }
-    .stat-value { font-size: 0.85rem !important; }
-    .stat-title { font-size: 0.55rem !important; }
-    .env-value { font-size: 0.75rem; }
-    .chart-card h4 { font-size: 0.7rem; }
-    .stats-grid { gap: 0.5rem; }
-    .vitals-grid { gap: 0.5rem; }
-    .env-grid { gap: 0.4rem; }
 }
 
-/* ======== تخصيص شريط التمرير العمودي فقط ======== */
+/* ======== تخصيص شريط التمرير ======== */
 .sidebar::-webkit-scrollbar { width: 4px; }
 .sidebar::-webkit-scrollbar-track { background: var(--border); }
 .sidebar::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
 
-/* ======== ضمان عدم وجود تمرير أفقي في أي عنصر ======== */
+/* ======== ضمان عدم وجود تمرير أفقي ======== */
 img, svg, iframe, video, canvas {
     max-width: 100%;
     height: auto;
@@ -4997,27 +5017,10 @@ pre, code, .alert-item, .faq-item {
     white-space: normal;
     overflow-wrap: break-word;
 }
-
-button, .export-btn {
-    white-space: nowrap;
-}
-
-/* في حالة الأزرار الطويلة جداً على الموبايل */
-@media (max-width: 480px) {
-    button, .export-btn {
-        white-space: normal;
-        word-break: break-word;
-        padding: 0.5rem 0.8rem;
-        font-size: 0.7rem;
-    }
-    #emergencySosBtn span {
-        font-size: 0.7rem;
-    }
-}
 </style>
 
 <script>
-// ========== ULTIMATE RESPONSIVE CONTROLLER - لا تمرير أفقي أبداً ==========
+// ========== PERFECT RESPONSIVE CONTROLLER ==========
 (function() {
     "use strict";
     
@@ -5025,12 +5028,24 @@ button, .export-btn {
     const collapseBtn = document.getElementById('collapseSidebar');
     const mainContent = document.querySelector('.main-content');
     
-    // حفظ حالة الشريط
-    function saveSidebarState(isCollapsed) {
-        localStorage.setItem('sidebarCollapsed', isCollapsed);
+    // إنشاء زر القائمة للموبايل إذا لم يكن موجوداً
+    let mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    if (!mobileMenuBtn) {
+        mobileMenuBtn = document.createElement('button');
+        mobileMenuBtn.id = 'mobileMenuBtn';
+        mobileMenuBtn.className = 'mobile-menu-btn';
+        mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        document.body.appendChild(mobileMenuBtn);
     }
     
-    // تحديث أيقونة الزر
+    // حفظ حالة الشريط للشاشات الكبيرة
+    function saveSidebarState(isCollapsed) {
+        if (window.innerWidth > 768) {
+            localStorage.setItem('sidebarCollapsed', isCollapsed);
+        }
+    }
+    
+    // تحديث أيقونة زر التصغير
     function updateButtonIcon(isCollapsed) {
         if (!collapseBtn) return;
         const icon = collapseBtn.querySelector('i');
@@ -5045,30 +5060,82 @@ button, .export-btn {
         }
     }
     
-    // تبديل حالة الشريط
+    // تحديث مسافة المحتوى الرئيسي (للكمبيوتر فقط)
+    function updateMainContentMargin() {
+        if (!mainContent || !sidebar) return;
+        const width = window.innerWidth;
+        
+        if (width <= 768) {
+            mainContent.style.marginLeft = '0';
+            return;
+        }
+        
+        if (sidebar.classList.contains('collapsed')) {
+            mainContent.style.marginLeft = '80px';
+        } else {
+            const sidebarWidth = window.innerWidth >= 992 && window.innerWidth <= 1199 ? '260px' : 
+                                 (window.innerWidth >= 768 && window.innerWidth <= 991 ? '220px' : '280px');
+            mainContent.style.marginLeft = sidebarWidth;
+        }
+    }
+    
+    // تبديل حالة الشريط (تصغير/تكبير) - للكمبيوتر فقط
     function toggleSidebar() {
-        if (!sidebar) return;
-        if (window.innerWidth <= 767) return;
+        if (!sidebar || !mainContent) return;
+        if (window.innerWidth <= 768) return;
         
         const isCollapsed = sidebar.classList.toggle('collapsed');
         updateButtonIcon(isCollapsed);
         saveSidebarState(isCollapsed);
+        updateMainContentMargin();
+    }
+    
+    // فتح/إغلاق الشريط على الموبايل
+    function toggleMobileSidebar() {
+        if (!sidebar) return;
+        sidebar.classList.toggle('mobile-open');
         
-        // إعادة ضبط أي تمرير بعد تغيير حجم الشريط
-        setTimeout(() => {
-            if (mainContent) mainContent.scrollLeft = 0;
-            window.scrollTo(0, window.scrollY);
-        }, 50);
+        // تغيير أيقونة الزر
+        if (sidebar.classList.contains('mobile-open')) {
+            mobileMenuBtn.innerHTML = '<i class="fas fa-times"></i>';
+            // منع التمرير في الخلفية
+            document.body.style.overflow = 'hidden';
+        } else {
+            mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.style.overflow = '';
+        }
     }
     
-    // ربط حدث الزر
+    // إغلاق الشريط على الموبايل عند الضغط على رابط
+    function closeMobileSidebar() {
+        if (sidebar && sidebar.classList.contains('mobile-open')) {
+            sidebar.classList.remove('mobile-open');
+            mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.style.overflow = '';
+        }
+    }
+    
+    // ربط الأحداث
     if (collapseBtn) {
-        collapseBtn.addEventListener('click', toggleSidebar);
+        const newBtn = collapseBtn.cloneNode(true);
+        collapseBtn.parentNode.replaceChild(newBtn, collapseBtn);
+        newBtn.addEventListener('click', toggleSidebar);
+        window.collapseBtn = newBtn;
     }
     
-    // استعادة الحالة المحفوظة
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', toggleMobileSidebar);
+    }
+    
+    // ربط روابط القائمة لإغلاق الشريط على الموبايل
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', closeMobileSidebar);
+    });
+    
+    // استعادة الحالة المحفوظة للشاشات الكبيرة
     function loadSidebarState() {
-        if (window.innerWidth <= 767) return;
+        if (window.innerWidth <= 768) return;
+        
         const saved = localStorage.getItem('sidebarCollapsed');
         if (saved === 'true' && sidebar) {
             sidebar.classList.add('collapsed');
@@ -5077,18 +5144,29 @@ button, .export-btn {
             sidebar.classList.remove('collapsed');
             updateButtonIcon(false);
         }
+        updateMainContentMargin();
     }
     
     // ضبط تلقائي حسب حجم الشاشة
     function autoAdjustLayout() {
-        if (!sidebar) return;
+        if (!sidebar || !mainContent) return;
         const width = window.innerWidth;
         
-        if (width <= 767) {
+        if (width <= 768) {
+            // وضع الموبايل
             sidebar.classList.remove('collapsed');
+            sidebar.classList.remove('mobile-open');
             if (collapseBtn) collapseBtn.style.display = 'none';
+            mainContent.style.marginLeft = '0';
+            mobileMenuBtn.style.display = 'flex';
         } else {
+            // وضع الكمبيوتر
             if (collapseBtn) collapseBtn.style.display = 'flex';
+            mobileMenuBtn.style.display = 'none';
+            sidebar.classList.remove('mobile-open');
+            document.body.style.overflow = '';
+            
+            // استعادة حالة التصغير المحفوظة
             const saved = localStorage.getItem('sidebarCollapsed');
             if (saved === 'true') {
                 sidebar.classList.add('collapsed');
@@ -5097,34 +5175,19 @@ button, .export-btn {
                 sidebar.classList.remove('collapsed');
                 updateButtonIcon(false);
             }
+            updateMainContentMargin();
         }
         
-        // التأكد من عدم وجود تمرير أفقي
-        if (mainContent) mainContent.scrollLeft = 0;
-        document.body.scrollLeft = 0;
-        
-        console.log(`📱 Screen: ${width}px | Layout adjusted | No horizontal scroll`);
-    }
-    
-    // منع أي تمرير أفقي باستخدام حدث
-    function preventHorizontalScroll(e) {
-        if (e.target === document.body || e.target === document.documentElement) {
-            if (window.scrollX !== 0) {
-                window.scrollTo(0, window.scrollY);
-            }
-        }
+        console.log(`📱 Screen: ${width}px | Mode: ${width <= 768 ? 'Mobile (with menu button)' : 'Desktop (fixed sidebar)'}`);
     }
     
     // إعادة ضبط حجم الرسوم البيانية
     function resizeAllCharts() {
-        // إعادة رسم جميع الـ ApexCharts
         if (window.heartGauge) window.heartGauge.render();
         if (window.spo2Gauge) window.spo2Gauge.render();
         if (window.tempGauge) window.tempGauge.render();
         if (window.bpGauge) window.bpGauge.render();
         if (window.glucoseGauge) window.glucoseGauge.render();
-        
-        // إعادة رسم الـ Chart.js
         if (window.heartTrendChart) window.heartTrendChart.resize();
         if (window.multiTrendChart) window.multiTrendChart.resize();
         if (window.glucoseChart) window.glucoseChart.resize();
@@ -5145,29 +5208,17 @@ button, .export-btn {
         resizeTimer = setTimeout(() => {
             autoAdjustLayout();
             resizeAllCharts();
-        , 150);
+        }, 150);
     });
-    
-    // منع التمرير الأفقي
-    window.addEventListener('scroll', preventHorizontalScroll);
-    document.body.addEventListener('touchmove', function(e) {
-        if (document.body.scrollLeft > 0) {
-            document.body.scrollLeft = 0;
-        }
-    }, { passive: false });
     
     // إعادة ضبط عند تبديل الصفحات
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.attributeName === 'class') {
-                const activePage = document.querySelector('.page-section.active');
-                if (activePage) {
-                    setTimeout(() => {
-                        if (mainContent) mainContent.scrollLeft = 0;
-                        window.scrollTo(0, 0);
-                        resizeAllCharts();
-                    }, 50);
-                }
+                setTimeout(() => {
+                    if (mainContent) mainContent.scrollLeft = 0;
+                    window.scrollTo(0, 0);
+                }, 50);
             }
         });
     });
@@ -5175,7 +5226,9 @@ button, .export-btn {
     const pages = document.querySelectorAll('.page-section');
     pages.forEach(page => observer.observe(page, { attributes: true }));
     
-    console.log("✅ Ultimate Responsive System Active - لن يظهر أي شريط تمرير أفقي أبداً");
+    console.log("✅ Perfect Responsive System Active");
+    console.log("   - Desktop: Fixed sidebar, always visible while scrolling");
+    console.log("   - Mobile: Menu button (☰) opens sidebar when clicked");
 })();
 </script>
 <!-- ============================================================== -->
