@@ -706,7 +706,7 @@ async function loadCheckinData() {
             const dates = Object.keys(checkins).sort();
             if (dates.length > 0) {
                 const lastDate = new Date(parseInt(dates[dates.length - 1]));
-                document.getElementById('lastCheckinDate').innerHTML = lastDate.toLocaleDateString();
+                document.getElementById('lastCheckinDate').innerHTML = formatDateOnlyArabic(lastDate.getTime());
                 
                 streakCount = 1;
                 let currentDate = new Date(parseInt(dates[dates.length - 1]));
@@ -1967,7 +1967,7 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
                 const data = readings[ts];
                 if (data && data.vitals) {
                     const date = new Date(parseInt(ts));
-                    dateLabels.push(date.toLocaleDateString());
+                    dateLabels.push(formatDateOnlyArabic(parseInt(ts)));
                     
                     if (data.vitals.glucose && data.vitals.glucose > 0) {
                         glucoseHistory.push(data.vitals.glucose);
@@ -2027,7 +2027,7 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
         for (let i = 1; i <= 7; i++) {
             const futureDate = new Date();
             futureDate.setDate(lastDate.getDate() + i);
-            predictionLabels.push(futureDate.toLocaleDateString());
+            predictionLabels.push(formatDateOnlyArabic(futureDate.getTime()));
         }
         
         // تحديث التوقعات النصية
@@ -2473,7 +2473,7 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         doc.text("Comprehensive Medical Report", 105, 33, { align: 'center' });
         doc.setFontSize(9);
         const now = new Date();
-        const dateStr = `${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()} - ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+        const dateStr = formatDateTimeArabic(now.getTime(), true);
         doc.text(`Generated: ${dateStr}`, 105, 40, { align: 'center' });
         
         yPos = 58;
@@ -3023,7 +3023,7 @@ function updateUICareSync(vitals) {
     const lastUpdateEl = document.getElementById('careSyncLastUpdate');
     if (lastUpdateEl && vitals.timestamp) {
         const date = new Date(parseInt(vitals.timestamp));
-        lastUpdateEl.innerHTML = `<i class="fas fa-sync-alt"></i> ${date.toLocaleTimeString()}`;
+        lastUpdateEl.innerHTML = `<i class="fas fa-sync-alt"></i> ${formatDateTimeArabic(parseInt(vitals.timestamp), true)}`;
     }
     
     // تنبيهات
@@ -3174,7 +3174,7 @@ function updateAllLabResults(data) {
     const lastUpdateSpan = document.getElementById('labLastUpdate');
     if (lastUpdateSpan && data.lastUpdated) {
         const date = new Date(data.lastUpdated);
-        lastUpdateSpan.innerHTML = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        lastUpdateSpan.innerHTML = formatDateTimeArabic(data.lastUpdated, true);
     }
 }
 
@@ -3261,28 +3261,12 @@ setTimeout(() => {
 
     // Helper function to format date with AM/PM in English
     function formatDateTimeWithAMPM(timestamp) {
-        const date = new Date(timestamp);
-        const options = {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true
-        };
-        return date.toLocaleString('en-US', options);
-    }
+    return formatDateTimeArabic(timestamp, true);
+}
 
-    // Helper function to format date only
     function formatDateOnly(timestamp) {
-        const date = new Date(timestamp);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    }
+    return formatDateOnlyArabic(timestamp);
+}
 
     // Load all readings from Firebase (ESP32 + AI Model)
     async function loadMedicalHistory() {
@@ -3873,7 +3857,7 @@ function viewSupportMessages() {
             <div style="border-bottom:1px solid var(--border); padding:1rem 0;">
                 <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
                     <strong>${escapeHtml(msg.subject)}</strong>
-                    <span style="font-size:0.7rem; color:var(--text-secondary);">${new Date(msg.timestampLocal).toLocaleString()}</span>
+                    <span style="font-size:0.7rem; color:var(--text-secondary);">${formatDateTimeArabic(new Date(msg.timestampLocal).getTime(), true)}</span>
                 </div>
                 <div style="font-size:0.85rem; margin-top:0.5rem; color:var(--text-secondary);">${escapeHtml(msg.message.substring(0, 100))}${msg.message.length > 100 ? '...' : ''}</div>
                 <div style="font-size:0.7rem; margin-top:0.5rem;">
@@ -4711,7 +4695,7 @@ function initSupportPage() {
             glucose: glucose,
             spo2: spo2,
             temperature: temp,
-            timestamp: new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' })
+            timestamp: formatDateTimeArabic(Date.now(), true)
         };
     }
     
@@ -6721,8 +6705,34 @@ pre, code, .alert-item, .faq-item {
     setTimeout(addVoiceButton, 1000);
     console.log("✅ Voice Commands System Active");
 })();
+    // ==================== دالة تنسيق التواريخ الموحدة ====================
+function formatDateTimeArabic(timestamp, includeTime = true) {
+    if (!timestamp) return '--';
+    const date = new Date(timestamp);
+    
+    // تنسيق التاريخ: يوم/شهر/سنة
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const dateStr = `${day}/${month}/${year}`;
+    
+    if (!includeTime) return dateStr;
+    
+    // تنسيق الوقت بصيغة 12 ساعة مع AM/PM
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    const timeStr = `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+    
+    return `${dateStr} ${timeStr}`;
+}
+
+function formatDateOnlyArabic(timestamp) {
+    return formatDateTimeArabic(timestamp, false);
+}
 </script>
-<!-- ============================================================== -->
+
    
 </body>
 </html>
