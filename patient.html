@@ -1986,7 +1986,6 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
             localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
         });
         if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
-
         // ========== EXPORT PDF - VERSION COMPATIBLE WITH ESP32 & FIREBASE ==========
 document.getElementById('exportBtn')?.addEventListener('click', async () => {
     try {
@@ -2378,6 +2377,7 @@ document.getElementById('exportBtn')?.addEventListener('click', async () => {
         alert('❌ Error generating report. Please try again.');
     }
 });
+
 
         document.getElementById('collapseSidebar')?.addEventListener('click', () => {
             const sidebar = document.getElementById('sidebar');
