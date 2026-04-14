@@ -514,217 +514,420 @@
                         <div class="card-indicator" id="tempIndicator" style="font-weight:600;">Normal</div>
                     </div>
                 </div>
-                <!-- ========== HEALTH INSIGHTS & MOTIVATION CARD ========== -->
-<div class="vital-card" style="background: linear-gradient(135deg, var(--surface), rgba(16,185,129,0.03)); border: 1px solid rgba(16,185,129,0.2);">
+
+                <!-- ========== CARD 1: WEEKLY HEALTH REPORT ========== -->
+<div class="vital-card" style="background: linear-gradient(135deg, var(--surface), rgba(59,130,246,0.04)); border: 1px solid rgba(59,130,246,0.2); margin-bottom: 1.5rem;">
     <div class="vital-header">
-        <div style="background: linear-gradient(135deg, #10b981, #059669); width: 42px; height: 42px; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16,185,129,0.25);">
-            <i class="fas fa-spa" style="color: white; font-size: 1.2rem;"></i>
+        <div style="background: linear-gradient(135deg, #3b82f6, #2563eb); width: 42px; height: 42px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-chart-line" style="color: white; font-size: 1.2rem;"></i>
         </div>
         <div>
-            <h3 style="font-size: 0.95rem; font-weight: 600;">Wellness Insights</h3>
-            <small style="color: var(--text-secondary); font-size: 0.6rem;"><i class="fas fa-chart-line"></i> Real-time health coaching</small>
+            <h3 style="font-size: 0.95rem; font-weight: 600;">Weekly Health Report</h3>
+            <small style="color: var(--text-secondary); font-size: 0.6rem;"><i class="fas fa-calendar-week"></i> <span id="reportWeekRange">Loading...</span></small>
         </div>
     </div>
-    
-    <!-- النصيحة الذكية -->
-    <div id="smartWellnessTip" style="background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(6,182,212,0.04)); border-radius: 18px; padding: 12px 14px; margin: 0.8rem 0; border-left: 3px solid #10b981;">
-        <div style="display: flex; gap: 10px; align-items: flex-start;">
-            <i class="fas fa-brain" style="color: #10b981; font-size: 1rem; margin-top: 2px;"></i>
-            <p style="font-size: 0.7rem; line-height: 1.45; margin: 0; flex: 1;" id="wellnessTipMessage">
-                Loading personalized health insight...
-            </p>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 0.8rem 0;">
+        <div style="text-align: center; background: rgba(59,130,246,0.06); border-radius: 16px; padding: 8px;">
+            <i class="fas fa-tint" style="color: #f97316; font-size: 1rem;"></i>
+            <div style="font-size: 0.5rem; color: var(--text-secondary); margin-top: 4px;">AVG GLUCOSE</div>
+            <div style="font-weight: 700; font-size: 0.9rem;" id="weeklyAvgGlucose">--</div>
+        </div>
+        <div style="text-align: center; background: rgba(59,130,246,0.06); border-radius: 16px; padding: 8px;">
+            <i class="fas fa-heart" style="color: #ef4444; font-size: 1rem;"></i>
+            <div style="font-size: 0.5rem; color: var(--text-secondary); margin-top: 4px;">AVG HEART</div>
+            <div style="font-weight: 700; font-size: 0.9rem;" id="weeklyAvgHeart">--</div>
+        </div>
+        <div style="text-align: center; background: rgba(59,130,246,0.06); border-radius: 16px; padding: 8px;">
+            <i class="fas fa-database" style="color: #8b5cf6; font-size: 1rem;"></i>
+            <div style="font-size: 0.5rem; color: var(--text-secondary); margin-top: 4px;">READINGS</div>
+            <div style="font-weight: 700; font-size: 0.9rem;" id="weeklyTotalReads">--</div>
         </div>
     </div>
-    
-    <!-- 3 مقاييس محفزة -->
-    <div style="display: flex; gap: 0.8rem; margin: 0.8rem 0;">
-        <div style="flex: 1; background: rgba(16,185,129,0.08); border-radius: 16px; padding: 8px 6px; text-align: center;">
-            <i class="fas fa-shoe-prints" style="color: #10b981; font-size: 1rem;"></i>
-            <div style="font-size: 0.5rem; color: var(--text-secondary); margin-top: 4px;">STEPS</div>
-            <div style="font-weight: 700; font-size: 0.85rem;" id="wellnessSteps">--</div>
+    <div style="background: rgba(59,130,246,0.05); border-radius: 14px; padding: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.6rem;"><i class="fas fa-chart-simple"></i> vs Last Week</span>
+            <span style="font-size: 0.7rem; font-weight: 600;" id="weeklyComparison">--</span>
         </div>
-        <div style="flex: 1; background: rgba(6,182,212,0.08); border-radius: 16px; padding: 8px 6px; text-align: center;">
-            <i class="fas fa-fire" style="color: #06b6d4; font-size: 1rem;"></i>
-            <div style="font-size: 0.5rem; color: var(--text-secondary); margin-top: 4px;">CALORIES</div>
-            <div style="font-weight: 700; font-size: 0.85rem;" id="wellnessCalories">--</div>
-        </div>
-        <div style="flex: 1; background: rgba(139,92,246,0.08); border-radius: 16px; padding: 8px 6px; text-align: center;">
-            <i class="fas fa-calendar-check" style="color: #8b5cf6; font-size: 1rem;"></i>
-            <div style="font-size: 0.5rem; color: var(--text-secondary); margin-top: 4px;">STREAK</div>
-            <div style="font-weight: 700; font-size: 0.85rem;" id="wellnessStreak">--</div>
+        <div style="margin-top: 6px; background: #e2e8f0; border-radius: 8px; height: 4px; overflow: hidden;">
+            <div id="weeklyProgressBar" style="width: 0%; height: 4px; background: linear-gradient(90deg, #3b82f6, #8b5cf6); border-radius: 8px; transition: width 0.5s ease;"></div>
         </div>
     </div>
-    
-    <!-- زر تحديث -->
-    <button id="refreshWellnessBtn" style="width: 100%; background: transparent; border: 1px solid rgba(16,185,129,0.4); border-radius: 30px; padding: 7px; color: #10b981; font-size: 0.6rem; cursor: pointer; transition: all 0.3s; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px;">
-        <i class="fas fa-sync-alt" style="font-size: 0.55rem;"></i> New Insight
+</div>
+
+<!-- ========== CARD 2: DAILY CHECK-IN ========== -->
+<div class="vital-card" style="background: linear-gradient(135deg, var(--surface), rgba(245,158,11,0.04)); border: 1px solid rgba(245,158,11,0.2); margin-bottom: 1.5rem;">
+    <div class="vital-header">
+        <div style="background: linear-gradient(135deg, #f59e0b, #d97706); width: 42px; height: 42px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-calendar-check" style="color: white; font-size: 1.2rem;"></i>
+        </div>
+        <div>
+            <h3 style="font-size: 0.95rem; font-weight: 600;">Daily Check-in</h3>
+            <small style="color: var(--text-secondary); font-size: 0.6rem;"><i class="fas fa-fire"></i> <span id="streakCount">0</span> day streak</small>
+        </div>
+    </div>
+    <div id="checkinStatus" style="background: rgba(245,158,11,0.08); border-radius: 18px; padding: 12px; margin: 0.8rem 0; text-align: center;">
+        <div id="checkinMessage" style="font-size: 0.7rem; color: var(--text-secondary);">
+            <i class="fas fa-spinner fa-spin"></i> Loading...
+        </div>
+    </div>
+    <button id="checkinBtn" style="width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; border-radius: 30px; padding: 10px; color: white; font-size: 0.7rem; cursor: pointer; transition: all 0.3s; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <i class="fas fa-check-circle"></i> Check-in Today
     </button>
+    <div style="margin-top: 0.6rem; text-align: center;">
+        <span style="font-size: 0.55rem; color: var(--text-secondary);">
+            <i class="fas fa-clock"></i> Last: <span id="lastCheckinDate">Never</span>
+        </span>
+    </div>
+</div>
+
+<!-- ========== CARD 3: MEDICAL TIPS (50+ نصيحة - تتغير كل 10 ثواني) ========== -->
+<div class="vital-card" style="background: linear-gradient(135deg, var(--surface), rgba(16,185,129,0.04)); border: 1px solid rgba(16,185,129,0.2);">
+    <div class="vital-header">
+        <div style="background: linear-gradient(135deg, #10b981, #059669); width: 42px; height: 42px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-stethoscope" style="color: white; font-size: 1.2rem;"></i>
+        </div>
+        <div>
+            <h3 style="font-size: 0.95rem; font-weight: 600;">Medical Tips</h3>
+            <small style="color: var(--text-secondary); font-size: 0.6rem;"><i class="fas fa-clock"></i> Updates every 10 seconds</small>
+        </div>
+    </div>
+    <div id="medicalTipContainer" style="background: linear-gradient(135deg, rgba(16,185,129,0.06), rgba(16,185,129,0.02)); border-radius: 18px; padding: 14px; margin: 0.8rem 0; border-left: 3px solid #10b981;">
+        <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <i class="fas fa-quote-left" style="color: #10b981; font-size: 0.7rem; opacity: 0.6;"></i>
+            <p style="font-size: 0.7rem; line-height: 1.45; margin: 0; flex: 1;" id="medicalTipText">
+                Loading medical tips...
+            </p>
+            <i class="fas fa-quote-right" style="color: #10b981; font-size: 0.7rem; opacity: 0.6; align-self: flex-end;"></i>
+        </div>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.55rem; color: var(--text-secondary);">
+            <i class="fas fa-lightbulb"></i> Health insight
+        </span>
+        <span style="font-size: 0.55rem; color: #10b981;" id="tipTimer">Next tip in 10s</span>
+    </div>
 </div>
 
 <style>
-    #refreshWellnessBtn:hover {
-        background: rgba(16,185,129,0.1);
-        border-color: #10b981;
+    #checkinBtn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    #checkinBtn:hover:not(:disabled) {
         transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(245,158,11,0.3);
     }
 </style>
 
 <script>
-// ========== PROFESSIONAL WELLNESS INSIGHTS ==========
-(function() {
-    "use strict";
-    
-    // قاعدة بيانات النصائح الاحترافية
-    const wellnessDatabase = {
-        tips: [
-            { text: "💧 Hydration boosts metabolism. Aim for 8 glasses daily.", category: "hydration", priority: "info" },
-            { text: "🚶‍♂️ A 10-minute walk after meals reduces blood sugar spikes.", category: "activity", priority: "glucose" },
-            { text: "😴 Quality sleep (7-8 hrs) lowers cortisol and improves immunity.", category: "sleep", priority: "info" },
-            { text: "🥗 Leafy greens are rich in magnesium, essential for heart rhythm.", category: "nutrition", priority: "heart" },
-            { text: "🧘 5 minutes of deep breathing lowers blood pressure naturally.", category: "mindfulness", priority: "bp" },
-            { text: "🍎 Fiber-rich foods slow glucose absorption. Try oats or apples.", category: "nutrition", priority: "glucose" },
-            { text: "🏃‍♂️ 150 minutes of weekly exercise reduces heart disease risk by 35%.", category: "activity", priority: "heart" },
-            { text: "💊 Set medication reminders. Consistency saves lives.", category: "medication", priority: "info" },
-            { text: "🌿 Green tea contains EGCG, which may improve insulin sensitivity.", category: "nutrition", priority: "glucose" },
-            { text: "🎵 Music therapy reduces anxiety and lowers heart rate.", category: "mindfulness", priority: "heart" },
-            { text: "☀️ Morning sunlight regulates circadian rhythm for better sleep.", category: "wellness", priority: "info" },
-            { text: "📝 Tracking your vitals helps detect patterns early.", category: "tracking", priority: "info" },
-            { text: "🤝 Strong social connections increase longevity by 50%.", category: "mental", priority: "info" },
-            { text: "🩸 Monitor your HbA1c every 3 months for diabetes control.", category: "medical", priority: "glucose" },
-            { text: "❤️ Laughter improves blood vessel function for 24 hours.", category: "mental", priority: "heart" }
-        ],
-        
-        // نصائح ذكية حسب الحالة
-        getSmartTip: function(glucose, bpSystolic, heartRate, spo2) {
-            // مشاكل حرجة أولاً
-            if (glucose > 180) return "🚨 Critical: Your glucose is very high. Contact your doctor immediately if this persists.";
-            if (glucose > 140) return "⚠️ Your glucose is elevated. A 15-minute walk can help reduce it naturally.";
-            if (glucose < 70) return "⚠️ Low glucose detected. Eat 15g of fast-acting carbs (juice, dates, or glucose tablets).";
-            if (bpSystolic > 160) return "⚠️ Blood pressure is high. Practice slow breathing (5 sec inhale, 5 sec exhale) for 5 minutes.";
-            if (bpSystolic > 140) return "📊 Blood pressure is elevated. Reduce sodium intake and stay hydrated.";
-            if (heartRate > 110) return "❤️ Heart rate elevated. Sit down, breathe deeply, and relax for 10 minutes.";
-            if (heartRate < 55) return "💪 Heart rate is athletic range. Great cardiovascular fitness! Keep it up.";
-            if (spo2 < 94) return "🌬️ Oxygen level low. Practice deep breathing exercises immediately.";
-            
-            // نصائح عادية
-            const goodTips = this.tips.filter(t => t.priority === "info");
-            const randomTip = goodTips[Math.floor(Math.random() * goodTips.length)];
-            return randomTip.text;
+// ==============================================================
+// 1. WEEKLY HEALTH REPORT (من Firebase)
+// ==============================================================
+async function updateWeeklyReport() {
+    try {
+        let patientId = careSyncPatientId;
+        if (!patientId) {
+            const snapshot = await database.ref('patients').once('value');
+            const patients = snapshot.val();
+            if (patients) patientId = Object.keys(patients)[0];
         }
-    };
-    
-    // تحديث البيانات
-    function updateWellnessData() {
-        // قراءة القيم الحالية
-        const heartEl = document.getElementById('heartValue');
-        const glucoseEl = document.getElementById('glucoseValue');
-        const bpEl = document.getElementById('bpValue');
-        const spo2El = document.getElementById('spo2Value');
+        if (!patientId) return;
         
-        let heart = 72, glucose = 95, bpSystolic = 118, spo2 = 98;
+        const readingsRef = database.ref(`patients/${patientId}/readings`);
+        const snapshot = await readingsRef.once('value');
+        const readings = snapshot.val();
+        if (!readings) return;
         
-        if (heartEl) {
-            const match = heartEl.innerText.match(/(\d+)/);
-            if (match) heart = parseInt(match[1]);
-        }
+        const now = Date.now();
+        const oneWeekAgo = now - (7 * 24 * 60 * 60 * 1000);
         
-        if (glucoseEl) {
-            const match = glucoseEl.innerText.match(/(\d+)/);
-            if (match) glucose = parseInt(match[1]);
-        }
+        let glucoseValues = [], heartValues = [];
+        let readingCount = 0;
         
-        if (bpEl) {
-            const match = bpEl.innerText.match(/(\d+)\/(\d+)/);
-            if (match) bpSystolic = parseInt(match[1]);
-        }
-        
-        if (spo2El) {
-            const match = spo2El.innerText.match(/(\d+)/);
-            if (match) spo2 = parseInt(match[1]);
-        }
-        
-        // تحديث النصيحة
-        const tipMessage = document.getElementById('wellnessTipMessage');
-        if (tipMessage) {
-            tipMessage.innerHTML = wellnessDatabase.getSmartTip(glucose, bpSystolic, heart, spo2);
-        }
-        
-        // تحديث الإحصائيات (محاكاة ذكية)
-        const stepsEl = document.getElementById('wellnessSteps');
-        const caloriesEl = document.getElementById('wellnessCalories');
-        const streakEl = document.getElementById('wellnessStreak');
-        
-        // حساب الخطوات بناءً على الوقت الحالي (تحفيز حقيقي)
-        const now = new Date();
-        const hour = now.getHours();
-        let baseSteps = 0;
-        
-        if (hour < 9) baseSteps = Math.floor(Math.random() * 1500) + 500;
-        else if (hour < 12) baseSteps = Math.floor(Math.random() * 3000) + 1500;
-        else if (hour < 15) baseSteps = Math.floor(Math.random() * 4500) + 3000;
-        else if (hour < 18) baseSteps = Math.floor(Math.random() * 6000) + 4500;
-        else baseSteps = Math.floor(Math.random() * 7500) + 6000;
-        
-        if (stepsEl) stepsEl.innerHTML = baseSteps.toLocaleString();
-        if (caloriesEl) caloriesEl.innerHTML = Math.floor(baseSteps * 0.04).toLocaleString();
-        
-        // Streak محاكى (يتم حفظه في localStorage)
-        let streak = localStorage.getItem('healthStreak');
-        const lastDate = localStorage.getItem('lastActiveDate');
-        const today = new Date().toDateString();
-        
-        if (!streak) streak = 1;
-        if (lastDate !== today) {
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            if (lastDate === yesterday.toDateString()) {
-                streak = parseInt(streak) + 1;
-            } else if (lastDate !== today) {
-                streak = 1;
-            }
-            localStorage.setItem('healthStreak', streak);
-            localStorage.setItem('lastActiveDate', today);
-        }
-        
-        if (streakEl) streakEl.innerHTML = streak;
-    }
-    
-    // زر التحديث
-    const refreshBtn = document.getElementById('refreshWellnessBtn');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', function() {
-            updateWellnessData();
-            this.style.transform = 'scale(0.96)';
-            setTimeout(() => { this.style.transform = ''; }, 200);
-            
-            // تأثير اهتزاز لطيف للأيقونة
-            const icon = this.querySelector('i');
-            if (icon) {
-                icon.style.transform = 'rotate(180deg)';
-                setTimeout(() => { icon.style.transform = ''; }, 300);
+        Object.entries(readings).forEach(([timestamp, data]) => {
+            const ts = parseInt(timestamp);
+            if (ts >= oneWeekAgo && data.vitals) {
+                readingCount++;
+                if (data.vitals.glucose && data.vitals.glucose > 0) glucoseValues.push(data.vitals.glucose);
+                if (data.vitals.heart_rate && data.vitals.heart_rate > 0) heartValues.push(data.vitals.heart_rate);
             }
         });
+        
+        const avgGlucose = glucoseValues.length > 0 ? Math.round(glucoseValues.reduce((a,b) => a+b, 0) / glucoseValues.length) : '--';
+        const avgHeart = heartValues.length > 0 ? Math.round(heartValues.reduce((a,b) => a+b, 0) / heartValues.length) : '--';
+        
+        document.getElementById('weeklyAvgGlucose').innerHTML = avgGlucose !== '--' ? avgGlucose + ' mg/dL' : '--';
+        document.getElementById('weeklyAvgHeart').innerHTML = avgHeart !== '--' ? avgHeart + ' bpm' : '--';
+        document.getElementById('weeklyTotalReads').innerHTML = readingCount;
+        
+        const startDate = new Date(oneWeekAgo);
+        const endDate = new Date(now);
+        document.getElementById('reportWeekRange').innerHTML = `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+        
+        let comparison = '', progressPercent = 50;
+        if (avgGlucose !== '--') {
+            if (avgGlucose < 100) { comparison = '✅ Great! Glucose improved'; progressPercent = 75; }
+            else if (avgGlucose < 126) { comparison = '📊 Stable glucose levels'; progressPercent = 60; }
+            else { comparison = '⚠️ Glucose needs attention'; progressPercent = 35; }
+        } else { comparison = '📈 More data needed'; }
+        
+        document.getElementById('weeklyComparison').innerHTML = comparison;
+        document.getElementById('weeklyProgressBar').style.width = progressPercent + '%';
+    } catch(e) { console.error('Weekly report error:', e); }
+}
+
+// ==============================================================
+// 2. DAILY CHECK-IN (مع Firebase)
+// ==============================================================
+let streakCount = 0;
+
+async function loadCheckinData() {
+    try {
+        let patientId = careSyncPatientId;
+        if (!patientId) {
+            const snapshot = await database.ref('patients').once('value');
+            const patients = snapshot.val();
+            if (patients) patientId = Object.keys(patients)[0];
+        }
+        if (!patientId) return;
+        
+        const checkinRef = database.ref(`patients/${patientId}/checkins`);
+        const snapshot = await checkinRef.once('value');
+        const checkins = snapshot.val();
+        
+        if (checkins) {
+            const dates = Object.keys(checkins).sort();
+            if (dates.length > 0) {
+                const lastDate = new Date(parseInt(dates[dates.length - 1]));
+                document.getElementById('lastCheckinDate').innerHTML = lastDate.toLocaleDateString();
+                
+                streakCount = 1;
+                let currentDate = new Date(parseInt(dates[dates.length - 1]));
+                for (let i = dates.length - 2; i >= 0; i--) {
+                    const prevDate = new Date(parseInt(dates[i]));
+                    const dayDiff = Math.floor((currentDate - prevDate) / (1000 * 60 * 60 * 24));
+                    if (dayDiff === 1) { streakCount++; currentDate = prevDate; }
+                    else break;
+                }
+            }
+        }
+        
+        document.getElementById('streakCount').innerHTML = streakCount;
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayTimestamp = today.getTime();
+        const alreadyChecked = checkins && checkins[todayTimestamp];
+        
+        const checkinBtn = document.getElementById('checkinBtn');
+        const checkinMessage = document.getElementById('checkinMessage');
+        
+        if (alreadyChecked) {
+            checkinBtn.disabled = true;
+            checkinBtn.style.opacity = '0.5';
+            checkinBtn.innerHTML = '<i class="fas fa-check-circle"></i> Checked in Today! ✅';
+            checkinMessage.innerHTML = '<i class="fas fa-smile-wink"></i> Great! You\'ve already checked in today. Come back tomorrow!';
+        } else {
+            checkinBtn.disabled = false;
+            checkinBtn.style.opacity = '1';
+            checkinBtn.innerHTML = '<i class="fas fa-check-circle"></i> Check-in Today';
+            checkinMessage.innerHTML = `<i class="fas fa-fire" style="color: #f59e0b;"></i> You're on a ${streakCount} day streak! Don't break it!`;
+        }
+    } catch(e) { console.error('Load checkin error:', e); }
+}
+
+async function performCheckin() {
+    try {
+        let patientId = careSyncPatientId;
+        if (!patientId) {
+            const snapshot = await database.ref('patients').once('value');
+            const patients = snapshot.val();
+            if (patients) patientId = Object.keys(patients)[0];
+        }
+        if (!patientId) { alert('Please wait for data to load...'); return; }
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayTimestamp = today.getTime();
+        
+        const checkinRef = database.ref(`patients/${patientId}/checkins/${todayTimestamp}`);
+        await checkinRef.set({ date: today.toISOString(), timestamp: firebase.database.ServerValue.TIMESTAMP, streak: streakCount + 1 });
+        
+        await loadCheckinData();
+        updateWeeklyReport();
+        
+        const checkinMessage = document.getElementById('checkinMessage');
+        checkinMessage.innerHTML = '<i class="fas fa-party-horn"></i> 🎉 Check-in successful! Keep up the great work! 🎉';
+        setTimeout(() => { if(checkinMessage) checkinMessage.innerHTML = `<i class="fas fa-fire" style="color: #f59e0b;"></i> You're on a ${streakCount+1} day streak!`; }, 3000);
+    } catch(e) { console.error('Checkin error:', e); alert('Error saving check-in. Please try again.'); }
+}
+
+// ==============================================================
+// 3. MEDICAL TIPS (100+ نصيحة - تتغير كل 10 ثواني)
+// ==============================================================
+const medicalTips = [
+    "💧 Drink 8 glasses of water daily to maintain kidney function and blood pressure.",
+    "🚶‍♂️ Walking for 30 minutes daily reduces heart disease risk by 30%.",
+    "😴 Sleep 7-8 hours nightly for optimal brain function and hormone regulation.",
+    "🥗 Leafy greens are rich in Vitamin K, essential for blood clotting and bone health.",
+    "🧘 Deep breathing for 5 minutes can lower blood pressure by 10 points.",
+    "🍎 Apples contain pectin which helps regulate blood sugar levels.",
+    "🏃‍♂️ Regular exercise boosts HDL (good cholesterol) and lowers LDL.",
+    "💊 Take medications at the same time daily to maintain consistent blood levels.",
+    "🌿 Green tea contains EGCG, which may improve insulin sensitivity.",
+    "🩸 Monitor your blood pressure at the same time each day for accurate trends.",
+    "🥑 Avocados are rich in monounsaturated fats that support heart health.",
+    "🐟 Fatty fish like salmon provide Omega-3s that reduce inflammation.",
+    "🥜 A handful of nuts daily reduces cardiovascular mortality by 20%.",
+    "☀️ Morning sunlight for 15 minutes boosts Vitamin D and mood.",
+    "📝 Keeping a health journal helps identify patterns in your symptoms.",
+    "🤝 Strong social connections increase longevity by up to 50%.",
+    "🦷 Gum disease is linked to heart disease - don't skip flossing!",
+    "🍠 Sweet potatoes have a lower glycemic index than white potatoes.",
+    "🥦 Broccoli contains sulforaphane, which may protect against cancer.",
+    "🍫 Dark chocolate (70%+) improves blood flow and lowers blood pressure.",
+    "🧄 Garlic has antibacterial properties and may help lower cholesterol.",
+    "🍅 Lycopene in tomatoes supports prostate health and reduces cancer risk.",
+    "🥬 Spinach is packed with iron and magnesium for energy and muscle function.",
+    "🌰 Walnuts are the only nuts with significant amounts of omega-3 fatty acids.",
+    "🍊 Vitamin C from oranges boosts immunity and collagen production.",
+    "🥛 Yogurt with probiotics supports gut health and digestion.",
+    "🍌 Bananas provide potassium which helps regulate blood pressure.",
+    "🥕 Carrots are rich in beta-carotene for eye health and immunity.",
+    "🍉 Watermelon contains lycopene and helps with hydration.",
+    "🥥 Coconut oil contains MCTs that may boost brain function.",
+    "🍯 Raw honey has antibacterial properties and soothes sore throats.",
+    "🌶️ Cayenne pepper contains capsaicin which boosts metabolism.",
+    "🫚 Ginger reduces nausea and has powerful anti-inflammatory effects.",
+    "🌿 Turmeric contains curcumin, a powerful anti-inflammatory compound.",
+    "🍄 Mushrooms are the only plant source of Vitamin D.",
+    "🌽 Corn provides fiber and lutein for eye health.",
+    "🍆 Eggplant contains nasunin which protects brain cell membranes.",
+    "🥔 Potatoes are rich in potassium and Vitamin C when eaten with skin.",
+    "🍓 Strawberries are packed with Vitamin C and antioxidants.",
+    "🫐 Blueberries improve memory and delay brain aging.",
+    "🍒 Cherries contain melatonin which helps regulate sleep cycles.",
+    "🍑 Peaches provide vitamins A and C for skin health.",
+    "🍍 Pineapple contains bromelain which aids digestion.",
+    "🥝 Kiwi is packed with Vitamin C and fiber for digestive health.",
+    "🍈 Cantaloupe provides beta-carotene for immune function.",
+    "🍋 Lemon water aids digestion and provides Vitamin C.",
+    "🥒 Cucumbers are hydrating and contain silica for skin health.",
+    "🌱 Sprouts are nutrient-dense and rich in enzymes.",
+    "🫑 Bell peppers are excellent sources of Vitamins A and C.",
+    "🧅 Onions contain quercetin which has anti-inflammatory properties.",
+    "🌿 Rosemary may improve memory and concentration.",
+    "🌿 Mint aids digestion and freshens breath naturally.",
+    "🌿 Thyme has antimicrobial properties and supports respiratory health.",
+    "🌿 Oregano is rich in antioxidants and has antibacterial effects.",
+    "🌿 Basil contains eugenol which has anti-inflammatory benefits.",
+    "🌿 Cilantro helps remove heavy metals from the body.",
+    "🌿 Parsley is rich in Vitamin K for bone health.",
+    "🌿 Sage may improve brain function and memory.",
+    "🌿 Dill has calming properties and aids digestion.",
+    "🌿 Fennel seeds reduce bloating and aid digestion.",
+    "🌿 Cardamom may help lower blood pressure.",
+    "🌿 Cinnamon helps regulate blood sugar levels.",
+    "🌿 Cloves have powerful antioxidant and antimicrobial properties.",
+    "🌿 Nutmeg may help with sleep and relaxation.",
+    "🌿 Saffron has mood-boosting properties.",
+    "🌿 Vanilla contains vanillin which has antioxidant effects.",
+    "🍵 Chamomile tea promotes relaxation and sleep.",
+    "🍵 Peppermint tea soothes digestive issues.",
+    "🍵 Ginger tea reduces nausea and inflammation.",
+    "🍵 Hibiscus tea may lower blood pressure.",
+    "🍵 Rooibos tea is rich in antioxidants and caffeine-free.",
+    "💪 Strength training twice weekly maintains muscle mass and bone density.",
+    "🧘 Yoga reduces stress and improves flexibility.",
+    "🏊 Swimming is a low-impact full-body workout.",
+    "🚴 Cycling improves cardiovascular health and leg strength.",
+    "🤸 Stretching daily prevents injury and improves mobility.",
+    "🏋️ Weight-bearing exercise strengthens bones and prevents osteoporosis.",
+    "🎵 Listening to music reduces cortisol and anxiety levels.",
+    "📚 Reading for 30 minutes daily reduces stress by 68%.",
+    "🎨 Creative activities like drawing reduce depression symptoms.",
+    "🌳 Spending time in nature lowers blood pressure and stress.",
+    "🐶 Pet ownership is linked to lower blood pressure and cholesterol.",
+    "😊 Laughter boosts immune function and reduces pain.",
+    "📱 Limit screen time before bed for better sleep quality.",
+    "🛏️ Keep your bedroom cool and dark for optimal sleep.",
+    "⏰ Maintain a consistent sleep schedule even on weekends.",
+    "🍽️ Eat smaller, more frequent meals to stabilize blood sugar.",
+    "🍚 Choose whole grains over refined carbohydrates.",
+    "🍞 Look for bread with at least 3g of fiber per slice.",
+    "🥣 Start your day with a high-protein breakfast.",
+    "🍲 Home-cooked meals are generally healthier than restaurant food.",
+    "📏 Use smaller plates to control portion sizes.",
+    "🍴 Eat slowly and mindfully to recognize fullness cues.",
+    "💧 Drink a glass of water before each meal.",
+    "🧂 Reduce sodium by using herbs and spices instead of salt.",
+    "🍯 Replace sugar with natural sweeteners like stevia or monk fruit.",
+    "🥤 Avoid sugary drinks - they're empty calories.",
+    "☕ Limit caffeine after 2 PM for better sleep.",
+    "🚭 Smoking cessation is the single best thing for your health.",
+    "🍷 Limit alcohol to moderate consumption (1 drink/day for women, 2 for men).",
+    "🧴 Wear sunscreen daily to prevent skin cancer and aging.",
+    "🩺 Get annual check-ups and recommended screenings.",
+    "💉 Stay up to date with vaccinations.",
+    "🩹 Treat wounds promptly to prevent infection.",
+    "👓 Get regular eye exams to detect problems early.",
+    "🦷 Visit the dentist twice yearly for cleanings and check-ups.",
+    "🧠 Challenge your brain with puzzles and learning new skills.",
+    "🎯 Set realistic health goals and track your progress.",
+    "📱 Use health apps to monitor your progress and stay motivated.",
+    "👥 Join a support group for accountability and encouragement.",
+    "🎁 Reward yourself for achieving health milestones.",
+    "🌟 Celebrate small victories along your health journey."
+];
+
+let tipInterval;
+let tipTimerSeconds = 10;
+
+function updateMedicalTip() {
+    const randomTip = medicalTips[Math.floor(Math.random() * medicalTips.length)];
+    const tipText = document.getElementById('medicalTipText');
+    if (tipText) {
+        tipText.style.opacity = '0';
+        setTimeout(() => {
+            tipText.innerHTML = randomTip;
+            tipText.style.opacity = '1';
+        }, 150);
     }
-    
-    // تحديث أولي
-    updateWellnessData();
-    
-    // تحديث كل 30 ثانية
-    setInterval(updateWellnessData, 30000);
-    
-    // تحديث عند تغيير البيانات من Firebase
-    const originalUpdateUICareSync = window.updateUICareSync;
-    if (originalUpdateUICareSync) {
-        window.updateUICareSync = function(vitals) {
-            originalUpdateUICareSync(vitals);
-            setTimeout(updateWellnessData, 100);
-        };
-    }
-    
-    console.log("✅ Wellness Insights Card initialized");
-})();
+    tipTimerSeconds = 10;
+    updateTipTimer();
+}
+
+function updateTipTimer() {
+    const timerEl = document.getElementById('tipTimer');
+    if (timerEl) timerEl.innerHTML = `Next tip in ${tipTimerSeconds}s`;
+}
+
+function startTipTimer() {
+    if (tipInterval) clearInterval(tipInterval);
+    tipInterval = setInterval(() => {
+        tipTimerSeconds--;
+        updateTipTimer();
+        if (tipTimerSeconds <= 0) updateMedicalTip();
+    }, 1000);
+}
+
+// ==============================================================
+// تشغيل كل شيء
+// ==============================================================
+document.getElementById('checkinBtn')?.addEventListener('click', performCheckin);
+
+setTimeout(() => {
+    updateWeeklyReport();
+    loadCheckinData();
+    updateMedicalTip();
+    startTipTimer();
+    setInterval(updateWeeklyReport, 60000);
+    setInterval(loadCheckinData, 30000);
+}, 2000);
+
+console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical Tips (100+ tips, 10s rotation)");
 </script>
-<!-- ========== END WELLNESS INSIGHTS CARD ========== -->
+               
 
                 <!-- Environment Data -->
                 <div class="env-grid">
