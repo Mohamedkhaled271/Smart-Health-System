@@ -638,14 +638,15 @@ async function updateWeeklyReport() {
         const readings = snapshot.val();
         if (!readings) return;
         
-        const now = Date.now();
-        const oneWeekAgo = now - (7 * 24 * 60 * 60 * 1000);
+        const now = new Date();
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(now.getDate() - 7);
         
         let glucoseValues = [], heartValues = [];
         let readingCount = 0;
         
         Object.entries(readings).forEach(([timestamp, data]) => {
-            const ts = parseInt(timestamp);
+            const ts = new Date(parseInt(timestamp));
             if (ts >= oneWeekAgo && data.vitals) {
                 readingCount++;
                 if (data.vitals.glucose && data.vitals.glucose > 0) glucoseValues.push(data.vitals.glucose);
@@ -660,9 +661,15 @@ async function updateWeeklyReport() {
         document.getElementById('weeklyAvgHeart').innerHTML = avgHeart !== '--' ? avgHeart + ' bpm' : '--';
         document.getElementById('weeklyTotalReads').innerHTML = readingCount;
         
-        const startDate = new Date(oneWeekAgo);
-        const endDate = new Date(now);
-        document.getElementById('reportWeekRange').innerHTML = `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+        // ✅ تنسيق التاريخ بشكل صحيح (يوم/شهر/سنة)
+        const formatDate = (date) => {
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        };
+        
+        document.getElementById('reportWeekRange').innerHTML = `${formatDate(oneWeekAgo)} - ${formatDate(now)}`;
         
         let comparison = '', progressPercent = 50;
         if (avgGlucose !== '--') {
