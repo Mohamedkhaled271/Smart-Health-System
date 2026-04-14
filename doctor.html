@@ -597,7 +597,7 @@
     document.getElementById('forceRefreshPreviewBtn')?.addEventListener('click', updatePreviewFromFirebase);
 
     initDoctorPortal();
-    // ========== CONVERT NUMBERS TO ENGLISH ==========
+    // ========== CONVERT NUMBERS TO ENGLISH (Doctor Portal) ==========
 (function() {
     "use strict";
     
@@ -610,95 +610,60 @@
             '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
         };
         
-        // تحويل الأرقام العربية
-        let converted = str.replace(/[٠-٩]/g, function(match) {
-            return arabicNumbers[match];
-        });
-        
-        // تحويل الأرقام الفارسية (إذا وجدت)
         const persianNumbers = {
             '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4',
             '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9'
         };
-        converted = converted.replace(/[۰-۹]/g, function(match) {
-            return persianNumbers[match];
-        });
+        
+        let converted = str.replace(/[٠-٩]/g, m => arabicNumbers[m]);
+        converted = converted.replace(/[۰-۹]/g, m => persianNumbers[m]);
         
         return converted;
     }
     
-    // دالة لتحويل جميع العناصر التي تحتوي على أرقام
-    function convertAllNumbersToEnglish() {
-        // العناصر التي تحتوي على أرقام (القيم الحيوية)
-        const elementsWithNumbers = [
-            'healthScore', 'heartValue', 'spo2Value', 'tempValue',
-            'bpValue', 'glucoseValue', 'roomTempValue', 'humidityValue',
-            'motionValue', 'weeklyAvgGlucose', 'weeklyAvgHeart', 'weeklyTotalReads',
-            'streakCount', 'activeAlertsCount', 'smartScore', 'lab_fbg',
-            'lab_hba1c', 'lab_ppg', 'lab_rbs', 'lab_creatinine', 'lab_bun',
-            'lab_egfr', 'lab_uric_acid', 'lab_alt', 'lab_ast', 'lab_alp',
-            'lab_bilirubin', 'lab_tsh', 'lab_t3', 'lab_t4', 'lab_troponin',
-            'lab_ckmb', 'lab_bnp', 'lab_crp', 'lab_esr', 'lab_pct'
-        ];
-        
-        // تحويل العناصر المحددة
-        elementsWithNumbers.forEach(id => {
-            const element = document.getElementById(id);
-            if (element && element.innerText) {
-                const originalText = element.innerText;
-                const convertedText = toEnglishNumbers(originalText);
-                if (originalText !== convertedText) {
-                    element.innerText = convertedText;
-                }
-            }
-        });
-        
-        // تحويل جميع العناصر التي تحتوي على class="stat-value"
-        document.querySelectorAll('.stat-value, .vital-value, .env-value').forEach(el => {
-            if (el.innerText) {
-                const originalText = el.innerText;
-                const convertedText = toEnglishNumbers(originalText);
-                if (originalText !== convertedText) {
-                    el.innerText = convertedText;
-                }
-            }
-        });
-        
-        // تحويل أي عنصر يحتوي على أرقام في محتواه
-        const allElements = document.querySelectorAll('div, span, p, h1, h2, h3, h4, button, label');
-        allElements.forEach(el => {
-            // نتخطى العناصر التي قد تحتوي على أيقونات أو نصوص لا نريد تغييرها
-            if (el.children.length === 0 && el.innerText && el.innerText.match(/[٠-٩]/)) {
-                const originalText = el.innerText;
-                const convertedText = toEnglishNumbers(originalText);
-                if (originalText !== convertedText) {
-                    el.innerText = convertedText;
-                }
+    // تحويل القيم في حقول الإدخال (inputs)
+    function convertInputNumbers() {
+        document.querySelectorAll('input[type="number"], input[type="text"]').forEach(input => {
+            if (input.value && input.value.match(/[٠-٩]/)) {
+                input.value = toEnglishNumbers(input.value);
             }
         });
     }
     
-    // إنشاء MutationObserver لمراقبة التغييرات في DOM
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'childList' || mutation.type === 'characterData') {
-                convertAllNumbersToEnglish();
+    // تحويل النصوص المعروضة (preview)
+    function convertDisplayNumbers() {
+        document.querySelectorAll('#previewPage span, .edit-card span, .live-indicator').forEach(el => {
+            if (el.innerText && el.innerText.match(/[٠-٩]/)) {
+                el.innerText = toEnglishNumbers(el.innerText);
             }
         });
+    }
+    
+    // مراقبة التغييرات
+    const observer = new MutationObserver(() => {
+        convertInputNumbers();
+        convertDisplayNumbers();
     });
     
-    // بدء المراقبة
     observer.observe(document.body, {
         childList: true,
         subtree: true,
         characterData: true
     });
     
-    // التحويل الأولي
-    setTimeout(convertAllNumbersToEnglish, 100);
-    setInterval(convertAllNumbersToEnglish, 2000);
+    // التنفيذ الأولي
+    setTimeout(() => {
+        convertInputNumbers();
+        convertDisplayNumbers();
+    }, 500);
     
-    console.log("✅ Numbers converter active - Arabic numbers → English numbers");
+    // تحديث دوري كل 3 ثواني
+    setInterval(() => {
+        convertInputNumbers();
+        convertDisplayNumbers();
+    }, 3000);
+    
+    console.log("✅ Numbers converter active for Doctor Portal");
 })();
 </script>
 </body>
