@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy Node.js app to Azure Web App - HELIOS
+name: Build and deploy Node.js app to Azure Web App - Helios
 
 on:
   push:
@@ -51,15 +51,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_EE14A347C2334AACB4EF1B9F4A751536 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_38F84C5AF5444B3D810A11C996C3DCC8 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B2699E96BB374F1A8EE3448623E10946 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_041C6186082D43A09CDC22BBA3EA88A6 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_FD0B5D4D067041D4B9A93215F315DC93 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F80DDA8EA7B1418FA7F0010FE4FC5835 }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'HELIOS'
+          app-name: 'Helios'
           slot-name: 'Production'
           package: .
           
