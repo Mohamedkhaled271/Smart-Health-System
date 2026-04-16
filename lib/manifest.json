@@ -1,125 +1,104 @@
 {
-  "name": "HELIOS Health Monitor",
-  "short_name": "HELIOS",
-  "description": "Real-time health monitoring system for patients and doctors",
-  "start_url": "/",
-  "scope": "/",
+  "name": "Helios Smart Health System",
+  "short_name": "Helios Health",
+  "description": "Smart Health Monitoring System with Real-time IoT Vitals, AI Predictions, and Telemedicine",
+  "start_url": "/index.html",
   "display": "standalone",
-  "orientation": "portrait",
   "theme_color": "#0284c7",
-  "background_color": "#0f172a",
-  "id": "helios-health-app",
-  "lang": "en",
-  "dir": "ltr",
-  "categories": ["health", "medical", "fitness"],
-  
+  "background_color": "#eef2f7",
+  "orientation": "portrait",
+  "scope": "/",
+  "categories": ["health", "medical", "fitness", "lifestyle"],
   "icons": [
     {
-      "src": "/assets/icons/icon-72x72.png",
+      "src": "assets/icons/icon-72x72.png",
       "sizes": "72x72",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/assets/icons/icon-96x96.png",
+      "src": "assets/icons/icon-96x96.png",
       "sizes": "96x96",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "/assets/icons/icon-128x128.png",
+      "src": "assets/icons/icon-128x128.png",
       "sizes": "128x128",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "/assets/icons/icon-144x144.png",
+      "src": "assets/icons/icon-144x144.png",
       "sizes": "144x144",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "/assets/icons/icon-152x152.png",
+      "src": "assets/icons/icon-152x152.png",
       "sizes": "152x152",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "/assets/icons/icon-192x192.png",
+      "src": "assets/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/assets/icons/icon-384x384.png",
+      "src": "assets/icons/icon-384x384.png",
       "sizes": "384x384",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "/assets/icons/icon-512x512.png",
+      "src": "assets/icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
-  
-  "screenshots": [
-    {
-      "src": "/assets/screenshots/dashboard.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Dashboard View"
-    },
-    {
-      "src": "/assets/screenshots/vitals.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Vital Signs"
-    }
-  ],
-  
   "shortcuts": [
     {
-      "name": "Dashboard",
-      "short_name": "Home",
+      "name": "Patient Dashboard",
+      "short_name": "Patient",
       "description": "View your health dashboard",
-      "url": "/",
-      "icons": [
-        {
-          "src": "/assets/icons/dashboard-icon.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Vital Signs",
-      "short_name": "Vitals",
-      "description": "Check your vital signs",
       "url": "/patient.html",
-      "icons": [
-        {
-          "src": "/assets/icons/vitals-icon.png",
-          "sizes": "96x96"
-        }
-      ]
+      "icons": [{ "src": "assets/icons/icon-96x96.png", "sizes": "96x96" }]
     },
     {
-      "name": "Medical History",
-      "short_name": "History",
-      "description": "View your medical records",
-      "url": "/patient.html?tab=history",
-      "icons": [
-        {
-          "src": "/assets/icons/history-icon.png",
-          "sizes": "96x96"
-        }
-      ]
+      "name": "Doctor Portal",
+      "short_name": "Doctor",
+      "description": "Access doctor portal",
+      "url": "/doctor.html",
+      "icons": [{ "src": "assets/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Admin Panel",
+      "short_name": "Admin",
+      "description": "System administration",
+      "url": "/admin.html",
+      "icons": [{ "src": "assets/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Emergency SOS",
+      "short_name": "SOS",
+      "description": "Send emergency alert",
+      "url": "/patient.html#emergency",
+      "icons": [{ "src": "assets/icons/icon-96x96.png", "sizes": "96x96" }]
     }
   ],
-  
-  "related_applications": [],
+  "screenshots": [
+    {
+      "src": "assets/screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Patient Dashboard"
+    }
+  ],
   "prefer_related_applications": false,
-  
-  "display_override": ["window-controls-overlay", "standalone"],
-  "handle_links": "preferred",
-  "launch_handler": {
-    "client_mode": ["focus-existing", "auto"]
-  }
+  "related_applications": [],
+  "display_override": ["window-controls-overlay", "standalone"]
 }
