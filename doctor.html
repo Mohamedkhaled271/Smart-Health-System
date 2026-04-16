@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>HELIOS · Doctor Portal · Edit Lab & Notes → Firebase Sync</title>
     <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007bff'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E">
+    <!-- ========== PWA META TAGS ========== -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1e6f5c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Helios Doctor">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/assets/icons/icon-512x512.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -722,6 +731,43 @@ function formatDateTimeArabic(timestamp, includeTime = true) {
 function formatDateOnlyArabic(timestamp) {
     return formatDateTimeArabic(timestamp, false);
 }
+</script>
+    <!-- ========== PWA SERVICE WORKER REGISTRATION ========== -->
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('✅ SW registered:', reg.scope))
+            .catch(err => console.log('❌ SW failed:', err));
+    });
+}
+</script>
+
+<!-- ========== PWA INSTALL PROMPT ========== -->
+<script>
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    console.log('📱 PWA install prompt ready for Doctor Portal');
+    
+    // إظهار زر تثبيت مخصص
+    setTimeout(() => {
+        const installMsg = document.createElement('div');
+        installMsg.style.cssText = 'position:fixed; bottom:20px; left:20px; right:20px; background:#1e6f5c; color:white; padding:12px; border-radius:12px; text-align:center; z-index:10000; cursor:pointer; font-family:Inter;';
+        installMsg.innerHTML = '📱 Install Doctor App <span style="float:right; cursor:pointer;">✕</span>';
+        installMsg.onclick = (e) => {
+            if (e.target.tagName !== 'SPAN' && deferredPrompt) {
+                deferredPrompt.prompt();
+                installMsg.remove();
+            } else if (e.target.tagName === 'SPAN') {
+                installMsg.remove();
+            }
+        };
+        document.body.appendChild(installMsg);
+        setTimeout(() => installMsg.remove(), 10000);
+    }, 3000);
+});
 </script>
 </body>
 </html>
