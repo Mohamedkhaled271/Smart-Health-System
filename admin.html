@@ -575,6 +575,15 @@
             }
         }
     </style>
+    <!-- ========== PWA META TAGS ========== -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a7f9e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Care Sync Admin">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/assets/icons/icon-512x512.png">
 </head>
 <body>
     <div id="toastContainer" class="toast-container"></div>
@@ -921,5 +930,41 @@
     <script src="js/auth.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/admin.js"></script>
+    <!-- ========== PWA SERVICE WORKER REGISTRATION ========== -->
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('✅ SW registered for Admin:', reg.scope))
+                .catch(err => console.log('❌ SW failed:', err));
+        });
+    }
+    </script>
+
+    <!-- ========== PWA INSTALL PROMPT ========== -->
+    <script>
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('📱 PWA install prompt ready for Admin Portal');
+        
+        setTimeout(() => {
+            const installMsg = document.createElement('div');
+            installMsg.style.cssText = 'position:fixed; bottom:20px; left:20px; right:20px; background:#1a7f9e; color:white; padding:12px; border-radius:12px; text-align:center; z-index:10000; cursor:pointer; font-family:Inter;';
+            installMsg.innerHTML = '📱 Install Admin App <span style="float:right; cursor:pointer;">✕</span>';
+            installMsg.onclick = (e) => {
+                if (e.target.tagName !== 'SPAN' && deferredPrompt) {
+                    deferredPrompt.prompt();
+                    installMsg.remove();
+                } else if (e.target.tagName === 'SPAN') {
+                    installMsg.remove();
+                }
+            };
+            document.body.appendChild(installMsg);
+            setTimeout(() => installMsg.remove(), 10000);
+        }, 3000);
+    });
+    </script>
 </body>
 </html>
