@@ -482,17 +482,17 @@
                     <button class="collapse-btn" id="themeToggle" style="width:42px;height:42px;"><i class="fas fa-moon"></i></button>
                 </div>
             </div>
-                        <!-- EMERGENCY SOS BUTTON -->
-            <div style="margin-bottom: 1.5rem;">
-                <button id="emergencySosBtn" style="width: 100%; background: linear-gradient(135deg, #ef4444, #dc2626, #b91c1c); border: none; padding: 1rem; border-radius: 60px; color: white; font-weight: 800; font-size: 1.2rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 30px rgba(239,68,68,0.4); display: flex; align-items: center; justify-content: center; gap: 12px;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem;"></i>
-                    <span>🚨 EMERGENCY SOS - SEND ALERT TO DOCTOR 🚨</span>
-                    <i class="fas fa-ambulance" style="font-size: 1.5rem;"></i>
-                </button>
-                <p style="text-align: center; font-size: 0.7rem; color: var(--text-secondary); margin-top: 8px;">
-                    <i class="fas fa-info-circle"></i> Pressing this button will send an immediate emergency alert to your doctor via email
-                </p>
-            </div>
+                        <!-- ==================== EMERGENCY SOS BUTTON - UPGRADED WITH GPS ==================== -->
+<div style="margin-bottom: 1.5rem;">
+    <button id="emergencySosBtn" style="width: 100%; background: linear-gradient(135deg, #ef4444, #dc2626, #b91c1c); border: none; padding: 1rem; border-radius: 60px; color: white; font-weight: 800; font-size: 1.2rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 30px rgba(239,68,68,0.4); display: flex; align-items: center; justify-content: center; gap: 12px;">
+        <i class="fas fa-map-marker-alt" style="font-size: 1.5rem;"></i>
+        <span>🚨 EMERGENCY SOS - GPS + AMBULANCE FINDER 🚨</span>
+        <i class="fas fa-ambulance" style="font-size: 1.5rem;"></i>
+    </button>
+    <p style="text-align: center; font-size: 0.7rem; color: var(--text-secondary); margin-top: 8px;">
+        <i class="fas fa-info-circle"></i> Pressing this button will get your GPS location, show nearby ambulances, and send an emergency alert
+    </p>
+</div>
 
             <!-- DASHBOARD PAGE -->
             <div class="page-section active" id="dashboardPage">
@@ -7934,6 +7934,370 @@ function formatDateOnlyArabic(timestamp) {
     
     console.log("✅ Bilingual Professional Chatbot initialized!");
     console.log("Features: Arabic/English support, voice input, reminders, weekly reports, vitals analysis");
+})();
+</script>
+                <!-- ==================== EMERGENCY SYSTEM MODAL & STYLES ==================== -->
+<style>
+.emergency-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 550px;
+    max-height: 85vh;
+    background: var(--surface);
+    border-radius: 28px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    z-index: 10001;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    animation: slideUp 0.3s ease;
+}
+.emergency-modal.open { display: flex; }
+.emergency-modal-header {
+    background: linear-gradient(135deg, #ef4444, #dc2626, #b91c1c);
+    padding: 20px;
+    color: white;
+    text-align: center;
+    position: relative;
+}
+.emergency-modal-header h2 {
+    font-size: 1.3rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.emergency-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.emergency-modal-content {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(85vh - 130px);
+}
+.location-card {
+    background: rgba(59,130,246,0.1);
+    border-radius: 20px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(59,130,246,0.3);
+}
+.location-coords {
+    font-family: monospace;
+    font-size: 0.8rem;
+    background: var(--surface-glass);
+    padding: 8px;
+    border-radius: 12px;
+    margin: 8px 0;
+}
+.map-container {
+    width: 100%;
+    height: 280px;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 15px 0;
+    border: 1px solid var(--border);
+}
+.ambulance-list {
+    max-height: 250px;
+    overflow-y: auto;
+    margin: 15px 0;
+}
+.ambulance-item {
+    background: var(--surface-glass);
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--border);
+}
+.ambulance-info h4 { margin: 0 0 5px 0; font-size: 0.9rem; }
+.ambulance-info p { margin: 0; font-size: 0.7rem; color: var(--text-secondary); }
+.ambulance-distance { font-size: 0.7rem; color: #10b981; margin-top: 4px; }
+.ambulance-actions { display: flex; gap: 8px; }
+.ambulance-call, .ambulance-sms {
+    width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer;
+}
+.ambulance-call { background: #10b981; color: white; }
+.ambulance-sms { background: #3b82f6; color: white; }
+.emergency-buttons-row { display: flex; gap: 12px; margin-top: 15px; }
+.btn-emergency-send {
+    flex: 2; background: linear-gradient(135deg, #ef4444, #dc2626);
+    border: none; padding: 12px; border-radius: 50px; color: white;
+    font-weight: bold; cursor: pointer;
+}
+.btn-emergency-refresh {
+    flex: 1; background: var(--surface-glass); border: 1px solid var(--border);
+    padding: 12px; border-radius: 50px; cursor: pointer;
+}
+.loading-spinner {
+    display: inline-block; width: 18px; height: 18px;
+    border: 2px solid white; border-top-color: transparent;
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; }
+.status-success { background: #10b98120; color: #10b981; }
+.status-error { background: #ef444420; color: #ef4444; }
+@keyframes slideUp {
+    from { opacity: 0; transform: translate(-50%, -40%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+}
+</style>
+
+<div class="emergency-modal" id="emergencyModal">
+    <div class="emergency-modal-header">
+        <button class="emergency-modal-close" id="emergencyModalClose">&times;</button>
+        <h2><i class="fas fa-ambulance"></i> 🚨 EMERGENCY RESPONSE 🚨</h2>
+        <p style="margin: 5px 0 0; font-size: 0.7rem;">GPS Location · Nearby Ambulances · Emergency Alert</p>
+    </div>
+    <div class="emergency-modal-content">
+        <div class="location-card">
+            <h4><i class="fas fa-map-marker-alt"></i> Your Current Location</h4>
+            <div id="emergencyLocationStatus">📍 Acquiring location...</div>
+            <div class="location-coords" id="emergencyLocationCoords"></div>
+            <div id="emergencyLocationAddress" style="font-size: 0.75rem; margin-top: 8px;"></div>
+        </div>
+        <div class="map-container"><div id="emergencyMap" style="width:100%;height:100%;"></div></div>
+        <div id="ambulanceSection">
+            <h4><i class="fas fa-truck-medical"></i> Nearby Ambulance Services</h4>
+            <div class="ambulance-list" id="ambulanceList"><div style="text-align:center;padding:20px;">📍 Getting your location...</div></div>
+        </div>
+        <div class="emergency-buttons-row">
+            <button class="btn-emergency-send" id="emergencySendAlertBtn"><i class="fas fa-paper-plane"></i> SEND EMERGENCY ALERT</button>
+            <button class="btn-emergency-refresh" id="emergencyRefreshLocationBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==================== EMERGENCY SYSTEM WITH GPS + AMBULANCE ====================
+(function() {
+    const DOCTOR_EMAIL = "mohamedkhaled271200127@gmail.com";
+    let userLocation = null;
+    let map = null;
+    let ambulanceMarkers = [];
+    
+    const AMBULANCE_SERVICES = [
+        { name: "🚑 Shibin El Kom Ambulance", phone: "123", smsNumber: "123", lat: 30.5570, lng: 31.0035, address: "Shibin El Kom, Menoufia", governorate: "Menoufia" },
+        { name: "🚑 Menouf Ambulance", phone: "123", smsNumber: "123", lat: 30.4660, lng: 30.9300, address: "Menouf, Menoufia", governorate: "Menoufia" },
+        { name: "🚑 El Sadat Ambulance", phone: "123", smsNumber: "123", lat: 30.3760, lng: 30.5330, address: "El Sadat City, Menoufia", governorate: "Menoufia" },
+        { name: "🚑 Quesna Ambulance", phone: "123", smsNumber: "123", lat: 30.5660, lng: 31.1500, address: "Quesna, Menoufia", governorate: "Menoufia" },
+        { name: "🚑 Bagour Ambulance", phone: "123", smsNumber: "123", lat: 30.5000, lng: 31.0500, address: "Bagour, Menoufia", governorate: "Menoufia" },
+        { name: "🚑 Egyptian Ambulance - Cairo", phone: "123", smsNumber: "123", lat: 30.0444, lng: 31.2357, address: "Tahrir Square, Cairo", governorate: "Cairo" },
+        { name: "🚑 Giza Ambulance", phone: "123", smsNumber: "123", lat: 30.0131, lng: 31.2089, address: "Giza", governorate: "Giza" },
+        { name: "🚑 Alexandria Ambulance", phone: "123", smsNumber: "123", lat: 31.2001, lng: 29.9187, address: "Alexandria", governorate: "Alexandria" }
+    ];
+    
+    function getPatientMedicalInfo() {
+        const name = document.getElementById('profileName')?.innerText || 'Mohamed Khaled';
+        const patientId = document.getElementById('profileId')?.innerText || 'P-10042';
+        const phone = document.getElementById('profilePhone')?.innerText || '01153493110';
+        const age = document.getElementById('profileDob')?.innerText || '15 March 1985';
+        const bloodType = document.getElementById('profileBloodType')?.innerText || 'A+';
+        const heartRate = document.getElementById('heartValue')?.innerText.split(' ')[0] || '--';
+        const bpText = document.getElementById('bpValue')?.innerText || '--/--';
+        const glucose = document.getElementById('glucoseValue')?.innerText.split(' ')[0] || '--';
+        const spo2 = document.getElementById('spo2Value')?.innerText.split(' ')[0] || '--';
+        const temp = document.getElementById('tempValue')?.innerText.split(' ')[0] || '--';
+        const chronic = document.getElementById('profileChronic')?.innerText || 'None';
+        const allergies = document.getElementById('profileAllergies')?.innerText || 'None';
+        const medications = document.getElementById('profileMedications')?.innerText || 'None';
+        return { name, patientId, phone, age, bloodType, heartRate, bloodPressure: bpText, glucose, spo2, temperature: temp, chronic, allergies, medications, timestamp: formatDateTimeArabic(Date.now(), true) };
+    }
+    
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+    
+    async function getAddressFromCoords(lat, lng) {
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18`);
+            const data = await response.json();
+            return data.display_name ? data.display_name.substring(0, 100) : `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        } catch(e) { return `${lat.toFixed(4)}, ${lng.toFixed(4)}`; }
+    }
+    
+    function getCurrentLocation() {
+        return new Promise((resolve, reject) => {
+            const statusDiv = document.getElementById('emergencyLocationStatus');
+            statusDiv.innerHTML = '<span class="loading-spinner"></span> Getting your location...';
+            if (!navigator.geolocation) {
+                statusDiv.innerHTML = '❌ Geolocation not supported';
+                reject('Not supported'); return;
+            }
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                userLocation = { lat: position.coords.latitude, lng: position.coords.longitude, accuracy: position.coords.accuracy };
+                statusDiv.innerHTML = '✅ Location acquired!';
+                statusDiv.className = 'status-badge status-success';
+                document.getElementById('emergencyLocationCoords').innerHTML = `📍 ${userLocation.lat.toFixed(6)}° N, ${userLocation.lng.toFixed(6)}° E | ±${Math.round(userLocation.accuracy)}m`;
+                const address = await getAddressFromCoords(userLocation.lat, userLocation.lng);
+                document.getElementById('emergencyLocationAddress').innerHTML = `<i class="fas fa-location-dot"></i> ${address}`;
+                initEmergencyMap();
+                findNearbyAmbulances();
+                resolve(userLocation);
+            }, (error) => {
+                let errorMsg = error.code === error.PERMISSION_DENIED ? '❌ Location permission denied.' : '❌ Could not get location.';
+                statusDiv.innerHTML = errorMsg;
+                statusDiv.className = 'status-badge status-error';
+                reject(error);
+            }, { enableHighAccuracy: true, timeout: 10000 });
+        });
+    }
+    
+    function initEmergencyMap() {
+        const mapContainer = document.getElementById('emergencyMap');
+        if (!mapContainer || !userLocation) return;
+        if (typeof L === 'undefined') {
+            if (!document.querySelector('#leaflet-css')) {
+                const link = document.createElement('link');
+                link.id = 'leaflet-css';
+                link.rel = 'stylesheet';
+                link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+                document.head.appendChild(link);
+            }
+            if (!document.querySelector('#leaflet-js')) {
+                const script = document.createElement('script');
+                script.id = 'leaflet-js';
+                script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+                script.onload = () => createMap();
+                document.head.appendChild(script);
+            }
+        } else { createMap(); }
+        function createMap() {
+            if (map) map.remove();
+            map = L.map('emergencyMap').setView([userLocation.lat, userLocation.lng], 12);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>' }).addTo(map);
+            const userIcon = L.divIcon({ html: '<div style="background: #ef4444; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white;"></div>', iconSize: [24, 24] });
+            L.marker([userLocation.lat, userLocation.lng], { icon: userIcon }).addTo(map).bindPopup('<b>📍 You are here</b>').openPopup();
+        }
+    }
+    
+    function findNearbyAmbulances() {
+        if (!userLocation) return;
+        const ambulancesWithDistance = AMBULANCE_SERVICES.map(amb => ({ ...amb, distance: calculateDistance(userLocation.lat, userLocation.lng, amb.lat, amb.lng) })).sort((a, b) => a.distance - b.distance);
+        const ambulanceList = document.getElementById('ambulanceList');
+        ambulanceList.innerHTML = ambulancesWithDistance.slice(0, 10).map(amb => `
+            <div class="ambulance-item">
+                <div class="ambulance-info">
+                    <h4>${amb.name}</h4>
+                    <p><i class="fas fa-location-dot"></i> ${amb.address}</p>
+                    <div class="ambulance-distance">📏 ${amb.distance.toFixed(1)} km away</div>
+                </div>
+                <div class="ambulance-actions">
+                    <button class="ambulance-call" onclick="window.location.href='tel:${amb.phone}'"><i class="fas fa-phone"></i></button>
+                    <button class="ambulance-sms" onclick="sendSMSToAmbulance('${amb.smsNumber}', '${amb.name}')"><i class="fas fa-sms"></i></button>
+                </div>
+            </div>
+        `).join('');
+        if (map && typeof L !== 'undefined') {
+            ambulanceMarkers.forEach(m => map.removeLayer(m));
+            ambulanceMarkers = [];
+            const ambIcon = L.divIcon({ html: '<div style="background: #10b981; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"><i class="fas fa-truck-medical" style="font-size: 10px; color: white;"></i></div>', iconSize: [20, 20] });
+            ambulancesWithDistance.slice(0, 5).forEach(amb => {
+                const marker = L.marker([amb.lat, amb.lng], { icon: ambIcon }).addTo(map);
+                marker.bindPopup(`<b>${amb.name}</b><br>${amb.address}<br>📏 ${amb.distance.toFixed(1)} km<br><a href="tel:${amb.phone}">📞 Call Now</a>`);
+                ambulanceMarkers.push(marker);
+            });
+        }
+    }
+    
+    window.sendSMSToAmbulance = function(number, name) {
+        const patientInfo = getPatientMedicalInfo();
+        const locationText = userLocation ? `https://www.google.com/maps?q=${userLocation.lat},${userLocation.lng}` : 'Location unavailable';
+        const message = `🚨 EMERGENCY SOS 🚨\n\nPatient: ${patientInfo.name}\nAge: ${patientInfo.age}\nBlood: ${patientInfo.bloodType}\n📍 ${locationText}\n❤️ HR: ${patientInfo.heartRate} bpm\n💓 BP: ${patientInfo.bloodPressure}\n🩸 Glucose: ${patientInfo.glucose} mg/dL\n\n⚠️ IMMEDIATE ASSISTANCE NEEDED!`;
+        window.location.href = `sms:${number}?body=${encodeURIComponent(message)}`;
+        showNotification(`📱 Opening SMS to ${name}...`, 'info');
+    };
+    
+    function sendEmergencyEmail() {
+        const patientInfo = getPatientMedicalInfo();
+        const locationText = userLocation ? `https://www.google.com/maps?q=${userLocation.lat},${userLocation.lng}` : 'Location unavailable';
+        const addressText = document.getElementById('emergencyLocationAddress')?.innerText || 'Address unavailable';
+        const subject = encodeURIComponent(`🚨 EMERGENCY SOS - ${patientInfo.name} Needs Immediate Assistance 🚨`);
+        const body = encodeURIComponent(`EMERGENCY ALERT\n\nTIME: ${patientInfo.timestamp}\nPATIENT: ${patientInfo.name}\nID: ${patientInfo.patientId}\nPHONE: ${patientInfo.phone}\nAGE: ${patientInfo.age}\nBLOOD: ${patientInfo.bloodType}\n\n📍 LOCATION:\nAddress: ${addressText}\nCoordinates: ${userLocation ? `${userLocation.lat}, ${userLocation.lng}` : 'N/A'}\nMaps: ${locationText}\n\n📊 VITALS:\nHeart Rate: ${patientInfo.heartRate} bpm\nBP: ${patientInfo.bloodPressure}\nGlucose: ${patientInfo.glucose} mg/dL\nSpO2: ${patientInfo.spo2}%\nTemp: ${patientInfo.temperature}°C\n\n📋 MEDICAL HISTORY:\nChronic: ${patientInfo.chronic}\nAllergies: ${patientInfo.allergies}\nMedications: ${patientInfo.medications}\n\n⚠️ PATIENT ACTIVATED EMERGENCY SOS!`);
+        window.location.href = `mailto:${DOCTOR_EMAIL}?subject=${subject}&body=${body}`;
+        return true;
+    }
+    
+    async function saveEmergencyToFirebase(patientInfo) {
+        try {
+            await database.ref('emergency_alerts').push({
+                id: Date.now().toString(), patientId: patientInfo.patientId, patientName: patientInfo.name,
+                phone: patientInfo.phone, location: userLocation, locationAddress: document.getElementById('emergencyLocationAddress')?.innerText || '',
+                vitals: { heartRate: patientInfo.heartRate, bloodPressure: patientInfo.bloodPressure, glucose: patientInfo.glucose, spo2: patientInfo.spo2, temperature: patientInfo.temperature },
+                timestamp: firebase.database.ServerValue.TIMESTAMP, status: 'active', type: 'emergency_sos'
+            });
+            return true;
+        } catch(e) { return false; }
+    }
+    
+    async function triggerEmergencyWithGPS() {
+        document.getElementById('emergencyModal').classList.add('open');
+        await getCurrentLocation();
+    }
+    
+    async function sendFullEmergencyAlert() {
+        const sendBtn = document.getElementById('emergencySendAlertBtn');
+        sendBtn.innerHTML = '<span class="loading-spinner"></span> Sending...';
+        sendBtn.disabled = true;
+        try {
+            await getCurrentLocation();
+            const patientInfo = getPatientMedicalInfo();
+            sendEmergencyEmail();
+            await saveEmergencyToFirebase(patientInfo);
+            showNotification('✅ Emergency alert sent!', 'success');
+            const alertsContainer = document.getElementById('alertsList');
+            if (alertsContainer) {
+                alertsContainer.prepend(Object.assign(document.createElement('div'), {
+                    className: 'alert-item', style: 'background: linear-gradient(135deg, #ef444420, #dc262620); border-left: 4px solid #ef4444;',
+                    innerHTML: `<i class="fas fa-map-marker-alt" style="color:#ef4444;"></i><div><strong>🚨 EMERGENCY SOS WITH GPS 🚨</strong><br><small>Location sent at ${patientInfo.timestamp}</small>${userLocation ? `<br><small>📍 ${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}</small>` : ''}</div>`
+                }));
+            }
+        } catch(e) { showNotification('❌ Error sending alert', 'error'); }
+        finally { sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> SEND EMERGENCY ALERT'; sendBtn.disabled = false; }
+    }
+    
+    function upgradeExistingSOSButton() {
+        const btn = document.getElementById('emergencySosBtn');
+        if (btn) {
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            newBtn.addEventListener('click', (e) => { e.preventDefault(); triggerEmergencyWithGPS(); });
+        }
+    }
+    
+    function init() {
+        upgradeExistingSOSButton();
+        document.getElementById('emergencyModalClose')?.addEventListener('click', () => document.getElementById('emergencyModal').classList.remove('open'));
+        document.getElementById('emergencyRefreshLocationBtn')?.addEventListener('click', () => getCurrentLocation());
+        document.getElementById('emergencySendAlertBtn')?.addEventListener('click', () => sendFullEmergencyAlert());
+        document.getElementById('emergencyModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('emergencyModal')) document.getElementById('emergencyModal').classList.remove('open'); });
+        console.log('✅ Emergency System Ready!');
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
 })();
 </script>
 
