@@ -6751,7 +6751,7 @@ function formatDateOnlyArabic(timestamp) {
         });
     }
     </script>
-                <!-- ==================== PROFESSIONAL AI CHATBOT WITH ADVANCED FEATURES ==================== -->
+              <!-- ==================== PROFESSIONAL AI CHATBOT - BILINGUAL (AR/EN) ==================== -->
 <style>
 /* Advanced Chatbot Styles - Professional & Stunning */
 .chatbot-container {
@@ -6759,7 +6759,7 @@ function formatDateOnlyArabic(timestamp) {
     bottom: 25px;
     right: 25px;
     z-index: 10000;
-    font-family: 'Inter', 'Poppins', sans-serif;
+    font-family: 'Inter', 'Poppins', 'Cairo', sans-serif;
 }
 
 /* Pulse Animation for Button */
@@ -6830,8 +6830,8 @@ function formatDateOnlyArabic(timestamp) {
     position: fixed;
     bottom: 105px;
     right: 25px;
-    width: 420px;
-    height: 600px;
+    width: 450px;
+    height: 650px;
     background: var(--surface);
     backdrop-filter: blur(20px);
     border-radius: 28px;
@@ -6894,6 +6894,21 @@ function formatDateOnlyArabic(timestamp) {
 .chatbot-header h3 i {
     font-size: 1.4rem;
     animation: pulse 1.5s infinite;
+}
+
+.language-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: 0.3s;
+    z-index: 1;
+}
+
+.language-badge:hover {
+    background: rgba(255,255,255,0.4);
+    transform: scale(1.05);
 }
 
 @keyframes pulse {
@@ -7209,6 +7224,9 @@ function formatDateOnlyArabic(timestamp) {
                 <i class="fas fa-brain"></i>
                 HELIOS AI Assistant
             </h3>
+            <div class="language-badge" id="languageToggle" title="Switch Language / تغيير اللغة">
+                <i class="fas fa-language"></i> EN/AR
+            </div>
             <div class="status-indicator">
                 <span class="status-dot"></span>
                 <span>Online</span>
@@ -7222,15 +7240,15 @@ function formatDateOnlyArabic(timestamp) {
             <div class="message bot">
                 <i class="fas fa-heartbeat" style="margin-right: 8px; color: #ef4444;"></i>
                 <strong>Welcome to HELIOS AI Health Assistant! 🌟</strong><br><br>
-                I'm your intelligent medical companion. I can help you with:<br><br>
-                📊 <strong>Vital Signs Analysis</strong> - Real-time interpretation<br>
-                💊 <strong>Medication Information</strong> - Dosages & interactions<br>
-                🩺 <strong>Symptom Checker</strong> - Initial guidance<br>
-                🚨 <strong>Emergency Protocols</strong> - Critical situations<br>
-                💡 <strong>Health Tips</strong> - Personalized recommendations<br>
-                📅 <strong>Appointment Reminders</strong> - Schedule tracking<br><br>
-                <i class="fas fa-microphone-alt"></i> <strong>Voice commands supported!</strong> Click the mic button.<br>
-                How may I assist you today? 💙
+                I speak both English and Arabic. أتحدث العربية والإنجليزية.<br><br>
+                I can help you with:<br>
+                📊 Vital signs analysis<br>
+                💊 Medication information<br>
+                🩺 Symptom checker<br>
+                🚨 Emergency protocols<br>
+                💡 Health tips<br>
+                📅 Reminders<br><br>
+                How can I assist you today? / كيف يمكنني مساعدتك اليوم؟
                 <span class="message-time">Just now</span>
             </div>
         </div>
@@ -7238,16 +7256,18 @@ function formatDateOnlyArabic(timestamp) {
         <!-- Quick Response Chips -->
         <div class="quick-responses">
             <span class="quick-response-chip" data-question="What are my vitals?">📊 My Vitals</span>
+            <span class="quick-response-chip" data-question="ما هي قراءاتي الحيوية؟">📊 قراءاتي</span>
             <span class="quick-response-chip" data-question="Blood pressure normal range">❤️ BP Range</span>
-            <span class="quick-response-chip" data-question="Diabetes symptoms">🩸 Diabetes</span>
-            <span class="quick-response-chip" data-question="Heart attack symptoms">🚨 Heart Attack</span>
-            <span class="quick-response-chip" data-question="Healthy diet tips">🥗 Diet Tips</span>
+            <span class="quick-response-chip" data-question="أعراض السكري">🩸 Diabetes</span>
+            <span class="quick-response-chip" data-question="Heart attack symptoms">🚨 Emergency</span>
+            <span class="quick-response-chip" data-question="نصائح غذائية">🥗 Diet Tips</span>
             <span class="quick-response-chip" data-question="Exercise recommendations">🏃 Exercise</span>
+            <span class="quick-response-chip" data-question="تذكير دواء">💊 Reminder</span>
         </div>
         
         <div class="chatbot-input-area">
-            <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Ask me anything about your health..." autocomplete="off">
-            <button class="voice-btn" id="voiceInputBtn" title="Voice Input">
+            <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Ask me anything... اسألني أي شيء..." autocomplete="off">
+            <button class="voice-btn" id="voiceInputBtn" title="Voice Input / إدخال صوتي">
                 <i class="fas fa-microphone"></i>
             </button>
             <button class="chatbot-send" id="chatbotSend">
@@ -7257,15 +7277,17 @@ function formatDateOnlyArabic(timestamp) {
         
         <!-- Quick Actions -->
         <div class="quick-actions">
-            <button class="quick-action-btn" data-action="export"><i class="fas fa-download"></i> Export Chat</button>
-            <button class="quick-action-btn" data-action="clear"><i class="fas fa-trash-alt"></i> Clear Chat</button>
+            <button class="quick-action-btn" data-action="export"><i class="fas fa-download"></i> Export</button>
+            <button class="quick-action-btn" data-action="clear"><i class="fas fa-trash-alt"></i> Clear</button>
+            <button class="quick-action-btn" data-action="weekly"><i class="fas fa-calendar-week"></i> Weekly Report</button>
+            <button class="quick-action-btn" data-action="reminders"><i class="fas fa-bell"></i> Reminders</button>
             <button class="quick-action-btn" data-action="help"><i class="fas fa-question-circle"></i> Help</button>
         </div>
     </div>
 </div>
 
 <script>
-// ==================== ADVANCED PROFESSIONAL CHATBOT ====================
+// ==================== BILINGUAL PROFESSIONAL CHATBOT ====================
 (function() {
     const chatbotToggle = document.getElementById('chatbotToggle');
     const chatbotWindow = document.getElementById('chatbotWindow');
@@ -7275,20 +7297,84 @@ function formatDateOnlyArabic(timestamp) {
     const chatbotMessages = document.getElementById('chatbotMessages');
     const voiceBtn = document.getElementById('voiceInputBtn');
     const notificationBadge = document.getElementById('chatNotificationBadge');
+    const languageToggle = document.getElementById('languageToggle');
     
+    let currentLanguage = localStorage.getItem('chatbot_language') || 'en'; // 'en' or 'ar'
     let isTyping = false;
     let isListening = false;
     let recognition = null;
     let unreadCount = 0;
-    let chatHistory = [];
     
-    // ========== Speech Recognition Setup ==========
+    // ========== Reminders System ==========
+    let reminders = JSON.parse(localStorage.getItem('helios_reminders') || '[]');
+    
+    function addReminder(medication, time, dosage) {
+        const reminder = {
+            id: Date.now(),
+            medication,
+            time,
+            dosage,
+            createdAt: new Date().toISOString()
+        };
+        reminders.push(reminder);
+        localStorage.setItem('helios_reminders', JSON.stringify(reminders));
+        return reminder;
+    }
+    
+    function getRemindersList() {
+        return reminders;
+    }
+    
+    function deleteReminder(id) {
+        reminders = reminders.filter(r => r.id !== id);
+        localStorage.setItem('helios_reminders', JSON.stringify(reminders));
+    }
+    
+    // ========== Language Detection ==========
+    function detectLanguage(text) {
+        const arabicPattern = /[\u0600-\u06FF]/;
+        return arabicPattern.test(text) ? 'ar' : 'en';
+    }
+    
+    function translateResponse(response, targetLang) {
+        // ترجمة بسيطة للردود الشائعة
+        const translations = {
+            'Your heart rate is': { ar: 'معدل ضربات قلبك هو' },
+            'bpm': { ar: 'نبضة في الدقيقة' },
+            'Blood pressure is': { ar: 'ضغط الدم هو' },
+            'mmHg': { ar: 'مم زئبق' },
+            'Glucose is': { ar: 'مستوى السكر هو' },
+            'mg/dL': { ar: 'مجم/دل' },
+            'Normal': { ar: 'طبيعي' },
+            'High': { ar: 'مرتفع' },
+            'Low': { ar: 'منخفض' },
+            'Critical': { ar: 'حرج' },
+            'Warning': { ar: 'تحذير' },
+            'Emergency': { ar: 'طوارئ' },
+            'Please consult your doctor': { ar: 'يرجى استشارة طبيبك' },
+            'Stay healthy': { ar: 'ابق بصحة جيدة' },
+            'Heart Rate': { ar: 'معدل ضربات القلب' },
+            'Oxygen Saturation': { ar: 'تشبع الأكسجين' },
+            'Body Temperature': { ar: 'درجة حرارة الجسم' },
+            'Health Score': { ar: 'درجة الصحة' }
+        };
+        
+        let translated = response;
+        for (const [en, ar] of Object.entries(translations)) {
+            if (targetLang === 'ar' && response.includes(en)) {
+                translated = translated.replace(new RegExp(en, 'g'), ar.ar);
+            }
+        }
+        return translated;
+    }
+    
+    // ========== Speech Recognition (Bilingual) ==========
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
         recognition.continuous = false;
         recognition.interimResults = false;
-        recognition.lang = 'en-US';
+        recognition.lang = currentLanguage === 'ar' ? 'ar-EG' : 'en-US';
         
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript;
@@ -7303,7 +7389,8 @@ function formatDateOnlyArabic(timestamp) {
             voiceBtn.classList.remove('listening');
             isListening = false;
             voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-            addMessage("🎤 Sorry, I couldn't hear you. Please try again.", false);
+            const errorMsg = currentLanguage === 'ar' ? '🎤 عذراً، لم أتمكن من سماعك. حاول مرة أخرى.' : '🎤 Sorry, I couldn\'t hear you. Please try again.';
+            addMessage(errorMsg, false);
         };
         
         recognition.onend = () => {
@@ -7315,10 +7402,10 @@ function formatDateOnlyArabic(timestamp) {
         };
     }
     
-    // Voice input handler
     voiceBtn.addEventListener('click', () => {
         if (!recognition) {
-            addMessage("🎤 Voice input is not supported in your browser. Please type your question.", false);
+            const msg = currentLanguage === 'ar' ? '🎤 الإدخال الصوتي غير مدعوم في متصفحك.' : '🎤 Voice input is not supported in your browser.';
+            addMessage(msg, false);
             return;
         }
         
@@ -7328,11 +7415,24 @@ function formatDateOnlyArabic(timestamp) {
             isListening = false;
             voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
         } else {
+            recognition.lang = currentLanguage === 'ar' ? 'ar-EG' : 'en-US';
             recognition.start();
             isListening = true;
             voiceBtn.classList.add('listening');
             voiceBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
         }
+    });
+    
+    // ========== Toggle Language ==========
+    languageToggle.addEventListener('click', () => {
+        currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+        localStorage.setItem('chatbot_language', currentLanguage);
+        languageToggle.innerHTML = currentLanguage === 'en' ? '<i class="fas fa-language"></i> EN/AR' : '<i class="fas fa-language"></i> AR/EN';
+        
+        const welcomeMsg = currentLanguage === 'en' 
+            ? '🌐 Language switched to English. How can I help you?' 
+            : '🌐 تم التبديل إلى اللغة العربية. كيف يمكنني مساعدتك؟';
+        addMessage(welcomeMsg, false);
     });
     
     // ========== Save/Load Chat History ==========
@@ -7376,14 +7476,17 @@ function formatDateOnlyArabic(timestamp) {
         a.download = `helios_chat_${new Date().toISOString().split('T')[0]}.txt`;
         a.click();
         URL.revokeObjectURL(url);
-        addMessage("📄 Chat history exported successfully!", false);
+        const msg = currentLanguage === 'ar' ? '📄 تم تصدير سجل المحادثة بنجاح!' : '📄 Chat history exported successfully!';
+        addMessage(msg, false);
     }
     
     // ========== Clear Chat ==========
     function clearChat() {
-        if (confirm('Are you sure you want to clear all chat messages?')) {
+        const confirmMsg = currentLanguage === 'ar' ? 'هل أنت متأكد من مسح جميع الرسائل؟' : 'Are you sure you want to clear all chat messages?';
+        if (confirm(confirmMsg)) {
             chatbotMessages.innerHTML = '';
-            addMessage("✨ Chat history cleared. How can I help you today?", false);
+            const welcomeMsg = currentLanguage === 'ar' ? '✨ تم مسح المحادثة. كيف يمكنني مساعدتك اليوم؟' : '✨ Chat history cleared. How can I help you today?';
+            addMessage(welcomeMsg, false);
             localStorage.removeItem('helios_chat_history');
             unreadCount = 0;
             notificationBadge.style.display = 'none';
@@ -7400,7 +7503,7 @@ function formatDateOnlyArabic(timestamp) {
         return `${hours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
     }
     
-    // ========== Add Message to Chat ==========
+    // ========== Add Message ==========
     function addMessage(text, isUser = false, time = null, save = true) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
@@ -7409,10 +7512,7 @@ function formatDateOnlyArabic(timestamp) {
         chatbotMessages.appendChild(messageDiv);
         chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
         
-        if (save && !isUser) {
-            chatHistory.push({ text, isUser, time: displayTime });
-            saveChatHistory();
-        }
+        if (save) saveChatHistory();
         
         if (!isUser && !chatbotWindow.classList.contains('open')) {
             unreadCount++;
@@ -7421,7 +7521,7 @@ function formatDateOnlyArabic(timestamp) {
         }
     }
     
-    // ========== Show Typing Indicator ==========
+    // ========== Typing Indicator ==========
     function showTypingIndicator() {
         const indicator = document.createElement('div');
         indicator.className = 'typing-indicator';
@@ -7457,9 +7557,21 @@ function formatDateOnlyArabic(timestamp) {
         };
     }
     
-    // ========== Professional Medical Responses ==========
-    function getVitalsSummary() {
+    // ========== Bilingual Responses ==========
+    function getVitalsSummary(lang) {
         const vitals = getCurrentVitals();
+        
+        if (lang === 'ar') {
+            return `📊 **ملخص قراءاتك الحيوية**\n\n` +
+                   `❤️ **معدل ضربات القلب:** ${vitals.heart} نبضة/دقيقة ${vitals.heart !== '--' ? (parseInt(vitals.heart) >= 100 ? '(مرتفع ⚠️)' : (parseInt(vitals.heart) <= 60 ? '(منخفض ⚠️)' : '(طبيعي ✅)')) : ''}\n` +
+                   `💓 **ضغط الدم:** ${vitals.bp} مم زئبق\n` +
+                   `🩸 **سكر الدم:** ${vitals.glucose} مجم/دل\n` +
+                   `🫁 **تشبع الأكسجين:** ${vitals.spo2}%\n` +
+                   `🌡️ **درجة حرارة الجسم:** ${vitals.temp}°م\n` +
+                   `📈 **درجة الصحة:** ${vitals.score}/100\n\n` +
+                   `بناءً على هذه القراءات، ${vitals.score >= 80 ? 'مؤشرات صحتك جيدة! استمر في العادات الصحية. 💪' : (vitals.score >= 60 ? 'بعض القراءات تحتاج اهتماماً. استشر طبيبك. 🩺' : '⚠️ يرجى استشارة الطبيب قريباً!')}`;
+        }
+        
         return `📊 **Your Current Vitals Summary**\n\n` +
                `❤️ **Heart Rate:** ${vitals.heart} bpm ${vitals.heart !== '--' ? (parseInt(vitals.heart) >= 100 ? '(High ⚠️)' : (parseInt(vitals.heart) <= 60 ? '(Low ⚠️)' : '(Normal ✅)')) : ''}\n` +
                `💓 **Blood Pressure:** ${vitals.bp} mmHg\n` +
@@ -7470,106 +7582,279 @@ function formatDateOnlyArabic(timestamp) {
                `Based on these readings, ${vitals.score >= 80 ? 'your health indicators look good! Keep maintaining healthy habits. 💪' : (vitals.score >= 60 ? 'some readings need attention. Consider consulting your doctor. 🩺' : '⚠️ Please consult a healthcare professional soon!')}`;
     }
     
-    function getPersonalizedRecommendation() {
+    function getPersonalizedRecommendation(lang) {
         const vitals = getCurrentVitals();
         let recommendations = [];
         
         if (vitals.heart !== '--' && parseInt(vitals.heart) > 100) {
-            recommendations.push("• Reduce caffeine and stress. Practice deep breathing exercises 🧘");
+            recommendations.push(lang === 'ar' ? "• قلل من الكافيين والتوتر. مارس تمارين التنفس العميق 🧘" : "• Reduce caffeine and stress. Practice deep breathing exercises 🧘");
         }
         if (vitals.heart !== '--' && parseInt(vitals.heart) < 60 && parseInt(vitals.heart) > 0) {
-            recommendations.push("• If you're not an athlete, consider checking with your doctor about bradycardia");
+            recommendations.push(lang === 'ar' ? "• إذا كنت لست رياضياً، استشر طبيبك بخصوص بطء القلب" : "• If you're not an athlete, consider checking with your doctor about bradycardia");
         }
         if (vitals.bp !== '--/--') {
             const systolic = parseInt(vitals.bp.split('/')[0]);
             if (systolic >= 140) {
-                recommendations.push("• Reduce sodium intake and exercise regularly to manage blood pressure");
+                recommendations.push(lang === 'ar' ? "• قلل من تناول الصوديوم ومارس الرياضة بانتظام للتحكم في ضغط الدم" : "• Reduce sodium intake and exercise regularly to manage blood pressure");
             }
         }
         if (vitals.glucose !== '--' && parseInt(vitals.glucose) > 140) {
-            recommendations.push("• Monitor carbohydrate intake and consult your doctor about blood sugar management");
-        }
-        if (vitals.spo2 !== '--' && parseInt(vitals.spo2) < 95 && parseInt(vitals.spo2) > 0) {
-            recommendations.push("• Practice deep breathing exercises and ensure good ventilation");
+            recommendations.push(lang === 'ar' ? "• راقب تناول الكربوهيدرات واستشر طبيبك بشأن إدارة سكر الدم" : "• Monitor carbohydrate intake and consult your doctor about blood sugar management");
         }
         
         if (recommendations.length === 0) {
-            recommendations.push("• Continue your healthy lifestyle! 🎉", "• Stay hydrated (8 glasses of water daily) 💧", "• Get 7-8 hours of quality sleep 😴");
+            recommendations = lang === 'ar' 
+                ? ["• استمر في نمط حياتك الصحي! 🎉", "• اشرب 8 أكواب ماء يومياً 💧", "• احصل على 7-8 ساعات من النوم الجيد 😴"]
+                : ["• Continue your healthy lifestyle! 🎉", "• Stay hydrated (8 glasses of water daily) 💧", "• Get 7-8 hours of quality sleep 😴"];
         }
         
-        return `💡 **Personalized Health Recommendations**\n\n${recommendations.slice(0, 3).join('\n')}\n\n⭐ Remember: These are AI suggestions. Always consult your doctor for medical advice.`;
+        const title = lang === 'ar' ? '💡 **توصيات صحية مخصصة**\n\n' : '💡 **Personalized Health Recommendations**\n\n';
+        const footer = lang === 'ar' ? '\n\n⭐ تذكر: هذه اقتراحات من الذكاء الاصطناعي. استشر طبيبك دائماً للحصول على المشورة الطبية.' : '\n\n⭐ Remember: These are AI suggestions. Always consult your doctor for medical advice.';
+        
+        return title + recommendations.slice(0, 3).join('\n') + footer;
     }
     
-    // ========== Advanced Medical Knowledge Base ==========
-    const medicalResponses = {
-        'vitals|my vitals|health summary|show vitals': getVitalsSummary,
-        'recommendation|advice|suggest|what should i do': getPersonalizedRecommendation,
-        'heart rate|pulse': "💓 **Heart Rate Information**\n\nNormal range: 60-100 bpm (resting)\n• Athletes: 40-60 bpm\n• Children: 70-120 bpm\n\n⚠️ Seek care if: >120 bpm at rest, <50 bpm with symptoms, irregular rhythm, chest pain.",
-        'blood pressure|bp': "❤️ **Blood Pressure Categories** (mmHg)\n\n✅ Normal: <120/<80\n🟡 Elevated: 120-129/<80\n🟠 Hypertension Stage 1: 130-139/80-89\n🔴 Hypertension Stage 2: 140+/90+\n🚨 Crisis: 180+/120+ (Call ambulance!)",
-        'glucose|blood sugar|sugar': "🩸 **Blood Glucose Guidelines** (mg/dL)\n\n✅ Normal fasting: 70-99\n🟡 Prediabetes: 100-125\n🔴 Diabetes: 126+\n⚠️ Low (hypoglycemia): <70\n🚨 Critical low: <50\n🚨 Critical high: >300\n\nAlways consult your doctor for your target ranges.",
-        'oxygen|spo2': "🫁 **Oxygen Saturation (SpO₂)**\n\n✅ Normal: 95-100%\n🟡 Mild hypoxia: 91-94%\n🔴 Severe hypoxia: <90% (Seek care!)\n\n💡 Tip: Levels below 90% require immediate medical attention.",
-        'temperature|fever': "🌡️ **Body Temperature Guide**\n\n✅ Normal: 36.1-37.2°C (97-99°F)\n🟡 Low-grade fever: 37.5-38°C\n🔴 Fever: 38-39.5°C\n🚨 High fever: >39.5°C (Seek care)\n⚠️ Hypothermia: <35°C (Emergency!)",
+    function getRemindersResponse(lang) {
+        if (reminders.length === 0) {
+            return lang === 'ar' 
+                ? "📋 ليس لديك تذكيرات نشطة. قل 'أضف تذكير' لإضافة واحد!"
+                : "📋 You have no active reminders. Say 'add reminder' to set one up!";
+        }
         
-        // Symptoms
-        'chest pain|heart attack': "🚨 **CHEST PAIN - EMERGENCY PROTOCOL** 🚨\n\n⚠️ Call emergency services IMMEDIATELY if you have:\n• Crushing chest pressure\n• Pain spreading to arm/jaw/back\n• Shortness of breath\n• Cold sweat, nausea\n\nDo NOT wait! Every minute matters. ❤️",
-        'stroke|face drooping|slurred speech': "⚠️ **STROKE - Think FAST** ⚠️\n\n**F**ace drooping?\n**A**rm weakness?\n**S**peech difficulty?\n**T**ime to call emergency!\n\n🚨 Call ambulance immediately!",
-        'shortness of breath|difficulty breathing': "🫁 **Shortness of Breath**\n\nSeek immediate care if:\n• Sudden severe breathlessness\n• Chest pain\n• Blue lips/fingertips\n• Can't speak full sentences\n\nFor mild cases: Sit upright, use pursed-lip breathing, use inhaler if prescribed.",
+        let message = lang === 'ar' ? "💊 **تذكيراتك النشطة:**\n\n" : "💊 **Your Active Reminders:**\n\n";
+        reminders.forEach(r => {
+            message += `• ${r.medication}: ${r.dosage} الساعة ${r.time}\n`;
+        });
+        message += lang === 'ar' ? "\n⏰ قل 'حذف تذكير' لإزالته." : "\n⏰ Say 'delete reminder' to remove one.";
+        return message;
+    }
+    
+    function getWeeklyReport(lang) {
+        const vitals = getCurrentVitals();
+        const now = new Date();
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - 7);
         
-        // Medications
-        'aspirin|ibuprofen|paracetamol|tylenol|advil': "💊 **Common Pain Relievers**\n\n• **Aspirin**: Blood thinner, fever reducer - Take with food\n• **Ibuprofen (Advil/Motrin)**: Anti-inflammatory - Max 1200mg/day\n• **Acetaminophen (Tylenol)**: Fever/pain - Max 3000mg/day\n\n⚠️ Never exceed recommended doses. Consult doctor if you have liver/kidney issues.",
-        'antibiotics': "💊 **Antibiotic Information**\n\n✅ Take exactly as prescribed\n✅ Complete full course\n✅ Take with/without food as directed\n❌ Never share antibiotics\n❌ Don't save for later\n\n⚠️ Antibiotics don't work for viruses (cold, flu)!",
+        const history = JSON.parse(localStorage.getItem('helios_vitals_history') || '[]');
+        const lastWeek = history.filter(h => new Date(h.date) >= weekStart);
         
-        // Diabetes
-        'diabetes type 1|type 1 diabetes': "🩸 **Type 1 Diabetes**\n\n• Autoimmune condition\n• Body doesn't produce insulin\n• Requires insulin therapy\n• Usually diagnosed in children/young adults\n• Continuous glucose monitoring recommended",
-        'diabetes type 2|type 2 diabetes': "🩸 **Type 2 Diabetes**\n\n• Body doesn't use insulin properly\n• Can be managed with lifestyle + medications\n• Risk factors: obesity, family history, age\n• Prevention: healthy diet, exercise, weight management",
+        if (lang === 'ar') {
+            let report = "📊 **التقرير الصحي الأسبوعي** 📊\n\n";
+            report += `📅 الفترة: ${weekStart.toLocaleDateString('ar-EG')} - ${now.toLocaleDateString('ar-EG')}\n\n`;
+            
+            if (lastWeek.length > 0) {
+                const avgHeart = lastWeek.reduce((a,b) => a + b.heart, 0) / lastWeek.length;
+                const avgGlucose = lastWeek.reduce((a,b) => a + b.glucose, 0) / lastWeek.length;
+                
+                report += `❤️ متوسط معدل ضربات القلب: ${Math.round(avgHeart)} نبضة/دقيقة\n`;
+                report += `🩸 متوسط سكر الدم: ${Math.round(avgGlucose)} مجم/دل\n`;
+                report += `📈 عدد القراءات: ${lastWeek.length}\n\n`;
+                
+                if (avgHeart > 100) report += "⚠️ معدل ضربات قلبك مرتفع. جرب تمارين الاسترخاء.\n";
+                else if (avgHeart < 60) report += "ℹ️ معدل ضربات قلبك منخفض. استشر طبيبك إذا كنت لست رياضياً.\n";
+                else report += "✅ معدل ضربات قلبك صحي! استمر!\n";
+                
+                if (avgGlucose > 140) report += "⚠️ مستوى سكر الدم مرتفع. راقب تناول الكربوهيدرات.\n";
+                else if (avgGlucose > 100) report += "🟡 سكر الدم في مرحلة ما قبل السكري. فكر في تغيير نمط الحياة.\n";
+                else report += "✅ مستوى سكر الدم تحت السيطرة!\n";
+            } else {
+                report += "📭 لا توجد بيانات كافية لهذا الأسبوع. سجل قراءاتك يومياً للحصول على تحليل أفضل!\n";
+            }
+            return report;
+        }
         
-        // Heart Health
-        'cholesterol|ldl|hdl|triglycerides': "🩸 **Cholesterol Guide**\n\n✅ **LDL (Bad)**: <100 mg/dL optimal\n✅ **HDL (Good)**: >60 mg/dL (higher is better)\n✅ **Triglycerides**: <150 mg/dL\n\n💡 Tips: Eat fiber-rich foods, exercise, limit saturated fats, avoid trans fats.",
+        let report = "📊 **Weekly Health Report** 📊\n\n";
+        report += `📅 Period: ${weekStart.toLocaleDateString()} - ${now.toLocaleDateString()}\n\n`;
         
-        // Diet & Nutrition
-        'mediterranean diet|healthy diet': "🥗 **Mediterranean Diet**\n\n✅ Eat: Fruits, vegetables, whole grains, fish, olive oil, nuts\n❌ Limit: Red meat, processed foods, sugar, refined carbs\n\nBenefits: Reduces heart disease, diabetes, improves longevity!",
-        'intermittent fasting|if': "⏰ **Intermittent Fasting**\n\nPopular methods:\n• 16:8 (fast 16hrs, eat 8hrs)\n• 5:2 (eat normally 5 days, restrict 2 days)\n\n⚠️ Consult doctor before starting if you have diabetes, eating disorders, or are pregnant.",
+        if (lastWeek.length > 0) {
+            const avgHeart = lastWeek.reduce((a,b) => a + b.heart, 0) / lastWeek.length;
+            const avgGlucose = lastWeek.reduce((a,b) => a + b.glucose, 0) / lastWeek.length;
+            
+            report += `❤️ Average Heart Rate: ${Math.round(avgHeart)} bpm\n`;
+            report += `🩸 Average Glucose: ${Math.round(avgGlucose)} mg/dL\n`;
+            report += `📈 Readings Count: ${lastWeek.length}\n\n`;
+            
+            if (avgHeart > 100) report += "⚠️ Your average heart rate is elevated. Consider stress management.\n";
+            else if (avgHeart < 60) report += "ℹ️ Your average heart rate is low. Consult your doctor if not an athlete.\n";
+            else report += "✅ Your heart rate looks healthy! Keep it up!\n";
+            
+            if (avgGlucose > 140) report += "⚠️ Your glucose levels are above normal. Monitor your carb intake.\n";
+            else if (avgGlucose > 100) report += "🟡 Your glucose is in prediabetes range. Consider lifestyle changes.\n";
+            else report += "✅ Your glucose levels are well controlled!\n";
+        } else {
+            report += "📭 Not enough data for this week. Check in daily for better insights!\n";
+        }
+        return report;
+    }
+    
+    function saveVitalsToHistory() {
+        const vitals = getCurrentVitals();
+        if (vitals.heart !== '--' && vitals.glucose !== '--') {
+            const history = JSON.parse(localStorage.getItem('helios_vitals_history') || '[]');
+            history.push({
+                date: new Date().toISOString(),
+                heart: parseInt(vitals.heart),
+                glucose: parseInt(vitals.glucose),
+                bp: vitals.bp,
+                spo2: parseInt(vitals.spo2)
+            });
+            while (history.length > 100) history.shift();
+            localStorage.setItem('helios_vitals_history', JSON.stringify(history));
+        }
+    }
+    
+    setInterval(saveVitalsToHistory, 300000);
+    
+    // ========== Process Commands ==========
+    function processAdvancedCommand(command, lang) {
+        const lower = command.toLowerCase();
         
-        // Mental Health
-        'anxiety|stress|panic attack': "🧘 **Anxiety & Stress Management**\n\nImmediate relief:\n• Deep breathing (4-7-8 technique)\n• Grounding (5-4-3-2-1 method)\n• Progressive muscle relaxation\n\nLong-term:\n• Regular exercise 🏃\n• Adequate sleep 😴\n• Limit caffeine ☕\n• Therapy/Counseling 🗣️\n\n📞 Crisis hotline: 988 (US)",
-        'depression|sad|hopeless': "💙 **Depression Support**\n\nYou're not alone. Help is available:\n\n✅ Talk to a therapist or counselor\n✅ Reach out to trusted friends/family\n✅ Call a mental health hotline\n✅ Consider medication (consult doctor)\n✅ Exercise and sunlight exposure\n\n📞 **988 Suicide & Crisis Lifeline** - Available 24/7",
+        // Add Reminder - English
+        if (lower.includes('add reminder') || (lower.includes('remind') && lower.includes('take'))) {
+            const medicationMatch = command.match(/(?:remind me to take|add reminder for|reminder for)\s+(\w+)/i);
+            const timeMatch = command.match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm))/i);
+            
+            if (medicationMatch && timeMatch) {
+                addReminder(medicationMatch[1], timeMatch[1], 'as prescribed');
+                return lang === 'ar' 
+                    ? `✅ تمت إضافة التذكير: تناول ${medicationMatch[1]} الساعة ${timeMatch[1]}\n\nسأذكرك عندما يحين الوقت!`
+                    : `✅ Reminder added: Take ${medicationMatch[1]} at ${timeMatch[1]}\n\nI'll remind you when it's time!`;
+            }
+            return lang === 'ar'
+                ? "📝 لإضافة تذكير، قل: 'أضف تذكير لدواء ميتفورمين الساعة 8 مساءً'"
+                : "📝 To add a reminder, say: 'Add reminder for Metformin at 8pm'";
+        }
         
-        // Sleep
-        'insomnia|cant sleep|sleep problems': "😴 **Sleep Hygiene Tips**\n\n✅ Consistent sleep schedule\n✅ Dark, cool, quiet room\n✅ No screens 1hr before bed\n✅ Avoid caffeine after 2pm\n✅ Limit alcohol before bed\n✅ Relaxation techniques\n\n💡 Try: Melatonin (3-5mg) 1hr before bed, consult doctor for persistent issues.",
+        // Add Reminder - Arabic
+        if (lower.includes('اضف تذكير') || lower.includes('ذكرني') || lower.includes('تذكير')) {
+            const medMatch = command.match(/(?:تذكير|ذكرني)\s+(?:لـ|بـ)?\s*([^\s]+)/i);
+            const timeMatch = command.match(/(\d{1,2})(?:\s*)(?:صباحاً|مساءً|ص|م|am|pm)/i);
+            
+            if (medMatch) {
+                const medication = medMatch[1];
+                const time = timeMatch ? timeMatch[1] + ':00' : '20:00';
+                addReminder(medication, time, 'حسب الوصفة');
+                return `✅ تمت إضافة التذكير: تناول ${medication} الساعة ${time}\n\nسأذكرك عندما يحين الوقت!`;
+            }
+            return "📝 لإضافة تذكير، قل: 'أضف تذكير لدواء ميتفورمين الساعة 8 مساءً'";
+        }
         
-        // Exercise
-        'exercise|workout|fitness': "🏃 **Exercise Recommendations**\n\n**Adults 18-65:**\n• 150 min moderate OR 75 min vigorous weekly\n• Strength training 2x/week\n• Balance exercises for older adults\n\n**Benefits:**\n• Reduces heart disease risk 30%\n• Improves mental health\n• Better sleep\n• Weight management\n\nStart slow, stay consistent! 💪",
+        // Show Reminders
+        if (lower.includes('my reminders') || lower.includes('show reminders') || lower.includes('تذكيراتي') || lower.includes('عرض التذكيرات')) {
+            return getRemindersResponse(lang);
+        }
+        
+        // Weekly Report
+        if (lower.includes('weekly report') || lower.includes('health report') || lower.includes('تقرير اسبوعي') || lower.includes('تقرير صحي')) {
+            return getWeeklyReport(lang);
+        }
+        
+        // Vitals
+        if (lower.includes('my vitals') || lower.includes('قراءاتي') || lower.includes('علاماتي الحيوية')) {
+            return getVitalsSummary(lang);
+        }
+        
+        // Recommendations
+        if (lower.includes('recommend') || lower.includes('advice') || lower.includes('توصيات') || lower.includes('نصيحة')) {
+            return getPersonalizedRecommendation(lang);
+        }
+        
+        return null;
+    }
+    
+    // ========== Medical Knowledge Base (Bilingual) ==========
+    function getMedicalResponse(userMessage, lang) {
+        const lower = userMessage.toLowerCase();
+        
+        // Heart Rate
+        if (lower.includes('heart rate') || lower.includes('pulse') || lower.includes('نبض') || lower.includes('معدل ضربات')) {
+            const vitals = getCurrentVitals();
+            if (lang === 'ar') {
+                return `💓 **معدل ضربات القلب:** ${vitals.heart} نبضة/دقيقة\n\nالمعدل الطبيعي للبالغين: 60-100 نبضة/دقيقة\nالرياضيون: 40-60 نبضة/دقيقة\n⚠️ استشر طبيبك إذا كان النبض غير منتظم أو مصحوباً بدوخة.`;
+            }
+            return `💓 **Heart Rate:** ${vitals.heart} bpm\n\nNormal range: 60-100 bpm (resting)\n• Athletes: 40-60 bpm\n⚠️ Seek care if irregular or with dizziness.`;
+        }
+        
+        // Blood Pressure
+        if (lower.includes('blood pressure') || lower.includes('bp') || lower.includes('ضغط الدم') || lower.includes('ضغط')) {
+            const vitals = getCurrentVitals();
+            if (lang === 'ar') {
+                return `❤️ **ضغط الدم:** ${vitals.bp} مم زئبق\n\n✅ طبيعي: أقل من 120/80\n🟡 مرتفع: 120-129/أقل من 80\n🟠 المرحلة 1: 130-139/80-89\n🔴 المرحلة 2: 140+/90+\n🚨 أزمة: 180+/120+ (اتصل بالإسعاف!)`;
+            }
+            return `❤️ **Blood Pressure:** ${vitals.bp} mmHg\n\n✅ Normal: <120/<80\n🟡 Elevated: 120-129/<80\n🟠 Stage 1: 130-139/80-89\n🔴 Stage 2: 140+/90+\n🚨 Crisis: 180+/120+ (Call ambulance!)`;
+        }
+        
+        // Glucose
+        if (lower.includes('glucose') || lower.includes('blood sugar') || lower.includes('سكر') || lower.includes('السكر')) {
+            const vitals = getCurrentVitals();
+            if (lang === 'ar') {
+                return `🩸 **سكر الدم:** ${vitals.glucose} مجم/دل\n\n✅ طبيعي: 70-99\n🟡 مقدمات السكري: 100-125\n🔴 سكري: 126+\n⚠️ منخفض: أقل من 70\n🚨 منخفض خطير: أقل من 50\n🚨 مرتفع خطير: أكثر من 300`;
+            }
+            return `🩸 **Blood Glucose:** ${vitals.glucose} mg/dL\n\n✅ Normal: 70-99\n🟡 Prediabetes: 100-125\n🔴 Diabetes: 126+\n⚠️ Low: <70\n🚨 Critical low: <50\n🚨 Critical high: >300`;
+        }
         
         // Emergency
-        'emergency|sos|911|ambulance': "🚨 **MEDICAL EMERGENCY** 🚨\n\n**CALL EMERGENCY SERVICES IMMEDIATELY!**\n\nBefore calling, prepare:\n1. Your location\n2. What happened\n3. Patient's condition\n4. Any known medical conditions\n\nWhile waiting:\n• Stay calm\n• Don't move patient unless necessary\n• Apply pressure to bleeding\n• Perform CPR if trained\n\n**Use the SOS button at the top of this dashboard!**",
+        if (lower.includes('emergency') || lower.includes('sos') || lower.includes('طوارئ') || lower.includes('اسعاف')) {
+            if (lang === 'ar') {
+                return "🚨 **حالة طوارئ طبية** 🚨\n\n📞 **اتصل بالإسعاف فوراً!**\n\nقبل الاتصال، جهز:\n1. موقعك\n2. ما حدث\n3. حالة المريض\n4. أي أمراض معروفة\n\nأثناء الانتظار:\n• حافظ على هدوئك\n• لا تحرك المريض إلا للضرورة\n• اضغط على مكان النزيف\n• قم بالإنعاش القلبي إذا كنت مدرباً\n\n**استخدم زر SOS في أعلى لوحة التحكم!**";
+            }
+            return "🚨 **MEDICAL EMERGENCY** 🚨\n\n**CALL EMERGENCY SERVICES IMMEDIATELY!**\n\nBefore calling, prepare:\n1. Your location\n2. What happened\n3. Patient's condition\n4. Any known medical conditions\n\nWhile waiting:\n• Stay calm\n• Don't move patient unless necessary\n• Apply pressure to bleeding\n• Perform CPR if trained\n\n**Use the SOS button at the top of this dashboard!**";
+        }
         
-        // Default
-        'default': "I'm your HELIOS AI Health Assistant. 💙\n\nI can help with:\n• 📊 **Vital signs** (ask 'my vitals')\n• 💡 **Health recommendations**\n• 🩺 **Symptom information**\n• 💊 **Medication guidance**\n• 🚨 **Emergency protocols**\n• 🥗 **Diet & exercise tips**\n\nWhat would you like to know? Just type your question naturally!"
-    };
+        // Heart Attack
+        if (lower.includes('heart attack') || lower.includes('chest pain') || lower.includes('نوبة قلبية') || lower.includes('ألم صدر')) {
+            if (lang === 'ar') {
+                return "🚨 **أعراض النوبة القلبية** 🚨\n\n• ألم أو ضغط في الصدر\n• ألم يمتد للذراع/الفك/الظهر\n• ضيق في التنفس\n• غثيان أو قيء\n• عرق بارد\n\n⚠️ **اتصل بالإسعاف فوراً! كل دقيقة مهمة!** ❤️";
+            }
+            return "🚨 **HEART ATTACK WARNING SIGNS** 🚨\n\n• Chest pain/pressure\n• Pain spreading to arm/jaw/back\n• Shortness of breath\n• Nausea, cold sweat\n\n⚠️ **CALL EMERGENCY SERVICES IMMEDIATELY! Every minute matters!** ❤️";
+        }
+        
+        // Stroke
+        if (lower.includes('stroke') || lower.includes('جلطة') || lower.includes('سكتة')) {
+            if (lang === 'ar') {
+                return "⚠️ **علامات الجلطة الدماغية - تصرف بسرعة** ⚠️\n\n**F** - تدلى الوجه؟\n**A** - ضعف في الذراع؟\n**S** - صعوبة في الكلام؟\n**T** - وقت الاتصال بالإسعاف!\n\n🚨 **اتصل بالإسعاف فوراً!**";
+            }
+            return "⚠️ **STROKE - Act FAST** ⚠️\n\n**F**ace drooping?\n**A**rm weakness?\n**S**peech difficulty?\n**T**ime to call emergency!\n\n🚨 **CALL AMBULANCE IMMEDIATELY!**";
+        }
+        
+        // Diabetes
+        if (lower.includes('diabetes') || lower.includes('سكري')) {
+            if (lang === 'ar') {
+                return "🩸 **معلومات عن السكري**\n\n**النوع الأول:** مناعة ذاتية، يحتاج أنسولين\n**النوع الثاني:** مقاومة الأنسولين، يمكن التحكم بنمط الحياة\n\nالأعراض: عطش شديد، تبول متكرر، تعب، فقدان وزن\n\nالوقاية: نظام غذائي صحي، رياضة، الحفاظ على وزن صحي";
+            }
+            return "🩸 **Diabetes Information**\n\n**Type 1:** Autoimmune, requires insulin\n**Type 2:** Insulin resistance, manageable with lifestyle\n\nSymptoms: excessive thirst, frequent urination, fatigue, weight loss\n\nPrevention: healthy diet, exercise, maintain healthy weight";
+        }
+        
+        // Help
+        if (lower.includes('help') || lower.includes('مساعدة')) {
+            if (lang === 'ar') {
+                return "💙 **HELIOS - المساعد الصحي الذكي**\n\nيمكنني مساعدتك في:\n• 📊 **العلامات الحيوية** - قل 'قراءاتي'\n• 💡 **التوصيات الصحية**\n• 🩺 **الأعراض**\n• 💊 **الأدوية**\n• 🚨 **حالات الطوارئ**\n• 🥗 **نصائح الغذاء والرياضة**\n• 📅 **التذكيرات** - قل 'أضف تذكير'\n• 📈 **التقرير الأسبوعي**\n\n🌐 يمكنك التبديل بين العربية والإنجليزية!";
+            }
+            return "💙 **HELIOS AI Health Assistant**\n\nI can help with:\n• 📊 **Vital signs** (say 'my vitals')\n• 💡 **Health recommendations**\n• 🩺 **Symptom information**\n• 💊 **Medication guidance**\n• 🚨 **Emergency protocols**\n• 🥗 **Diet & exercise tips**\n• 📅 **Reminders** (say 'add reminder')\n• 📈 **Weekly report**\n\n🌐 Switch between English and Arabic anytime!";
+        }
+        
+        return null;
+    }
     
-    function getBotResponse(userMessage) {
+    // ========== Main Response Handler ==========
+    async function getBotResponse(userMessage) {
+        const lang = detectLanguage(userMessage);
         const lowerMsg = userMessage.toLowerCase();
         
-        // Check for vitals request
-        if (lowerMsg.includes('vital') || lowerMsg.includes('my health') || (lowerMsg.includes('show') && lowerMsg.includes('vitals'))) {
-            return getVitalsSummary();
-        }
-        if (lowerMsg.includes('recommend') || lowerMsg.includes('advice') || lowerMsg.includes('what should i do')) {
-            return getPersonalizedRecommendation();
-        }
+        // Check advanced commands first
+        const advancedResponse = processAdvancedCommand(userMessage, lang);
+        if (advancedResponse) return advancedResponse;
         
         // Check medical knowledge base
-        for (const [pattern, response] of Object.entries(medicalResponses)) {
-            if (pattern === 'default') continue;
-            const keywords = pattern.split('|');
-            for (const keyword of keywords) {
-                if (lowerMsg.includes(keyword)) {
-                    return typeof response === 'function' ? response() : response;
-                }
-            }
+        const medicalResponse = getMedicalResponse(userMessage, lang);
+        if (medicalResponse) return medicalResponse;
+        
+        // Default response
+        if (lang === 'ar') {
+            return "أنا HELIOS، مساعدك الصحي الذكي. 💙\n\nيمكنني مساعدتك في:\n• 📊 **العلامات الحيوية** (قل 'قراءاتي')\n• 💡 **التوصيات الصحية**\n• 🩺 **الأعراض**\n• 💊 **الأدوية**\n• 🚨 **حالات الطوارئ**\n• 🥗 **نصائح الغذاء والرياضة**\n• 📅 **التذكيرات**\n\n🌐 يمكنك التبديل بين العربية والإنجليزية! ماذا تريد أن تعرف؟";
         }
         
-        return medicalResponses.default;
+        return "I'm your HELIOS AI Health Assistant. 💙\n\nI can help with:\n• 📊 **Vital signs** (say 'my vitals')\n• 💡 **Health recommendations**\n• 🩺 **Symptom information**\n• 💊 **Medication guidance**\n• 🚨 **Emergency protocols**\n• 🥗 **Diet & exercise tips**\n• 📅 **Reminders**\n\n🌐 Switch between English and Arabic anytime! What would you like to know?";
     }
     
     // ========== Send Message ==========
@@ -7584,9 +7869,9 @@ function formatDateOnlyArabic(timestamp) {
         
         showTypingIndicator();
         
-        setTimeout(() => {
+        setTimeout(async () => {
             removeTypingIndicator();
-            const botResponse = getBotResponse(userMessage);
+            const botResponse = await getBotResponse(userMessage);
             addMessage(botResponse, false);
         }, 800 + Math.random() * 400);
     }
@@ -7621,25 +7906,36 @@ function formatDateOnlyArabic(timestamp) {
     
     // Quick action buttons
     document.querySelectorAll('.quick-action-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
             const action = btn.dataset.action;
             if (action === 'export') exportChat();
             if (action === 'clear') clearChat();
-            if (action === 'help') addMessage(medicalResponses.default, false);
+            if (action === 'weekly') {
+                const report = getWeeklyReport(currentLanguage);
+                addMessage(report, false);
+            }
+            if (action === 'reminders') {
+                const remindersMsg = getRemindersResponse(currentLanguage);
+                addMessage(remindersMsg, false);
+            }
+            if (action === 'help') {
+                const helpMsg = currentLanguage === 'ar' 
+                    ? "💙 **HELIOS - المساعد الصحي الذكي**\n\nيمكنني مساعدتك في:\n• 📊 العلامات الحيوية\n• 💡 التوصيات الصحية\n• 🩺 الأعراض\n• 💊 الأدوية\n• 🚨 حالات الطوارئ\n• 🥗 نصائح الغذاء والرياضة\n• 📅 التذكيرات\n\n🌐 يمكنك التبديل بين العربية والإنجليزية!"
+                    : "💙 **HELIOS AI Health Assistant**\n\nI can help with:\n• 📊 Vital signs\n• 💡 Health recommendations\n• 🩺 Symptoms\n• 💊 Medications\n• 🚨 Emergencies\n• 🥗 Diet & exercise\n• 📅 Reminders\n\n🌐 Switch between English and Arabic!";
+                addMessage(helpMsg, false);
+            }
         });
     });
     
-    // Prevent window close when clicking inside
     chatbotWindow.addEventListener('click', (e) => e.stopPropagation());
     
     // Load history
     loadChatHistory();
     
-    console.log("✅ Advanced Professional Chatbot initialized!");
-    console.log("Features: Voice input, chat history, export, quick responses, personalized recommendations");
+    console.log("✅ Bilingual Professional Chatbot initialized!");
+    console.log("Features: Arabic/English support, voice input, reminders, weekly reports, vitals analysis");
 })();
 </script>
 
-   
 </body>
 </html>
