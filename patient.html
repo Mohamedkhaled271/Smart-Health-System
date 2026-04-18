@@ -6751,6 +6751,894 @@ function formatDateOnlyArabic(timestamp) {
         });
     }
     </script>
+                <!-- ==================== PROFESSIONAL AI CHATBOT WITH ADVANCED FEATURES ==================== -->
+<style>
+/* Advanced Chatbot Styles - Professional & Stunning */
+.chatbot-container {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 10000;
+    font-family: 'Inter', 'Poppins', sans-serif;
+}
+
+/* Pulse Animation for Button */
+@keyframes chatbotPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 15px rgba(2, 132, 199, 0.2);
+        transform: scale(1.05);
+    }
+    100% {
+        box-shadow: 0 0 0 30px rgba(2, 132, 199, 0);
+        transform: scale(1);
+    }
+}
+
+@keyframes notificationBadge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.chatbot-toggle {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0284c7, #0369a1, #0ea5e9, #38bdf8);
+    border: 3px solid rgba(255,255,255,0.3);
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(2, 132, 199, 0.5);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    position: relative;
+    animation: chatbotPulse 2s infinite;
+}
+
+.chatbot-toggle:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 12px 35px rgba(2, 132, 199, 0.7);
+    animation: none;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: notificationBadge 1s infinite;
+    border: 2px solid white;
+}
+
+/* Chat Window - Premium Glassmorphism */
+.chatbot-window {
+    position: fixed;
+    bottom: 105px;
+    right: 25px;
+    width: 420px;
+    height: 600px;
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    border-radius: 28px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255,255,255,0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transform: scale(0);
+    opacity: 0;
+    transform-origin: bottom right;
+    pointer-events: none;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.chatbot-window.open {
+    transform: scale(1);
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Header with Gradient */
+.chatbot-header {
+    background: linear-gradient(135deg, #0284c7, #0369a1, #0ea5e9);
+    padding: 18px 20px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.chatbot-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: rotate 10s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.chatbot-header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1;
+}
+
+.chatbot-header h3 i {
+    font-size: 1.4rem;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    background: rgba(255,255,255,0.2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    z-index: 1;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.chatbot-close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    z-index: 1;
+}
+
+.chatbot-close:hover {
+    background: rgba(255,255,255,0.4);
+    transform: rotate(90deg);
+}
+
+/* Messages Area */
+.chatbot-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--surface-glass);
+}
+
+/* Custom Scrollbar */
+.chatbot-messages::-webkit-scrollbar {
+    width: 5px;
+}
+
+.chatbot-messages::-webkit-scrollbar-track {
+    background: var(--border);
+    border-radius: 10px;
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #0284c7, #0ea5e9);
+    border-radius: 10px;
+}
+
+.message {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    animation: slideInMessage 0.3s ease;
+    position: relative;
+}
+
+@keyframes slideInMessage {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message.user {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 5px;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+}
+
+.message.bot {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    align-self: flex-start;
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.message-time {
+    font-size: 0.6rem;
+    opacity: 0.6;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: flex;
+    gap: 6px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border-radius: 20px;
+    width: fit-content;
+    border: 1px solid var(--border);
+    align-self: flex-start;
+}
+
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, #0284c7, #0ea5e9);
+    border-radius: 50%;
+    animation: typingWave 1.4s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(1) { animation-delay: 0s; }
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingWave {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-10px); opacity: 1; }
+}
+
+/* Input Area */
+.chatbot-input-area {
+    padding: 15px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    background: var(--surface);
+}
+
+.chatbot-input {
+    flex: 1;
+    padding: 12px 18px;
+    border: 2px solid var(--border);
+    border-radius: 30px;
+    background: var(--surface-glass);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.chatbot-input:focus {
+    border-color: #0284c7;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+}
+
+.chatbot-send {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    border: none;
+    color: white;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.chatbot-send:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+}
+
+/* Quick Actions Buttons */
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--surface-glass);
+    border-top: 1px solid var(--border);
+}
+
+.quick-action-btn {
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.1), rgba(14, 165, 233, 0.1));
+    border: 1px solid rgba(2, 132, 199, 0.3);
+    color: var(--text-primary);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.quick-action-btn:hover {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Voice Input Button */
+.voice-btn {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    border: none;
+    color: white;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.voice-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.voice-btn.listening {
+    animation: pulse 1s infinite;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .chatbot-window {
+        width: calc(100vw - 40px);
+        right: 20px;
+        left: 20px;
+        height: 550px;
+        bottom: 95px;
+    }
+    
+    .chatbot-toggle {
+        width: 55px;
+        height: 55px;
+        font-size: 24px;
+    }
+    
+    .quick-actions {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding: 10px 15px;
+    }
+}
+
+/* Quick Responses Section */
+.quick-responses {
+    padding: 10px 20px;
+    background: var(--surface-glass);
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+}
+
+.quick-response-chip {
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.08), rgba(14, 165, 233, 0.08));
+    border: 1px solid rgba(2, 132, 199, 0.2);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s;
+    color: var(--text-secondary);
+}
+
+.quick-response-chip:hover {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    color: white;
+    transform: translateY(-2px);
+}
+</style>
+
+<div class="chatbot-container">
+    <button class="chatbot-toggle" id="chatbotToggle">
+        <i class="fas fa-robot"></i>
+        <span class="notification-badge" id="chatNotificationBadge" style="display: none;">1</span>
+    </button>
+    
+    <div class="chatbot-window" id="chatbotWindow">
+        <div class="chatbot-header">
+            <h3>
+                <i class="fas fa-brain"></i>
+                HELIOS AI Assistant
+            </h3>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span>Online</span>
+            </div>
+            <button class="chatbot-close" id="chatbotClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="message bot">
+                <i class="fas fa-heartbeat" style="margin-right: 8px; color: #ef4444;"></i>
+                <strong>Welcome to HELIOS AI Health Assistant! 🌟</strong><br><br>
+                I'm your intelligent medical companion. I can help you with:<br><br>
+                📊 <strong>Vital Signs Analysis</strong> - Real-time interpretation<br>
+                💊 <strong>Medication Information</strong> - Dosages & interactions<br>
+                🩺 <strong>Symptom Checker</strong> - Initial guidance<br>
+                🚨 <strong>Emergency Protocols</strong> - Critical situations<br>
+                💡 <strong>Health Tips</strong> - Personalized recommendations<br>
+                📅 <strong>Appointment Reminders</strong> - Schedule tracking<br><br>
+                <i class="fas fa-microphone-alt"></i> <strong>Voice commands supported!</strong> Click the mic button.<br>
+                How may I assist you today? 💙
+                <span class="message-time">Just now</span>
+            </div>
+        </div>
+        
+        <!-- Quick Response Chips -->
+        <div class="quick-responses">
+            <span class="quick-response-chip" data-question="What are my vitals?">📊 My Vitals</span>
+            <span class="quick-response-chip" data-question="Blood pressure normal range">❤️ BP Range</span>
+            <span class="quick-response-chip" data-question="Diabetes symptoms">🩸 Diabetes</span>
+            <span class="quick-response-chip" data-question="Heart attack symptoms">🚨 Heart Attack</span>
+            <span class="quick-response-chip" data-question="Healthy diet tips">🥗 Diet Tips</span>
+            <span class="quick-response-chip" data-question="Exercise recommendations">🏃 Exercise</span>
+        </div>
+        
+        <div class="chatbot-input-area">
+            <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Ask me anything about your health..." autocomplete="off">
+            <button class="voice-btn" id="voiceInputBtn" title="Voice Input">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button class="chatbot-send" id="chatbotSend">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <button class="quick-action-btn" data-action="export"><i class="fas fa-download"></i> Export Chat</button>
+            <button class="quick-action-btn" data-action="clear"><i class="fas fa-trash-alt"></i> Clear Chat</button>
+            <button class="quick-action-btn" data-action="help"><i class="fas fa-question-circle"></i> Help</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==================== ADVANCED PROFESSIONAL CHATBOT ====================
+(function() {
+    const chatbotToggle = document.getElementById('chatbotToggle');
+    const chatbotWindow = document.getElementById('chatbotWindow');
+    const chatbotClose = document.getElementById('chatbotClose');
+    const chatbotInput = document.getElementById('chatbotInput');
+    const chatbotSend = document.getElementById('chatbotSend');
+    const chatbotMessages = document.getElementById('chatbotMessages');
+    const voiceBtn = document.getElementById('voiceInputBtn');
+    const notificationBadge = document.getElementById('chatNotificationBadge');
+    
+    let isTyping = false;
+    let isListening = false;
+    let recognition = null;
+    let unreadCount = 0;
+    let chatHistory = [];
+    
+    // ========== Speech Recognition Setup ==========
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+        
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            chatbotInput.value = transcript;
+            sendMessage();
+            voiceBtn.classList.remove('listening');
+            isListening = false;
+            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+        };
+        
+        recognition.onerror = () => {
+            voiceBtn.classList.remove('listening');
+            isListening = false;
+            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            addMessage("🎤 Sorry, I couldn't hear you. Please try again.", false);
+        };
+        
+        recognition.onend = () => {
+            if (isListening) {
+                voiceBtn.classList.remove('listening');
+                isListening = false;
+                voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            }
+        };
+    }
+    
+    // Voice input handler
+    voiceBtn.addEventListener('click', () => {
+        if (!recognition) {
+            addMessage("🎤 Voice input is not supported in your browser. Please type your question.", false);
+            return;
+        }
+        
+        if (isListening) {
+            recognition.stop();
+            voiceBtn.classList.remove('listening');
+            isListening = false;
+            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+        } else {
+            recognition.start();
+            isListening = true;
+            voiceBtn.classList.add('listening');
+            voiceBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+        }
+    });
+    
+    // ========== Save/Load Chat History ==========
+    function saveChatHistory() {
+        const messages = [];
+        document.querySelectorAll('.chatbot-messages .message').forEach(msg => {
+            const isUser = msg.classList.contains('user');
+            const text = msg.innerText.replace(/Just now|\d+:\d+ (AM|PM)/g, '').trim();
+            const time = msg.querySelector('.message-time')?.innerText || new Date().toLocaleTimeString();
+            messages.push({ isUser, text, time });
+        });
+        localStorage.setItem('helios_chat_history', JSON.stringify(messages.slice(-50)));
+    }
+    
+    function loadChatHistory() {
+        const saved = localStorage.getItem('helios_chat_history');
+        if (saved) {
+            const messages = JSON.parse(saved);
+            chatbotMessages.innerHTML = '';
+            messages.forEach(msg => {
+                addMessage(msg.text, msg.isUser, msg.time, false);
+            });
+        }
+    }
+    
+    // ========== Export Chat ==========
+    function exportChat() {
+        const messages = [];
+        document.querySelectorAll('.chatbot-messages .message').forEach(msg => {
+            const isUser = msg.classList.contains('user');
+            const text = msg.innerText.replace(/\d+:\d+ (AM|PM)/g, '').trim();
+            const time = msg.querySelector('.message-time')?.innerText || '';
+            messages.push(`${time} - ${isUser ? 'You' : 'HELIOS AI'}: ${text}`);
+        });
+        
+        const content = messages.join('\n\n');
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `helios_chat_${new Date().toISOString().split('T')[0]}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+        addMessage("📄 Chat history exported successfully!", false);
+    }
+    
+    // ========== Clear Chat ==========
+    function clearChat() {
+        if (confirm('Are you sure you want to clear all chat messages?')) {
+            chatbotMessages.innerHTML = '';
+            addMessage("✨ Chat history cleared. How can I help you today?", false);
+            localStorage.removeItem('helios_chat_history');
+            unreadCount = 0;
+            notificationBadge.style.display = 'none';
+        }
+    }
+    
+    // ========== Get Current Time ==========
+    function getCurrentTime() {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = now.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        return `${hours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+    }
+    
+    // ========== Add Message to Chat ==========
+    function addMessage(text, isUser = false, time = null, save = true) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+        const displayTime = time || getCurrentTime();
+        messageDiv.innerHTML = `${text}<span class="message-time">${displayTime}</span>`;
+        chatbotMessages.appendChild(messageDiv);
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        
+        if (save && !isUser) {
+            chatHistory.push({ text, isUser, time: displayTime });
+            saveChatHistory();
+        }
+        
+        if (!isUser && !chatbotWindow.classList.contains('open')) {
+            unreadCount++;
+            notificationBadge.style.display = 'flex';
+            notificationBadge.innerText = unreadCount;
+        }
+    }
+    
+    // ========== Show Typing Indicator ==========
+    function showTypingIndicator() {
+        const indicator = document.createElement('div');
+        indicator.className = 'typing-indicator';
+        indicator.id = 'typingIndicator';
+        indicator.innerHTML = '<span></span><span></span><span></span>';
+        chatbotMessages.appendChild(indicator);
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        isTyping = true;
+    }
+    
+    function removeTypingIndicator() {
+        const indicator = document.getElementById('typingIndicator');
+        if (indicator) indicator.remove();
+        isTyping = false;
+    }
+    
+    // ========== Get Current Vitals ==========
+    function getCurrentVitals() {
+        const heartEl = document.getElementById('heartValue');
+        const bpEl = document.getElementById('bpValue');
+        const glucoseEl = document.getElementById('glucoseValue');
+        const spo2El = document.getElementById('spo2Value');
+        const tempEl = document.getElementById('tempValue');
+        const healthScoreEl = document.getElementById('healthScore');
+        
+        return {
+            heart: heartEl ? heartEl.innerText.split(' ')[0] : '--',
+            bp: bpEl ? bpEl.innerText.split(' ')[0] : '--/--',
+            glucose: glucoseEl ? glucoseEl.innerText.split(' ')[0] : '--',
+            spo2: spo2El ? spo2El.innerText.split(' ')[0] : '--',
+            temp: tempEl ? tempEl.innerText.split(' ')[0] : '--',
+            score: healthScoreEl ? healthScoreEl.innerText : '--'
+        };
+    }
+    
+    // ========== Professional Medical Responses ==========
+    function getVitalsSummary() {
+        const vitals = getCurrentVitals();
+        return `📊 **Your Current Vitals Summary**\n\n` +
+               `❤️ **Heart Rate:** ${vitals.heart} bpm ${vitals.heart !== '--' ? (parseInt(vitals.heart) >= 100 ? '(High ⚠️)' : (parseInt(vitals.heart) <= 60 ? '(Low ⚠️)' : '(Normal ✅)')) : ''}\n` +
+               `💓 **Blood Pressure:** ${vitals.bp} mmHg\n` +
+               `🩸 **Blood Glucose:** ${vitals.glucose} mg/dL\n` +
+               `🫁 **Oxygen Saturation:** ${vitals.spo2}%\n` +
+               `🌡️ **Body Temperature:** ${vitals.temp}°C\n` +
+               `📈 **Health Score:** ${vitals.score}/100\n\n` +
+               `Based on these readings, ${vitals.score >= 80 ? 'your health indicators look good! Keep maintaining healthy habits. 💪' : (vitals.score >= 60 ? 'some readings need attention. Consider consulting your doctor. 🩺' : '⚠️ Please consult a healthcare professional soon!')}`;
+    }
+    
+    function getPersonalizedRecommendation() {
+        const vitals = getCurrentVitals();
+        let recommendations = [];
+        
+        if (vitals.heart !== '--' && parseInt(vitals.heart) > 100) {
+            recommendations.push("• Reduce caffeine and stress. Practice deep breathing exercises 🧘");
+        }
+        if (vitals.heart !== '--' && parseInt(vitals.heart) < 60 && parseInt(vitals.heart) > 0) {
+            recommendations.push("• If you're not an athlete, consider checking with your doctor about bradycardia");
+        }
+        if (vitals.bp !== '--/--') {
+            const systolic = parseInt(vitals.bp.split('/')[0]);
+            if (systolic >= 140) {
+                recommendations.push("• Reduce sodium intake and exercise regularly to manage blood pressure");
+            }
+        }
+        if (vitals.glucose !== '--' && parseInt(vitals.glucose) > 140) {
+            recommendations.push("• Monitor carbohydrate intake and consult your doctor about blood sugar management");
+        }
+        if (vitals.spo2 !== '--' && parseInt(vitals.spo2) < 95 && parseInt(vitals.spo2) > 0) {
+            recommendations.push("• Practice deep breathing exercises and ensure good ventilation");
+        }
+        
+        if (recommendations.length === 0) {
+            recommendations.push("• Continue your healthy lifestyle! 🎉", "• Stay hydrated (8 glasses of water daily) 💧", "• Get 7-8 hours of quality sleep 😴");
+        }
+        
+        return `💡 **Personalized Health Recommendations**\n\n${recommendations.slice(0, 3).join('\n')}\n\n⭐ Remember: These are AI suggestions. Always consult your doctor for medical advice.`;
+    }
+    
+    // ========== Advanced Medical Knowledge Base ==========
+    const medicalResponses = {
+        'vitals|my vitals|health summary|show vitals': getVitalsSummary,
+        'recommendation|advice|suggest|what should i do': getPersonalizedRecommendation,
+        'heart rate|pulse': "💓 **Heart Rate Information**\n\nNormal range: 60-100 bpm (resting)\n• Athletes: 40-60 bpm\n• Children: 70-120 bpm\n\n⚠️ Seek care if: >120 bpm at rest, <50 bpm with symptoms, irregular rhythm, chest pain.",
+        'blood pressure|bp': "❤️ **Blood Pressure Categories** (mmHg)\n\n✅ Normal: <120/<80\n🟡 Elevated: 120-129/<80\n🟠 Hypertension Stage 1: 130-139/80-89\n🔴 Hypertension Stage 2: 140+/90+\n🚨 Crisis: 180+/120+ (Call ambulance!)",
+        'glucose|blood sugar|sugar': "🩸 **Blood Glucose Guidelines** (mg/dL)\n\n✅ Normal fasting: 70-99\n🟡 Prediabetes: 100-125\n🔴 Diabetes: 126+\n⚠️ Low (hypoglycemia): <70\n🚨 Critical low: <50\n🚨 Critical high: >300\n\nAlways consult your doctor for your target ranges.",
+        'oxygen|spo2': "🫁 **Oxygen Saturation (SpO₂)**\n\n✅ Normal: 95-100%\n🟡 Mild hypoxia: 91-94%\n🔴 Severe hypoxia: <90% (Seek care!)\n\n💡 Tip: Levels below 90% require immediate medical attention.",
+        'temperature|fever': "🌡️ **Body Temperature Guide**\n\n✅ Normal: 36.1-37.2°C (97-99°F)\n🟡 Low-grade fever: 37.5-38°C\n🔴 Fever: 38-39.5°C\n🚨 High fever: >39.5°C (Seek care)\n⚠️ Hypothermia: <35°C (Emergency!)",
+        
+        // Symptoms
+        'chest pain|heart attack': "🚨 **CHEST PAIN - EMERGENCY PROTOCOL** 🚨\n\n⚠️ Call emergency services IMMEDIATELY if you have:\n• Crushing chest pressure\n• Pain spreading to arm/jaw/back\n• Shortness of breath\n• Cold sweat, nausea\n\nDo NOT wait! Every minute matters. ❤️",
+        'stroke|face drooping|slurred speech': "⚠️ **STROKE - Think FAST** ⚠️\n\n**F**ace drooping?\n**A**rm weakness?\n**S**peech difficulty?\n**T**ime to call emergency!\n\n🚨 Call ambulance immediately!",
+        'shortness of breath|difficulty breathing': "🫁 **Shortness of Breath**\n\nSeek immediate care if:\n• Sudden severe breathlessness\n• Chest pain\n• Blue lips/fingertips\n• Can't speak full sentences\n\nFor mild cases: Sit upright, use pursed-lip breathing, use inhaler if prescribed.",
+        
+        // Medications
+        'aspirin|ibuprofen|paracetamol|tylenol|advil': "💊 **Common Pain Relievers**\n\n• **Aspirin**: Blood thinner, fever reducer - Take with food\n• **Ibuprofen (Advil/Motrin)**: Anti-inflammatory - Max 1200mg/day\n• **Acetaminophen (Tylenol)**: Fever/pain - Max 3000mg/day\n\n⚠️ Never exceed recommended doses. Consult doctor if you have liver/kidney issues.",
+        'antibiotics': "💊 **Antibiotic Information**\n\n✅ Take exactly as prescribed\n✅ Complete full course\n✅ Take with/without food as directed\n❌ Never share antibiotics\n❌ Don't save for later\n\n⚠️ Antibiotics don't work for viruses (cold, flu)!",
+        
+        // Diabetes
+        'diabetes type 1|type 1 diabetes': "🩸 **Type 1 Diabetes**\n\n• Autoimmune condition\n• Body doesn't produce insulin\n• Requires insulin therapy\n• Usually diagnosed in children/young adults\n• Continuous glucose monitoring recommended",
+        'diabetes type 2|type 2 diabetes': "🩸 **Type 2 Diabetes**\n\n• Body doesn't use insulin properly\n• Can be managed with lifestyle + medications\n• Risk factors: obesity, family history, age\n• Prevention: healthy diet, exercise, weight management",
+        
+        // Heart Health
+        'cholesterol|ldl|hdl|triglycerides': "🩸 **Cholesterol Guide**\n\n✅ **LDL (Bad)**: <100 mg/dL optimal\n✅ **HDL (Good)**: >60 mg/dL (higher is better)\n✅ **Triglycerides**: <150 mg/dL\n\n💡 Tips: Eat fiber-rich foods, exercise, limit saturated fats, avoid trans fats.",
+        
+        // Diet & Nutrition
+        'mediterranean diet|healthy diet': "🥗 **Mediterranean Diet**\n\n✅ Eat: Fruits, vegetables, whole grains, fish, olive oil, nuts\n❌ Limit: Red meat, processed foods, sugar, refined carbs\n\nBenefits: Reduces heart disease, diabetes, improves longevity!",
+        'intermittent fasting|if': "⏰ **Intermittent Fasting**\n\nPopular methods:\n• 16:8 (fast 16hrs, eat 8hrs)\n• 5:2 (eat normally 5 days, restrict 2 days)\n\n⚠️ Consult doctor before starting if you have diabetes, eating disorders, or are pregnant.",
+        
+        // Mental Health
+        'anxiety|stress|panic attack': "🧘 **Anxiety & Stress Management**\n\nImmediate relief:\n• Deep breathing (4-7-8 technique)\n• Grounding (5-4-3-2-1 method)\n• Progressive muscle relaxation\n\nLong-term:\n• Regular exercise 🏃\n• Adequate sleep 😴\n• Limit caffeine ☕\n• Therapy/Counseling 🗣️\n\n📞 Crisis hotline: 988 (US)",
+        'depression|sad|hopeless': "💙 **Depression Support**\n\nYou're not alone. Help is available:\n\n✅ Talk to a therapist or counselor\n✅ Reach out to trusted friends/family\n✅ Call a mental health hotline\n✅ Consider medication (consult doctor)\n✅ Exercise and sunlight exposure\n\n📞 **988 Suicide & Crisis Lifeline** - Available 24/7",
+        
+        // Sleep
+        'insomnia|cant sleep|sleep problems': "😴 **Sleep Hygiene Tips**\n\n✅ Consistent sleep schedule\n✅ Dark, cool, quiet room\n✅ No screens 1hr before bed\n✅ Avoid caffeine after 2pm\n✅ Limit alcohol before bed\n✅ Relaxation techniques\n\n💡 Try: Melatonin (3-5mg) 1hr before bed, consult doctor for persistent issues.",
+        
+        // Exercise
+        'exercise|workout|fitness': "🏃 **Exercise Recommendations**\n\n**Adults 18-65:**\n• 150 min moderate OR 75 min vigorous weekly\n• Strength training 2x/week\n• Balance exercises for older adults\n\n**Benefits:**\n• Reduces heart disease risk 30%\n• Improves mental health\n• Better sleep\n• Weight management\n\nStart slow, stay consistent! 💪",
+        
+        // Emergency
+        'emergency|sos|911|ambulance': "🚨 **MEDICAL EMERGENCY** 🚨\n\n**CALL EMERGENCY SERVICES IMMEDIATELY!**\n\nBefore calling, prepare:\n1. Your location\n2. What happened\n3. Patient's condition\n4. Any known medical conditions\n\nWhile waiting:\n• Stay calm\n• Don't move patient unless necessary\n• Apply pressure to bleeding\n• Perform CPR if trained\n\n**Use the SOS button at the top of this dashboard!**",
+        
+        // Default
+        'default': "I'm your HELIOS AI Health Assistant. 💙\n\nI can help with:\n• 📊 **Vital signs** (ask 'my vitals')\n• 💡 **Health recommendations**\n• 🩺 **Symptom information**\n• 💊 **Medication guidance**\n• 🚨 **Emergency protocols**\n• 🥗 **Diet & exercise tips**\n\nWhat would you like to know? Just type your question naturally!"
+    };
+    
+    function getBotResponse(userMessage) {
+        const lowerMsg = userMessage.toLowerCase();
+        
+        // Check for vitals request
+        if (lowerMsg.includes('vital') || lowerMsg.includes('my health') || (lowerMsg.includes('show') && lowerMsg.includes('vitals'))) {
+            return getVitalsSummary();
+        }
+        if (lowerMsg.includes('recommend') || lowerMsg.includes('advice') || lowerMsg.includes('what should i do')) {
+            return getPersonalizedRecommendation();
+        }
+        
+        // Check medical knowledge base
+        for (const [pattern, response] of Object.entries(medicalResponses)) {
+            if (pattern === 'default') continue;
+            const keywords = pattern.split('|');
+            for (const keyword of keywords) {
+                if (lowerMsg.includes(keyword)) {
+                    return typeof response === 'function' ? response() : response;
+                }
+            }
+        }
+        
+        return medicalResponses.default;
+    }
+    
+    // ========== Send Message ==========
+    async function sendMessage() {
+        const userMessage = chatbotInput.value.trim();
+        if (!userMessage) return;
+        
+        addMessage(userMessage, true);
+        chatbotInput.value = '';
+        unreadCount = 0;
+        notificationBadge.style.display = 'none';
+        
+        showTypingIndicator();
+        
+        setTimeout(() => {
+            removeTypingIndicator();
+            const botResponse = getBotResponse(userMessage);
+            addMessage(botResponse, false);
+        }, 800 + Math.random() * 400);
+    }
+    
+    // ========== Event Listeners ==========
+    chatbotToggle.addEventListener('click', () => {
+        chatbotWindow.classList.toggle('open');
+        if (chatbotWindow.classList.contains('open')) {
+            unreadCount = 0;
+            notificationBadge.style.display = 'none';
+        }
+    });
+    
+    chatbotClose.addEventListener('click', () => {
+        chatbotWindow.classList.remove('open');
+    });
+    
+    chatbotInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+    
+    chatbotSend.addEventListener('click', sendMessage);
+    
+    // Quick response chips
+    document.querySelectorAll('.quick-response-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            const question = chip.dataset.question;
+            chatbotInput.value = question;
+            sendMessage();
+        });
+    });
+    
+    // Quick action buttons
+    document.querySelectorAll('.quick-action-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const action = btn.dataset.action;
+            if (action === 'export') exportChat();
+            if (action === 'clear') clearChat();
+            if (action === 'help') addMessage(medicalResponses.default, false);
+        });
+    });
+    
+    // Prevent window close when clicking inside
+    chatbotWindow.addEventListener('click', (e) => e.stopPropagation());
+    
+    // Load history
+    loadChatHistory();
+    
+    console.log("✅ Advanced Professional Chatbot initialized!");
+    console.log("Features: Voice input, chat history, export, quick responses, personalized recommendations");
+})();
+</script>
 
    
 </body>
