@@ -644,3 +644,248 @@
     @media (max-width: 480px) {
       .login-card { padding: 2rem 1.5rem; }
     }
+/* ===================================================== */
+/*     MEDICAL PROFESSIONAL ANIMATED BACKGROUND          */
+/*     أضف هذا الكود في نهاية ملف CSS                    */
+/* ===================================================== */
+
+.medical-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* ========== 1. HEARTBEAT WAVE - نبضات قلب ========== */
+.heartbeat-wave {
+    position: absolute;
+    top: 12%;
+    right: 3%;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(239,68,68,0.2) 0%, rgba(239,68,68,0) 70%);
+    border-radius: 50%;
+    animation: heartbeatWave 1.8s ease-in-out infinite;
+}
+
+.heartbeat-wave::before {
+    content: '❤️';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    opacity: 0.5;
+    animation: heartBeat 0.8s ease-in-out infinite;
+}
+
+@keyframes heartbeatWave {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(1.3); opacity: 0.8; }
+}
+
+@keyframes heartBeat {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.15); }
+}
+
+/* ========== 2. ECG LINE - رسمة قلب ========== */
+.ecg-line-animated {
+    position: absolute;
+    bottom: 15%;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 100'%3E%3Cpath d='M0,50 L60,50 L80,25 L100,75 L120,25 L140,50 L220,50 L260,50 L300,50 L340,50 L370,35 L400,65 L430,35 L460,50 L540,50 L580,50 L620,50 L660,50 L700,35 L730,65 L760,35 L790,50 L870,50 L910,50 L950,50 L990,50 L1020,35 L1050,65 L1080,35 L1110,50 L1200,50' stroke='%2310b981' stroke-width='2.5' fill='none' opacity='0.35'/%3E%3C/svg%3E") repeat-x;
+    background-size: 300px 100px;
+    animation: ecgMove 4s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes ecgMove {
+    from { background-position: 0 0; }
+    to { background-position: 300px 0; }
+}
+
+/* ========== 3. PULSE RINGS - حلقات نبض ========== */
+.pulse-ring-1 {
+    position: absolute;
+    bottom: 20%;
+    left: 5%;
+    width: 200px;
+    height: 200px;
+    border: 2px solid rgba(2,132,199,0.2);
+    border-radius: 50%;
+    animation: pulseExpand 3s ease-out infinite;
+}
+
+.pulse-ring-2 {
+    position: absolute;
+    bottom: 20%;
+    left: 5%;
+    width: 200px;
+    height: 200px;
+    border: 2px solid rgba(139,92,246,0.15);
+    border-radius: 50%;
+    animation: pulseExpand 3s ease-out 1.5s infinite;
+}
+
+@keyframes pulseExpand {
+    0% { transform: scale(0.5); opacity: 0.8; }
+    100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* ========== 4. MEDICAL CROSS - صليب طبي ========== */
+.medical-cross-glow {
+    position: absolute;
+    top: 18%;
+    left: 12%;
+    width: 90px;
+    height: 90px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230284c7'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z'/%3E%3C/svg%3E") center/contain no-repeat;
+    opacity: 0.12;
+    animation: crossGlow 4s ease-in-out infinite;
+}
+
+@keyframes crossGlow {
+    0%, 100% { opacity: 0.08; transform: scale(1) rotate(0deg); }
+    50% { opacity: 0.2; transform: scale(1.05) rotate(5deg); }
+}
+
+/* ========== 5. FLOATING ICONS - أيقونات عائمة ========== */
+.floating-icon {
+    position: absolute;
+    font-size: 2rem;
+    opacity: 0.1;
+    animation: floatIcon 6s ease-in-out infinite;
+    z-index: 1;
+}
+
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.06; }
+    50% { transform: translateY(-25px) rotate(10deg); opacity: 0.15; }
+}
+
+/* ========== 6. LIGHT PARTICLES - جسيمات ضوئية ========== */
+.light-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+@keyframes particleFloat {
+    0% { transform: translateY(0) scale(1); opacity: 0; }
+    10% { opacity: 0.5; }
+    90% { opacity: 0.5; }
+    100% { transform: translateY(-100vh) scale(0); opacity: 0; }
+}
+
+/* ========== 7. LOGIN CARD IMPROVEMENTS ========== */
+.login-card {
+    position: relative;
+    z-index: 10;
+    backdrop-filter: blur(20px) saturate(180%);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Animated border gradient */
+.login-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #0284c7, #10b981, #8b5cf6, #f59e0b, #ef4444, #0284c7);
+    background-size: 200% 100%;
+    border-radius: 48px 48px 0 0;
+    animation: borderGradient 4s linear infinite;
+}
+
+@keyframes borderGradient {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+}
+
+/* Logo animation enhancement */
+.logo-animation i {
+    animation: logoPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(59,130,246,0.5)); }
+    50% { transform: scale(1.08); filter: drop-shadow(0 0 20px rgba(59,130,246,0.8)); }
+}
+
+/* Input focus effect */
+.input-wrapper input:focus {
+    border-color: var(--input-focus-border);
+    box-shadow: 0 0 0 4px var(--input-focus-glow);
+    transform: translateY(-2px);
+}
+
+/* Button ripple effect */
+.btn-login {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-login::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+}
+
+.btn-login:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--btn-shadow);
+}
+
+/* Social buttons hover */
+.social-btn {
+    transition: all 0.3s ease;
+}
+
+.social-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    background: var(--btn-gradient);
+    color: white;
+}
+
+/* ========== 8. RESPONSIVE ADJUSTMENTS ========== */
+@media (max-width: 768px) {
+    .heartbeat-wave { width: 100px; height: 100px; top: 8%; right: 2%; }
+    .heartbeat-wave::before { font-size: 1.8rem; }
+    .floating-icon { font-size: 1.2rem; }
+    .medical-cross-glow { width: 55px; height: 55px; top: 10%; left: 5%; }
+    .pulse-ring-1, .pulse-ring-2 { width: 120px; height: 120px; bottom: 10%; left: 2%; }
+    .ecg-line-animated { bottom: 5%; height: 60px; background-size: 200px 60px; }
+}
+
+/* ========== 9. HIDE DUPLICATE ELEMENTS ========== */
+.bg-shapes, .shape, .ecg-line {
+    display: none;
+}
