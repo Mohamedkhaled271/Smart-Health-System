@@ -639,6 +639,355 @@
       color: var(--text-secondary);
       font-size: 0.75rem;
     }
+/* ===================================================== */
+/*     ULTRA PREMIUM MEDICAL ANIMATED BACKGROUND        */
+/* ===================================================== */
+
+.ultra-medical-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 30% 40%, rgba(59,130,246,0.08) 0%, transparent 80%);
+}
+
+/* ========== NEBULA BACKGROUND ========== */
+.nebula-bg {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background: radial-gradient(circle at 20% 30%, rgba(59,130,246,0.15), transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(139,92,246,0.15), transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(16,185,129,0.1), transparent 50%);
+    animation: nebulaRotate 30s linear infinite;
+}
+@keyframes nebulaRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ========== 3D HUMAN BODY ========== */
+.human-body-3d {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 280px;
+    height: 400px;
+    animation: bodyFloat 6s ease-in-out infinite;
+}
+.body-silhouette {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at 50% 30%, rgba(59,130,246,0.15), transparent);
+    border-radius: 50% 50% 40% 40%;
+    box-shadow: 0 0 50px rgba(59,130,246,0.2);
+    animation: bodyPulse 4s ease-in-out infinite;
+}
+.heart-organ, .brain-organ, .lungs-organ, .bone-organ, .eye-organ {
+    position: absolute;
+    font-size: 1.8rem;
+    animation: organFloat 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 10px rgba(59,130,246,0.5));
+}
+.heart-organ { top: 45%; left: 45%; color: #ef4444; animation-delay: 0s; }
+.brain-organ { top: 25%; left: 40%; color: #8b5cf6; animation-delay: 0.5s; }
+.lungs-organ { top: 35%; left: 55%; color: #10b981; animation-delay: 1s; }
+.bone-organ { bottom: 15%; left: 45%; color: #f59e0b; animation-delay: 1.5s; }
+.eye-organ { top: 20%; left: 50%; color: #06b6d4; animation-delay: 2s; }
+@keyframes bodyFloat {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -52%) scale(1.02); }
+}
+@keyframes bodyPulse {
+    0%, 100% { opacity: 0.5; box-shadow: 0 0 30px rgba(59,130,246,0.2); }
+    50% { opacity: 0.8; box-shadow: 0 0 60px rgba(59,130,246,0.4); }
+}
+@keyframes organFloat {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-5px) scale(1.05); }
+}
+
+/* ========== 3D HEARTBEAT RINGS ========== */
+.heartbeat-3d-container {
+    position: absolute;
+    top: 20%;
+    right: 8%;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.heartbeat-core {
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle, #ef4444, #dc2626);
+    clip-path: path("M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5 2,5.41 4.42,3 7.5,3c1.74,0 3.41,0.81 4.5,2.08C13.09,3.81 14.76,3 16.5,3 19.58,3 22,5.41 22,8.5c0,3.77-3.4,6.86-8.55,11.54L12,21.35Z");
+    animation: heartbeatCore 1s ease-in-out infinite;
+    box-shadow: 0 0 30px rgba(239,68,68,0.6);
+    z-index: 5;
+}
+.heartbeat-ring-1, .heartbeat-ring-2, .heartbeat-ring-3, .heartbeat-ring-4, .heartbeat-ring-5 {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(239,68,68,0.3);
+    animation: ringWave 2s ease-out infinite;
+}
+.heartbeat-ring-2 { width: 80px; height: 80px; animation-delay: 0.4s; }
+.heartbeat-ring-3 { width: 120px; height: 120px; animation-delay: 0.8s; }
+.heartbeat-ring-4 { width: 160px; height: 160px; animation-delay: 1.2s; }
+.heartbeat-ring-5 { width: 200px; height: 200px; animation-delay: 1.6s; }
+@keyframes heartbeatCore {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); box-shadow: 0 0 50px rgba(239,68,68,0.9); }
+}
+@keyframes ringWave {
+    0% { transform: scale(0.5); opacity: 0.8; }
+    100% { transform: scale(2); opacity: 0; }
+}
+
+/* ========== 3D ECG WAVES ========== */
+.ecg-3d-container {
+    position: absolute;
+    bottom: 12%;
+    left: 0;
+    width: 100%;
+    height: 120px;
+}
+.ecg-wave-3d-1, .ecg-wave-3d-2, .ecg-wave-3d-3, .ecg-wave-3d-4 {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0.4;
+}
+.ecg-wave-3d-1 {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath d='M0,60 L100,60 L120,30 L140,90 L160,30 L180,60 L300,60 L340,60 L380,60 L420,60 L450,45 L480,75 L510,45 L540,60 L660,60 L700,60 L740,60 L780,60 L820,45 L850,75 L880,45 L910,60 L1030,60 L1070,60 L1110,60 L1150,60 L1180,45 L1200,75' stroke='%2310b981' stroke-width='3' fill='none'/%3E%3C/svg%3E") repeat-x;
+    background-size: 350px 120px;
+    animation: ecgWave3d 3s linear infinite;
+}
+.ecg-wave-3d-2 {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath d='M0,60 L80,60 L100,40 L120,80 L140,40 L160,60 L280,60 L320,60 L360,60 L400,60 L430,50 L460,70 L490,50 L520,60 L640,60 L680,60 L720,60 L760,60 L800,50 L830,70 L860,50 L890,60 L1010,60 L1050,60 L1090,60 L1130,60 L1160,50 L1200,70' stroke='%233b82f6' stroke-width='2.5' fill='none' opacity='0.6'/%3E%3C/svg%3E") repeat-x;
+    background-size: 300px 120px;
+    animation: ecgWave3d 4s linear infinite reverse;
+}
+.ecg-wave-3d-3 {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath d='M0,60 L60,60 L80,50 L100,70 L120,50 L140,60 L260,60 L300,60 L340,60 L380,60 L410,55 L440,65 L470,55 L500,60 L620,60 L660,60 L700,60 L740,60 L780,55 L810,65 L840,55 L870,60 L990,60 L1030,60 L1070,60 L1110,60 L1140,55 L1200,65' stroke='%238b5cf6' stroke-width='2' fill='none' opacity='0.5'/%3E%3C/svg%3E") repeat-x;
+    background-size: 280px 120px;
+    animation: ecgWave3d 5s linear infinite;
+}
+.ecg-wave-3d-4 {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath d='M0,60 L120,60 L140,35 L160,85 L180,35 L200,60 L320,60 L360,60 L400,60 L440,60 L470,48 L500,72 L530,48 L560,60 L680,60 L720,60 L760,60 L800,60 L840,48 L870,72 L900,48 L930,60 L1050,60 L1090,60 L1130,60 L1170,60 L1200,48' stroke='%23f59e0b' stroke-width='2' fill='none' opacity='0.35'/%3E%3C/svg%3E") repeat-x;
+    background-size: 320px 120px;
+    animation: ecgWave3d 3.5s linear infinite reverse;
+}
+@keyframes ecgWave3d {
+    from { background-position: 0 0; }
+    to { background-position: 350px 0; }
+}
+
+/* ========== DNA 3D CONTAINER ========== */
+.dna-3d-container {
+    position: absolute;
+    bottom: 20%;
+    right: 5%;
+    width: 140px;
+    height: 220px;
+    animation: dnaContainerFloat 5s ease-in-out infinite;
+}
+.dna-spiral {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(0deg,
+        rgba(59,130,246,0.3) 0px, rgba(59,130,246,0.3) 12px,
+        transparent 12px, transparent 24px,
+        rgba(139,92,246,0.3) 24px, rgba(139,92,246,0.3) 36px,
+        transparent 36px, transparent 48px);
+    border-radius: 30px;
+    animation: dnaSpiralMove 3s linear infinite;
+}
+.dna-particle-1, .dna-particle-2, .dna-particle-3 {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle, #3b82f6, #8b5cf6);
+    border-radius: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: dnaParticleMove 4s linear infinite;
+    box-shadow: 0 0 15px rgba(59,130,246,0.6);
+}
+.dna-particle-2 { animation-delay: 1.33s; background: radial-gradient(circle, #10b981, #06b6d4); }
+.dna-particle-3 { animation-delay: 2.66s; background: radial-gradient(circle, #f59e0b, #ef4444); }
+@keyframes dnaContainerFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+@keyframes dnaSpiralMove {
+    0%, 100% { background-position: 0 0; }
+    50% { background-position: 0 24px; }
+}
+@keyframes dnaParticleMove {
+    0% { top: 0; opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+}
+
+/* ========== COSMIC RINGS ========== */
+.cosmic-rings {
+    position: absolute;
+    top: 30%;
+    left: 15%;
+    width: 300px;
+    height: 300px;
+}
+.cosmic-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(59,130,246,0.2);
+    animation: cosmicRingExpand 5s ease-out infinite;
+}
+.cosmic-ring:nth-child(1) { width: 50px; height: 50px; animation-delay: 0s; }
+.cosmic-ring:nth-child(2) { width: 90px; height: 90px; animation-delay: 1s; }
+.cosmic-ring:nth-child(3) { width: 130px; height: 130px; animation-delay: 2s; }
+.cosmic-ring:nth-child(4) { width: 170px; height: 170px; animation-delay: 3s; }
+.cosmic-ring:nth-child(5) { width: 210px; height: 210px; animation-delay: 4s; }
+@keyframes cosmicRingExpand {
+    0% { transform: scale(0.3); opacity: 0.8; }
+    100% { transform: scale(2); opacity: 0; }
+}
+
+/* ========== CELLS CONTAINER ========== */
+.cells-container .cell {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59,130,246,0.15), rgba(139,92,246,0.05));
+    border: 1px solid rgba(59,130,246,0.2);
+    animation: cellFloat 8s ease-in-out infinite;
+}
+.cell-1 { width: 30px; height: 30px; top: 15%; left: 20%; animation-delay: 0s; }
+.cell-2 { width: 45px; height: 45px; top: 70%; left: 85%; animation-delay: 1s; }
+.cell-3 { width: 25px; height: 25px; top: 40%; left: 75%; animation-delay: 2s; }
+.cell-4 { width: 35px; height: 35px; top: 80%; left: 10%; animation-delay: 3s; }
+.cell-5 { width: 20px; height: 20px; top: 10%; left: 85%; animation-delay: 4s; }
+.cell-6 { width: 40px; height: 40px; top: 50%; left: 15%; animation-delay: 5s; }
+.cell-7 { width: 28px; height: 28px; top: 25%; left: 45%; animation-delay: 6s; }
+.cell-8 { width: 32px; height: 32px; top: 65%; left: 55%; animation-delay: 7s; }
+@keyframes cellFloat {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.4; }
+    50% { transform: translateY(-20px) scale(1.1); opacity: 0.7; }
+}
+.cell-extra {
+    position: absolute;
+    border-radius: 50%;
+    animation: cellFloat 10s ease-in-out infinite;
+}
+
+/* ========== MEDICAL ICONS 3D ========== */
+.medical-icons-3d .icon-3d {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.8rem;
+    color: rgba(59,130,246,0.6);
+    animation: icon3dFloat 5s ease-in-out infinite;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    z-index: 2;
+    filter: drop-shadow(0 0 10px rgba(59,130,246,0.3));
+}
+.medical-icons-3d .icon-3d span {
+    font-size: 0.65rem;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+    padding: 4px 10px;
+    border-radius: 20px;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+}
+.medical-icons-3d .icon-3d:hover {
+    color: #3b82f6;
+    transform: scale(1.2) translateY(-10px) !important;
+    filter: drop-shadow(0 0 20px rgba(59,130,246,0.6));
+}
+.medical-icons-3d .icon-3d:hover span {
+    opacity: 1;
+}
+@keyframes icon3dFloat {
+    0%, 100% { transform: translateY(0); opacity: 0.5; }
+    50% { transform: translateY(-15px); opacity: 0.8; }
+}
+
+/* ========== STAR PARTICLES ========== */
+.star-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+@keyframes starTwinkleUltra {
+    0%, 100% { opacity: 0; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.5); }
+}
+
+/* ========== LIGHT PARTICLES ULTRA ========== */
+.light-particles-ultra {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+@keyframes particleFloatUltra {
+    0% { transform: translateY(0) scale(1); opacity: 0; }
+    10% { opacity: 0.8; }
+    90% { opacity: 0.8; }
+    100% { transform: translateY(-100vh) scale(0); opacity: 0; }
+}
+
+/* ========== MEDICAL FOG ========== */
+.medical-fog {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30%;
+    background: linear-gradient(to top, rgba(59,130,246,0.1), transparent);
+    animation: fogPulse 8s ease-in-out infinite;
+}
+@keyframes fogPulse {
+    0%, 100% { opacity: 0.3; height: 25%; }
+    50% { opacity: 0.6; height: 35%; }
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .human-body-3d { transform: translate(-50%, -50%) scale(0.5); }
+    .heartbeat-3d-container { transform: scale(0.5); top: 5%; right: -5%; }
+    .dna-3d-container { transform: scale(0.5); bottom: 10%; right: -5%; }
+    .cosmic-rings { transform: scale(0.5); top: 10%; left: -5%; }
+    .ecg-3d-container { bottom: 5%; height: 70px; }
+    .medical-icons-3d .icon-3d { font-size: 1rem; }
+    .medical-icons-3d .icon-3d span { display: none; }
+    .cells-container .cell { display: none; }
+}
+
+/* ========== HIDE OLD ELEMENTS ========== */
+.bg-shapes, .shape, .ecg-line {
+    display: none;
+}
 
     /* responsiveness */
     @media (max-width: 480px) {
