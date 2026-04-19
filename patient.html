@@ -523,6 +523,24 @@
                         <div class="card-indicator" id="tempIndicator" style="font-weight:600;">Normal</div>
                     </div>
                 </div>
+                                <!-- Environment Data -->
+                <div class="env-grid">
+                    <div class="env-card"><i class="fas fa-temperature-low" style="color:#3b82f6;"></i><div class="env-label">Room Temp</div><div class="env-value" id="roomTempValue">-- °C</div></div>
+                    <div class="env-card"><i class="fas fa-tint" style="color:#06b6d4;"></i><div class="env-label">Humidity</div><div class="env-value" id="humidityValue">-- %</div></div>
+                    <div class="env-card"><i class="fas fa-shoe-prints" style="color:#a855f7;"></i><div class="env-label">Motion Index</div><div class="env-value" id="motionValue">-- m/s²</div></div>
+                </div>
+                <!-- Trend Charts -->
+                <div class="charts-row">
+                    <div class="chart-card"><h4><i class="fas fa-chart-line"></i> Heart Rate Trend (24h)</h4><canvas id="heartTrendChart" style="height:200px;"></canvas></div>
+                    <div class="chart-card"><h4><i class="fas fa-chart-line"></i> SpO₂ & Temperature Trend</h4><canvas id="multiTrendChart" style="height:200px;"></canvas></div>
+                </div>
+                
+                <button class="export-btn" id="exportBtn"><i class="fas fa-download"></i> Export Comprehensive Report</button>
+
+                <div class="alerts-section">
+                    <div class="alerts-header"><h3><i class="fas fa-bell"></i> Critical Alerts</h3><button class="mute-button" id="muteAlerts" style="background:transparent;border:1px solid var(--border);padding:0.3rem 1rem;border-radius:20px;">Mute</button></div>
+                    <div class="alerts-list" id="alertsList"><div class="alert-item">✅ All vitals within normal range</div></div>
+                </div>
 
                 <!-- ========== CARD 1: WEEKLY HEALTH REPORT ========== -->
 <div class="vital-card" style="background: linear-gradient(135deg, var(--surface), rgba(59,130,246,0.04)); border: 1px solid rgba(59,130,246,0.2); margin-bottom: 1.5rem;">
@@ -945,25 +963,7 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
 </script>
                
 
-                <!-- Environment Data -->
-                <div class="env-grid">
-                    <div class="env-card"><i class="fas fa-temperature-low" style="color:#3b82f6;"></i><div class="env-label">Room Temp</div><div class="env-value" id="roomTempValue">-- °C</div></div>
-                    <div class="env-card"><i class="fas fa-tint" style="color:#06b6d4;"></i><div class="env-label">Humidity</div><div class="env-value" id="humidityValue">-- %</div></div>
-                    <div class="env-card"><i class="fas fa-shoe-prints" style="color:#a855f7;"></i><div class="env-label">Motion Index</div><div class="env-value" id="motionValue">-- m/s²</div></div>
-                </div>
-
-                <!-- Trend Charts -->
-                <div class="charts-row">
-                    <div class="chart-card"><h4><i class="fas fa-chart-line"></i> Heart Rate Trend (24h)</h4><canvas id="heartTrendChart" style="height:200px;"></canvas></div>
-                    <div class="chart-card"><h4><i class="fas fa-chart-line"></i> SpO₂ & Temperature Trend</h4><canvas id="multiTrendChart" style="height:200px;"></canvas></div>
-                </div>
                 
-                <button class="export-btn" id="exportBtn"><i class="fas fa-download"></i> Export Comprehensive Report</button>
-
-                <div class="alerts-section">
-                    <div class="alerts-header"><h3><i class="fas fa-bell"></i> Critical Alerts</h3><button class="mute-button" id="muteAlerts" style="background:transparent;border:1px solid var(--border);padding:0.3rem 1rem;border-radius:20px;">Mute</button></div>
-                    <div class="alerts-list" id="alertsList"><div class="alert-item">✅ All vitals within normal range</div></div>
-                </div>
                    <!-- ==================== LABORATORY RESULTS SECTION (ENTERED BY DOCTOR) ==================== -->
                 <div class="lab-results-section" style="margin: 2rem 0;">
                     <div class="section-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
