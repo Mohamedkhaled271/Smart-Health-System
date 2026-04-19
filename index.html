@@ -254,5 +254,332 @@
       }, 3000);
   });
   </script>
+
+
+    <!-- ========== إضافة الخلفية الطبية ثلاثية الأبعاد المبهرة ========== -->
+  <div class="ultra-medical-bg">
+    <!-- خلفية متحركة -->
+    <div class="nebula-bg"></div>
+    
+    <!-- جسم الإنسان ثلاثي الأبعاد متحرك -->
+    <div class="human-body-3d">
+      <div class="body-silhouette"></div>
+      <div class="heart-organ"><i class="fas fa-heart"></i></div>
+      <div class="brain-organ"><i class="fas fa-brain"></i></div>
+      <div class="lungs-organ"><i class="fas fa-lungs"></i></div>
+      <div class="bone-organ"><i class="fas fa-bone"></i></div>
+      <div class="eye-organ"><i class="fas fa-eye"></i></div>
+    </div>
+    
+    <!-- موجات نبضات قلب ثلاثية -->
+    <div class="heartbeat-3d-container">
+      <div class="heartbeat-core"></div>
+      <div class="heartbeat-ring"></div>
+      <div class="heartbeat-ring2"></div>
+      <div class="heartbeat-ring3"></div>
+    </div>
+    
+    <!-- خطوط ECG متعددة -->
+    <div class="ecg-3d-container">
+      <div class="ecg-wave"></div>
+      <div class="ecg-wave2"></div>
+    </div>
+    
+    <!-- أيقونات طبية ثلاثية الأبعاد -->
+    <div class="medical-icons-3d">
+      <div class="icon-3d" style="top: 10%; left: 5%;"><i class="fas fa-stethoscope"></i><span>Diagnosis</span></div>
+      <div class="icon-3d" style="top: 20%; right: 5%;"><i class="fas fa-microscope"></i><span>Research</span></div>
+      <div class="icon-3d" style="bottom: 15%; left: 8%;"><i class="fas fa-capsules"></i><span>Medicine</span></div>
+      <div class="icon-3d" style="bottom: 25%; right: 8%;"><i class="fas fa-ambulance"></i><span>Emergency</span></div>
+      <div class="icon-3d" style="top: 40%; left: 10%;"><i class="fas fa-syringe"></i><span>Vaccine</span></div>
+      <div class="icon-3d" style="top: 50%; right: 12%;"><i class="fas fa-heartbeat"></i><span>Cardio</span></div>
+      <div class="icon-3d" style="bottom: 45%; left: 15%;"><i class="fas fa-brain"></i><span>Neuro</span></div>
+      <div class="icon-3d" style="top: 65%; right: 18%;"><i class="fas fa-lungs"></i><span>Pulmo</span></div>
+    </div>
+    
+    <!-- جسيمات ضوئية متحركة -->
+    <div class="light-particles"></div>
+    
+    <!-- تأثير الضباب الطبي -->
+    <div class="medical-fog"></div>
+  </div>
+
+  <style>
+    /* ========== الخلفية الطبية ثلاثية الأبعاد ========== */
+    .ultra-medical-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .nebula-bg {
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      top: -50%;
+      left: -50%;
+      background: radial-gradient(circle at 20% 30%, rgba(59,130,246,0.12), transparent 50%),
+                  radial-gradient(circle at 80% 70%, rgba(139,92,246,0.12), transparent 50%),
+                  radial-gradient(circle at 40% 60%, rgba(16,185,129,0.08), transparent 50%);
+      animation: nebulaRotate 30s linear infinite;
+    }
+
+    @keyframes nebulaRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .human-body-3d {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      height: 400px;
+      animation: bodyFloat 6s ease-in-out infinite;
+    }
+
+    .body-silhouette {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at 50% 30%, rgba(59,130,246,0.15), transparent);
+      border-radius: 50% 50% 40% 40%;
+      box-shadow: 0 0 60px rgba(59,130,246,0.2);
+      animation: bodyPulse 4s ease-in-out infinite;
+    }
+
+    .heart-organ, .brain-organ, .lungs-organ, .bone-organ, .eye-organ {
+      position: absolute;
+      font-size: 1.8rem;
+      animation: organFloat 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 10px rgba(59,130,246,0.5));
+    }
+
+    .heart-organ { top: 45%; left: 45%; color: #ef4444; animation-delay: 0s; }
+    .brain-organ { top: 25%; left: 40%; color: #8b5cf6; animation-delay: 0.5s; }
+    .lungs-organ { top: 35%; left: 55%; color: #10b981; animation-delay: 1s; }
+    .bone-organ { bottom: 15%; left: 45%; color: #f59e0b; animation-delay: 1.5s; }
+    .eye-organ { top: 20%; left: 50%; color: #06b6d4; animation-delay: 2s; }
+
+    @keyframes bodyFloat {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -52%) scale(1.02); }
+    }
+
+    @keyframes bodyPulse {
+      0%, 100% { opacity: 0.5; box-shadow: 0 0 30px rgba(59,130,246,0.2); }
+      50% { opacity: 0.8; box-shadow: 0 0 70px rgba(59,130,246,0.4); }
+    }
+
+    @keyframes organFloat {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-8px) scale(1.05); }
+    }
+
+    /* نبضات القلب */
+    .heartbeat-3d-container {
+      position: absolute;
+      top: 15%;
+      right: 5%;
+      width: 180px;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .heartbeat-core {
+      width: 45px;
+      height: 45px;
+      background: radial-gradient(circle, #ef4444, #dc2626);
+      clip-path: path("M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5 2,5.41 4.42,3 7.5,3c1.74,0 3.41,0.81 4.5,2.08C13.09,3.81 14.76,3 16.5,3 19.58,3 22,5.41 22,8.5c0,3.77-3.4,6.86-8.55,11.54L12,21.35Z");
+      animation: heartbeatCore 1s ease-in-out infinite;
+      box-shadow: 0 0 30px rgba(239,68,68,0.6);
+    }
+
+    .heartbeat-ring, .heartbeat-ring2, .heartbeat-ring3 {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid rgba(239,68,68,0.3);
+      animation: ringWave 2s ease-out infinite;
+    }
+
+    .heartbeat-ring2 { width: 80px; height: 80px; animation-delay: 0.4s; }
+    .heartbeat-ring3 { width: 120px; height: 120px; animation-delay: 0.8s; }
+
+    @keyframes heartbeatCore {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); box-shadow: 0 0 50px rgba(239,68,68,0.9); }
+    }
+
+    @keyframes ringWave {
+      0% { transform: scale(0.5); opacity: 0.8; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+
+    /* موجات ECG */
+    .ecg-3d-container {
+      position: absolute;
+      bottom: 8%;
+      left: 0;
+      width: 100%;
+      height: 80px;
+    }
+
+    .ecg-wave, .ecg-wave2 {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0.3;
+    }
+
+    .ecg-wave {
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath d='M0,60 L100,60 L120,30 L140,90 L160,30 L180,60 L300,60 L340,60 L380,60 L420,60 L450,45 L480,75 L510,45 L540,60 L660,60 L700,60 L740,60 L780,60 L820,45 L850,75 L880,45 L910,60 L1030,60 L1070,60 L1110,60 L1150,60 L1180,45 L1200,75' stroke='%2310b981' stroke-width='3' fill='none'/%3E%3C/svg%3E") repeat-x;
+      background-size: 350px 80px;
+      animation: ecgWaveMove 3s linear infinite;
+    }
+
+    .ecg-wave2 {
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath d='M0,60 L80,60 L100,40 L120,80 L140,40 L160,60 L280,60 L320,60 L360,60 L400,60 L430,50 L460,70 L490,50 L520,60 L640,60 L680,60 L720,60 L760,60 L800,50 L830,70 L860,50 L890,60 L1010,60 L1050,60 L1090,60 L1130,60 L1160,50 L1200,70' stroke='%233b82f6' stroke-width='2.5' fill='none' opacity='0.6'/%3E%3C/svg%3E") repeat-x;
+      background-size: 300px 80px;
+      animation: ecgWaveMove 4s linear infinite reverse;
+    }
+
+    @keyframes ecgWaveMove {
+      from { background-position: 0 0; }
+      to { background-position: 350px 0; }
+    }
+
+    /* الأيقونات الطبية */
+    .medical-icons-3d .icon-3d {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      font-size: 1.5rem;
+      color: rgba(59,130,246,0.5);
+      animation: iconFloat 5s ease-in-out infinite;
+      filter: drop-shadow(0 0 8px rgba(59,130,246,0.3));
+      transition: all 0.3s ease;
+    }
+
+    .medical-icons-3d .icon-3d span {
+      font-size: 0.6rem;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      padding: 3px 8px;
+      border-radius: 15px;
+      color: white;
+      opacity: 0;
+      transition: opacity 0.3s;
+      white-space: nowrap;
+    }
+
+    .medical-icons-3d .icon-3d:hover {
+      color: #3b82f6;
+      transform: scale(1.2) translateY(-8px) !important;
+    }
+
+    .medical-icons-3d .icon-3d:hover span {
+      opacity: 1;
+    }
+
+    @keyframes iconFloat {
+      0%, 100% { transform: translateY(0); opacity: 0.4; }
+      50% { transform: translateY(-12px); opacity: 0.7; }
+    }
+
+    /* الجسيمات الضوئية */
+    .light-particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* الضباب الطبي */
+    .medical-fog {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 25%;
+      background: linear-gradient(to top, rgba(59,130,246,0.08), transparent);
+      animation: fogPulse 8s ease-in-out infinite;
+    }
+
+    @keyframes fogPulse {
+      0%, 100% { opacity: 0.3; height: 20%; }
+      50% { opacity: 0.6; height: 30%; }
+    }
+
+    /* استجابة للشاشات الصغيرة */
+    @media (max-width: 768px) {
+      .human-body-3d { transform: translate(-50%, -50%) scale(0.5); }
+      .heartbeat-3d-container { transform: scale(0.5); top: 5%; right: -5%; }
+      .ecg-3d-container { bottom: 3%; height: 50px; }
+      .medical-icons-3d .icon-3d { font-size: 1rem; }
+      .medical-icons-3d .icon-3d span { display: none; }
+    }
+  </style>
+
+  <script>
+    // إضافة جسيمات ضوئية متحركة
+    (function() {
+      const container = document.querySelector('.light-particles');
+      if (container) {
+        for (let i = 0; i < 80; i++) {
+          const particle = document.createElement('div');
+          particle.style.position = 'absolute';
+          particle.style.width = (2 + Math.random() * 5) + 'px';
+          particle.style.height = particle.style.width;
+          const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4'];
+          particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+          particle.style.borderRadius = '50%';
+          particle.style.left = Math.random() * 100 + '%';
+          particle.style.top = Math.random() * 100 + '%';
+          particle.style.animation = `particleFloat ${3 + Math.random() * 6}s linear infinite`;
+          particle.style.animationDelay = Math.random() * 5 + 's';
+          particle.style.opacity = '0';
+          particle.style.boxShadow = `0 0 12px ${colors[Math.floor(Math.random() * colors.length)]}`;
+          container.appendChild(particle);
+        }
+      }
+
+      // تأثير تتبع الماوس للأيقونات
+      const icons3d = document.querySelectorAll('.icon-3d');
+      document.addEventListener('mousemove', (e) => {
+        const mouseX = e.clientX / window.innerWidth;
+        const mouseY = e.clientY / window.innerHeight;
+        
+        icons3d.forEach((icon, index) => {
+          const speed = 0.06 + (index * 0.003);
+          const x = (mouseX - 0.5) * 40 * speed;
+          const y = (mouseY - 0.5) * 40 * speed;
+          icon.style.transform = `translate(${x}px, ${y}px)`;
+        });
+      });
+    })();
+
+    // إضافة حركة للجسيمات في CSS
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `
+      @keyframes particleFloat {
+        0% { transform: translateY(0) scale(1); opacity: 0; }
+        10% { opacity: 0.7; }
+        90% { opacity: 0.7; }
+        100% { transform: translateY(-100vh) scale(0); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(styleSheet);
+  </script>
 </body>
 </html>
