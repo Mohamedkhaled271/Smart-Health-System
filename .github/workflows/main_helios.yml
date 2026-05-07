@@ -51,9 +51,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_5813F8E7375F46AC989A96CA94FA2ADD }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_ECFEFF140CF949BA870F0E363A2AC5FD }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_CBF910BE4F4D4B43A06A8316A531DA6D }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_B9D63CE4C00647B2BF1462886CB0E676 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_FCE5F94AF9EA4961896590A45F172DEE }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_785F8B7F328C467FA06D431D8AA33998 }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -62,3 +62,4 @@ jobs:
           app-name: 'HELIOS'
           slot-name: 'Production'
           package: .
+          
