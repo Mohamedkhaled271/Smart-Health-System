@@ -62,4 +62,3 @@ jobs:
           app-name: 'HELIOS'
           slot-name: 'Production'
           package: .
-          
