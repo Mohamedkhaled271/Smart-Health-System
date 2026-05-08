@@ -3,20 +3,20 @@ const express = require('express');
 const path = require('path');
 const app = express();
 
-// Optional: Log requests (for debugging)
+// Logging middleware
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
 
-// Optional: Allow CORS for external API calls
+// CORS middleware
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   next();
 });
 
-// ========== الحل الأساسي ==========
-// خدمة الملفات الثابتة (الصور، CSS، JS، إلخ)
+// ========== 1. خدمة الملفات الثابتة (الأولوية القصوى) ==========
+// هذا السطر هو الحل الكامل للمشكلة
 app.use(express.static(__dirname, {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.png')) {
@@ -29,23 +29,10 @@ app.use(express.static(__dirname, {
   }
 }));
 
-// ========== التعديل المهم هنا ==========
-// أي طلب لملف موجود بالفعل - يخدمه مباشرة
-// أي طلب تاني (مش ملف) - يروح لـ index.html
-app.get(/\.(png|jpg|jpeg|gif|svg|css|js|json|pdf|ico|webp)$/, (req, res, next) => {
-  // الملفات دي خلاص اتعاملت معاها من express.static
-  next();
-});
-
-// SPA routing: فقط اللي مش ملف ثابت يروح لـ index.html
-app.get('*', (req, res) => {
-  // لو الطلب لأي ملف موجود - نخدمه مباشرة
-  const filePath = path.join(__dirname, req.path);
-  res.sendFile(filePath, err => {
-    if (err) {
-      res.sendFile(path.join(__dirname, 'index.html'));
-    }
-  });
+// ========== 2. SPA Routing: إرسال index.html فقط للطلبات التي ليست ملفات ==========
+// هذا الـ middleware سيتعامل مع أي طلب لم تتم خدمته بواسطة express.static
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Listen on Azure port
