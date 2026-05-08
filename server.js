@@ -15,18 +15,37 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve all files in project root (css, js, lib, assets, pdfs)
+// ========== الحل الأساسي ==========
+// خدمة الملفات الثابتة (الصور، CSS، JS، إلخ)
 app.use(express.static(__dirname, {
   setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.pdf')) {
+    if (filePath.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (filePath.endsWith('.pdf')) {
       res.setHeader('Content-Type', 'application/pdf');
     }
   }
 }));
 
-// SPA routing: Redirect all other requests to index.html
+// ========== التعديل المهم هنا ==========
+// أي طلب لملف موجود بالفعل - يخدمه مباشرة
+// أي طلب تاني (مش ملف) - يروح لـ index.html
+app.get(/\.(png|jpg|jpeg|gif|svg|css|js|json|pdf|ico|webp)$/, (req, res, next) => {
+  // الملفات دي خلاص اتعاملت معاها من express.static
+  next();
+});
+
+// SPA routing: فقط اللي مش ملف ثابت يروح لـ index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  // لو الطلب لأي ملف موجود - نخدمه مباشرة
+  const filePath = path.join(__dirname, req.path);
+  res.sendFile(filePath, err => {
+    if (err) {
+      res.sendFile(path.join(__dirname, 'index.html'));
+    }
+  });
 });
 
 // Listen on Azure port
