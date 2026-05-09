@@ -2224,9 +2224,9 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
 })();
 </script>
 <!-- ========== END TREND ANALYSIS PAGE ========== -->
-                    <!-- ==================== PROFESSIONAL BARCODE & QR SCANNER - FULLY WORKING ==================== -->
+                    <!-- ==================== PROFESSIONAL MEDICATIONS SYSTEM - FULLY WORKING ==================== -->
 <style>
-/* Advanced Medications System Styles */
+/* ========== PROFESSIONAL STYLES ========== */
 :root {
     --med-primary: #10b981;
     --med-primary-dark: #059669;
@@ -2259,18 +2259,6 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
     background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
     border-radius: 50%;
     animation: float 8s ease-in-out infinite;
-}
-
-.med-header::after {
-    content: '';
-    position: absolute;
-    bottom: -30%;
-    left: -10%;
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
-    border-radius: 50%;
-    animation: float 6s ease-in-out infinite reverse;
 }
 
 @keyframes float {
@@ -2414,17 +2402,10 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
     box-shadow: 0 20px 35px -10px rgba(0,0,0,0.3);
 }
 
-#scannerVideo, #previewCanvas {
+#scannerVideo {
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-#previewCanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    display: none;
 }
 
 .scan-overlay {
@@ -2634,16 +2615,6 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
     font-size: 0.9rem;
 }
 
-.barcode-info {
-    background: rgba(0, 0, 0, 0.05);
-    padding: 0.8rem;
-    border-radius: 16px;
-    text-align: center;
-    font-family: monospace;
-    font-size: 0.8rem;
-    margin: 1rem 0;
-}
-
 .scan-result-actions {
     display: flex;
     gap: 1rem;
@@ -2651,18 +2622,57 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
     margin-top: 1rem;
 }
 
-.loading-spinner {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+/* Schedule Form */
+.schedule-form {
+    background: var(--surface-glass);
+    border-radius: 20px;
+    padding: 1rem;
+    margin-top: 1rem;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.schedule-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 0.8rem;
+    padding: 0.8rem;
+    background: rgba(16, 185, 129, 0.05);
+    border-radius: 16px;
+}
+
+.schedule-time {
+    flex: 1;
+}
+
+.schedule-time input {
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-primary);
+}
+
+.schedule-dose {
+    width: 100px;
+}
+
+.schedule-dose input {
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-primary);
+    width: 100%;
+}
+
+.add-schedule-btn {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 30px;
+    cursor: pointer;
 }
 
 /* Drug Cards */
@@ -2711,50 +2721,7 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
     color: #10b981;
 }
 
-/* Modal */
-.drug-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.85);
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10002;
-    animation: fadeIn 0.3s ease;
-}
-
-.drug-modal.hidden {
-    display: none;
-}
-
-.drug-modal-content {
-    background: var(--surface);
-    border-radius: 32px;
-    max-width: 550px;
-    width: 90%;
-    max-height: 85vh;
-    overflow-y: auto;
-    padding: 1.8rem;
-    position: relative;
-    animation: slideUp 0.3s ease;
-}
-
-.drug-modal-close {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    background: transparent;
-    border: none;
-    font-size: 1.8rem;
-    cursor: pointer;
-    color: var(--text-secondary);
-}
-
-/* My Medications */
+/* My Medications List */
 .my-meds-list {
     max-height: 500px;
     overflow-y: auto;
@@ -2767,6 +2734,8 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
     padding: 1rem;
     border-bottom: 1px solid var(--border);
     transition: all 0.3s;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .my-med-item:hover {
@@ -2777,6 +2746,7 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
     display: flex;
     gap: 1rem;
     align-items: center;
+    flex: 1;
 }
 
 .my-med-icon {
@@ -2796,6 +2766,21 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
 .my-med-dosage {
     font-size: 0.7rem;
     color: var(--text-secondary);
+}
+
+.my-med-schedule {
+    font-size: 0.65rem;
+    color: #f59e0b;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.schedule-tag {
+    background: rgba(245, 158, 11, 0.15);
+    padding: 2px 8px;
+    border-radius: 12px;
 }
 
 .my-med-actions {
@@ -2854,14 +2839,38 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
     cursor: pointer;
 }
 
+/* Reminder Modal */
+.reminder-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10003;
+}
+
+.reminder-modal.hidden {
+    display: none;
+}
+
+.reminder-modal-content {
+    background: var(--surface);
+    border-radius: 32px;
+    max-width: 400px;
+    width: 90%;
+    padding: 1.8rem;
+    position: relative;
+    animation: slideUp 0.3s ease;
+}
+
 @keyframes slideUp {
     from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
 }
 
 @keyframes fadeInUp {
@@ -2878,7 +2887,7 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
             <div class="med-header-content">
                 <div class="med-header-title">
                     <h2><i class="fas fa-capsules"></i> 💊 Medications Manager</h2>
-                    <p>🔍 Scan barcode, search database, and manage your medications</p>
+                    <p>🔍 Scan barcode, manage schedules, and track your medications</p>
                 </div>
                 <div class="med-stats-row">
                     <div class="med-stat">
@@ -2889,16 +2898,21 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
                         <div class="med-stat-number" id="drugsDBCount">0</div>
                         <div class="med-stat-label">💊 Drugs DB</div>
                     </div>
+                    <div class="med-stat">
+                        <div class="med-stat-number" id="todayRemindersCount">0</div>
+                        <div class="med-stat-label">⏰ Today</div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Tabs -->
         <div class="med-tabs">
-            <button class="med-tab-btn active" data-tab="scanner"><i class="fas fa-qrcode"></i> 📷 Barcode Scanner</button>
+            <button class="med-tab-btn active" data-tab="scanner"><i class="fas fa-qrcode"></i> 📷 Scan Barcode</button>
             <button class="med-tab-btn" data-tab="database"><i class="fas fa-database"></i> 📚 Drug Database</button>
             <button class="med-tab-btn" data-tab="my-meds"><i class="fas fa-list-alt"></i> ❤️ My Medications</button>
             <button class="med-tab-btn" data-tab="manual"><i class="fas fa-pen-alt"></i> ✍️ Manual Entry</button>
+            <button class="med-tab-btn" data-tab="reminders"><i class="fas fa-bell"></i> 🔔 Reminders</button>
         </div>
 
         <!-- Tab 1: Barcode Scanner -->
@@ -2912,7 +2926,6 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
                 <div id="cameraScanMode">
                     <div class="video-wrapper">
                         <video id="scannerVideo" autoplay playsinline></video>
-                        <canvas id="previewCanvas" style="display: none;"></canvas>
                         <div class="scan-overlay">
                             <div class="scan-frame">
                                 <div class="scan-laser"></div>
@@ -2928,7 +2941,7 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
                         <button class="med-btn med-btn-danger" id="stopScanBtn" style="display:none;"><i class="fas fa-stop"></i> ⏹️ Stop Scanner</button>
                     </div>
                     <p style="text-align: center; font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.8rem;">
-                        <i class="fas fa-info-circle"></i> 📌 Place the barcode inside the frame to scan automatically
+                        <i class="fas fa-info-circle"></i> 📌 Place the barcode inside the frame - scans automatically!
                     </p>
                 </div>
                 
@@ -2989,73 +3002,34 @@ console.log("✅ 3 cards initialized: Weekly Report + Daily Check-in + Medical T
                         <input type="text" id="manualDosage" class="search-input" style="width:100%;" placeholder="e.g., 500mg">
                     </div>
                     <div>
-                        <label style="font-size:0.7rem; color:var(--text-secondary);">⏰ Time to Take</label>
-                        <select id="manualTime" class="category-filter" style="width:100%;">
-                            <option value="Morning">🌅 Morning</option>
-                            <option value="Afternoon">☀️ Afternoon</option>
-                            <option value="Evening">🌙 Evening</option>
-                            <option value="Before Bed">😴 Before Bed</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="font-size:0.7rem; color:var(--text-secondary);">🔄 Frequency</label>
-                        <select id="manualFrequency" class="category-filter" style="width:100%;">
-                            <option value="Once daily">Once daily</option>
-                            <option value="Twice daily">Twice daily</option>
-                            <option value="Three times daily">Three times daily</option>
-                            <option value="As needed">As needed</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="font-size:0.7rem; color:var(--text-secondary);">📝 Instructions</label>
+                        <label style="font-size:0.7rem; color:var(--text-secondary);">📋 Instructions</label>
                         <input type="text" id="manualInstructions" class="search-input" style="width:100%;" placeholder="e.g., Take with food">
                     </div>
                 </div>
-                <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+                <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end">
                     <button class="med-btn med-btn-primary" id="saveManualMedBtn"><i class="fas fa-save"></i> 💾 Save Medication</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 5: Reminders -->
+        <div class="med-tab-panel" id="tab-reminders">
+            <div class="scanner-card">
+                <h3 style="margin-bottom: 1rem;"><i class="fas fa-bell"></i> 🔔 Medication Reminders</h3>
+                <div id="remindersList">
+                    <div class="empty-state">
+                        <i class="fas fa-bell-slash"></i>
+                        <p>No reminders set. Add medication with schedule to see reminders here.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Drug Modal -->
-<div id="drugModal" class="drug-modal hidden">
-    <div class="drug-modal-content">
-        <button class="drug-modal-close" id="closeDrugModal">&times;</button>
-        <div class="drug-modal-icon">
-            <i class="fas fa-capsules"></i>
-        </div>
-        <div class="drug-modal-title" id="modalDrugName"></div>
-        <div class="drug-modal-section">
-            <h4><i class="fas fa-info-circle"></i> 📋 Basic Information</h4>
-            <p><strong>Category:</strong> <span id="modalCategory"></span></p>
-            <p><strong>Standard Dosage:</strong> <span id="modalDosage"></span></p>
-            <p><strong>Common Uses:</strong> <span id="modalUses"></span></p>
-        </div>
-        <div class="drug-modal-section">
-            <h4><i class="fas fa-exclamation-triangle"></i> ⚠️ Side Effects</h4>
-            <p id="modalSideEffects"></p>
-        </div>
-        <div class="drug-modal-section">
-            <h4><i class="fas fa-shield-alt"></i> 🛡️ Warnings & Precautions</h4>
-            <p id="modalWarnings"></p>
-        </div>
-        <div class="drug-modal-section">
-            <h4><i class="fas fa-hand-holding-heart"></i> 💡 Patient Advice</h4>
-            <p id="modalAdvice"></p>
-        </div>
-        <button class="med-btn med-btn-primary" id="addToMyMedsBtn" style="width:100%; margin-top:1rem;">
-            <i class="fas fa-plus-circle"></i> ➕ Add to My Medications
-        </button>
-    </div>
-</div>
-
 <script>
-// ==================== PROFESSIONAL BARCODE SCANNER - FULLY WORKING ====================
-
-// Load HTML5-QRCode Library
-function loadQRScannerLibrary() {
+// ==================== LOAD HTML5-QRCODE LIBRARY ====================
+function loadScannerLibrary() {
     return new Promise((resolve, reject) => {
         if (typeof Html5Qrcode !== 'undefined') {
             resolve();
@@ -3069,34 +3043,21 @@ function loadQRScannerLibrary() {
     });
 }
 
-// ========== DRUGS DATABASE ==========
+// ==================== DRUGS DATABASE WITH BARCODES ====================
 const drugsDatabase = [
-    { id: 1, name: "💊 Amlodipine", category: "Cardiovascular", dosage: "5-10mg daily", uses: "High blood pressure, Angina", sideEffects: "Swelling ankles, headache", warnings: "Avoid grapefruit juice", advice: "Take at same time daily", barcodes: ["1234567890123", "8901234567890"] },
-    { id: 2, name: "💊 Lisinopril", category: "Cardiovascular", dosage: "10-40mg daily", uses: "High blood pressure, Heart failure", sideEffects: "Dry cough, dizziness", warnings: "Can cause angioedema", advice: "Monitor kidney function", barcodes: ["2345678901234"] },
-    { id: 3, name: "💊 Atorvastatin", category: "Cardiovascular", dosage: "10-80mg daily", uses: "High cholesterol", sideEffects: "Muscle pain", warnings: "Avoid grapefruit", advice: "Take in evening", barcodes: ["3456789012345"] },
-    { id: 4, name: "💊 Metoprolol", category: "Cardiovascular", dosage: "25-200mg daily", uses: "High BP, Angina", sideEffects: "Fatigue, slow heart rate", warnings: "Don't stop abruptly", advice: "Monitor heart rate", barcodes: ["4567890123456"] },
-    { id: 5, name: "💊 Losartan", category: "Cardiovascular", dosage: "25-100mg daily", uses: "High blood pressure", sideEffects: "Dizziness, fatigue", warnings: "Avoid pregnancy", advice: "Stay hydrated", barcodes: ["5678901234567"] },
-    { id: 11, name: "🩸 Metformin", category: "Diabetes", dosage: "500-2000mg daily", uses: "Type 2 diabetes", sideEffects: "GI upset, metallic taste", warnings: "Risk of lactic acidosis", advice: "Take with food", barcodes: ["6789012345678", "0037800012345"] },
-    { id: 21, name: "💊 Paracetamol", category: "Pain Relief", dosage: "500-1000mg every 4-6h", uses: "Pain, Fever", sideEffects: "Liver damage (overdose)", warnings: "Max 4000mg/day", advice: "Do not exceed dose", barcodes: ["7890123456789", "5001234567890"] },
-    { id: 22, name: "💊 Ibuprofen", category: "Pain Relief", dosage: "200-400mg every 6-8h", uses: "Pain, Inflammation", sideEffects: "Stomach upset", warnings: "Avoid with NSAIDs", advice: "Take with food", barcodes: ["8901234567890"] },
-    { id: 31, name: "🦠 Amoxicillin", category: "Antibiotic", dosage: "250-500mg every 8h", uses: "Bacterial infections", sideEffects: "Diarrhea, rash", warnings: "Allergic reactions", advice: "Complete full course", barcodes: ["9012345678901"] },
-    { id: 41, name: "🍽️ Omeprazole", category: "Gastrointestinal", dosage: "20-40mg daily", uses: "GERD, Ulcers", sideEffects: "Headache", warnings: "Long-term use risks", advice: "Take before breakfast", barcodes: ["0123456789012"] },
-    { id: 42, name: "🍽️ Minalax", category: "Gastrointestinal", dosage: "17g once daily", uses: "Constipation", sideEffects: "Bloating, gas", warnings: "Not for long-term use", advice: "Dissolve in water", barcodes: ["1122334455667", "9988776655443"] },
-    { id: 66, name: "🧘 Sertraline", category: "Psychiatry", dosage: "50-200mg daily", uses: "Depression, Anxiety", sideEffects: "Nausea, insomnia", warnings: "Suicidal thoughts", advice: "May take 4-6 weeks", barcodes: ["2233445566778"] },
-    { id: 76, name: "⚖️ Levothyroxine", category: "Hormone", dosage: "25-200mcg daily", uses: "Hypothyroidism", sideEffects: "Weight changes", warnings: "Monitor TSH", advice: "Take on empty stomach", barcodes: ["3344556677889"] }
+    { id: 1, name: "Amlodipine", category: "Cardiovascular", dosage: "5-10mg daily", uses: "High blood pressure, Angina", sideEffects: "Swelling ankles, headache", warnings: "Avoid grapefruit juice", advice: "Take at same time daily", barcodes: ["1234567890123", "5901234123457"] },
+    { id: 2, name: "Lisinopril", category: "Cardiovascular", dosage: "10-40mg daily", uses: "High blood pressure", sideEffects: "Dry cough, dizziness", warnings: "Can cause angioedema", advice: "Monitor kidney function", barcodes: ["2345678901234"] },
+    { id: 3, name: "Atorvastatin", category: "Cardiovascular", dosage: "10-80mg daily", uses: "High cholesterol", sideEffects: "Muscle pain", warnings: "Avoid grapefruit", advice: "Take in evening", barcodes: ["3456789012345"] },
+    { id: 4, name: "Metformin", category: "Diabetes", dosage: "500-2000mg daily", uses: "Type 2 diabetes", sideEffects: "GI upset", warnings: "Risk of lactic acidosis", advice: "Take with food", barcodes: ["6789012345678", "0037800012345"] },
+    { id: 5, name: "Paracetamol", category: "Pain Relief", dosage: "500-1000mg every 4-6h", uses: "Pain, Fever", sideEffects: "Liver damage", warnings: "Max 4000mg/day", advice: "Do not exceed dose", barcodes: ["7890123456789", "5001234567890"] },
+    { id: 6, name: "Ibuprofen", category: "Pain Relief", dosage: "200-400mg every 6-8h", uses: "Pain, Inflammation", sideEffects: "Stomach upset", warnings: "Avoid with NSAIDs", advice: "Take with food", barcodes: ["8901234567890"] },
+    { id: 7, name: "Amoxicillin", category: "Antibiotic", dosage: "250-500mg every 8h", uses: "Bacterial infections", sideEffects: "Diarrhea, rash", warnings: "Allergic reactions", advice: "Complete full course", barcodes: ["9012345678901"] },
+    { id: 8, name: "Omeprazole", category: "Gastrointestinal", dosage: "20-40mg daily", uses: "GERD, Ulcers", sideEffects: "Headache", warnings: "Long-term use risks", advice: "Take before breakfast", barcodes: ["0123456789012"] },
+    { id: 9, name: "Sertraline", category: "Psychiatry", dosage: "50-200mg daily", uses: "Depression, Anxiety", sideEffects: "Nausea, insomnia", warnings: "Suicidal thoughts", advice: "May take 4-6 weeks", barcodes: ["2233445566778"] },
+    { id: 10, name: "Levothyroxine", category: "Hormone", dosage: "25-200mcg daily", uses: "Hypothyroidism", sideEffects: "Weight changes", warnings: "Monitor TSH", advice: "Take on empty stomach", barcodes: ["3344556677889"] }
 ];
 
-// Add remaining drugs
-for(let i = drugsDatabase.length; i < 50; i++) {
-    drugsDatabase.push({
-        id: i+1, name: `💊 Medication ${i+1}`, category: "Other",
-        dosage: "As prescribed", uses: "Medical treatment",
-        sideEffects: "Consult doctor", warnings: "Follow prescription",
-        advice: "Take as directed", barcodes: []
-    });
-}
-
-// Barcode mapping
+// Barcode to drug mapping
 const barcodeToDrug = new Map();
 drugsDatabase.forEach(drug => {
     drug.barcodes.forEach(barcode => {
@@ -3104,16 +3065,63 @@ drugsDatabase.forEach(drug => {
     });
 });
 
-// Storage
+// ==================== STORAGE ====================
 let myMedications = JSON.parse(localStorage.getItem('helios_my_medications') || '[]');
 let currentDrugModal = null;
 let html5QrCode = null;
 let scannerActive = false;
 
-// ========== SCANNER FUNCTIONS ==========
+// ==================== REMINDER FUNCTIONS ====================
+function checkReminders() {
+    const now = new Date();
+    const currentTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+    
+    myMedications.forEach(med => {
+        if (med.schedules) {
+            med.schedules.forEach(schedule => {
+                if (schedule.time === currentTime) {
+                    showReminderNotification(med.name, schedule.dosage);
+                }
+            });
+        }
+    });
+}
+
+function showReminderNotification(medName, dosage) {
+    if (Notification.permission === 'granted') {
+        new Notification('💊 Medication Reminder', {
+            body: `Time to take ${medName} - ${dosage}`,
+            icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2310b981"%3E%3Cpath d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm3 12h-6v-2c0-1.33 2.67-2 4-2s4 .67 4 2v2z"/%3E%3C/svg%3E'
+        });
+    }
+    
+    const alertsContainer = document.getElementById('alertsList');
+    if (alertsContainer) {
+        const reminderDiv = document.createElement('div');
+        reminderDiv.className = 'alert-item';
+        reminderDiv.style.background = 'linear-gradient(135deg, #f59e0b20, #d9770620)';
+        reminderDiv.style.borderLeft = '4px solid #f59e0b';
+        reminderDiv.innerHTML = `
+            <i class="fas fa-bell" style="color:#f59e0b;"></i>
+            <div><strong>💊 Reminder:</strong> Time to take ${medName} - ${dosage}</div>
+        `;
+        alertsContainer.prepend(reminderDiv);
+        setTimeout(() => reminderDiv.remove(), 10000);
+    }
+    
+    showNotification(`🔔 Time to take ${medName} - ${dosage}`, 'warning');
+}
+
+// Request notification permission
+if (Notification.permission === 'default') {
+    Notification.requestPermission();
+}
+setInterval(checkReminders, 60000);
+
+// ==================== BARCODE SCANNER ====================
 async function startRealScanner() {
     try {
-        await loadQRScannerLibrary();
+        await loadScannerLibrary();
         
         const videoElement = document.getElementById('scannerVideo');
         
@@ -3137,20 +3145,18 @@ async function startRealScanner() {
         await html5QrCode.start(
             { facingMode: "environment" },
             config,
-            (decodedText, decodedResult) => {
+            (decodedText) => {
                 console.log("✅ Scanned:", decodedText);
                 processScannedBarcode(decodedText);
                 stopRealScanner();
             },
-            (errorMessage) => {
-                // Silent fail - still scanning
-            }
+            (errorMessage) => {}
         );
         
         scannerActive = true;
         document.getElementById('startScanBtn').style.display = 'none';
         document.getElementById('stopScanBtn').style.display = 'inline-flex';
-        showNotification("📷 Scanner ready! Point camera at barcode/QR code.", "success");
+        showNotification("📷 Scanner ready! Point camera at barcode.", "success");
         
     } catch(error) {
         console.error("Scanner error:", error);
@@ -3165,9 +3171,7 @@ function stopRealScanner() {
             document.getElementById('startScanBtn').style.display = 'inline-flex';
             document.getElementById('stopScanBtn').style.display = 'none';
             showNotification("⏹️ Scanner stopped.", "info");
-        }).catch(err => {
-            console.error("Stop error:", err);
-        });
+        }).catch(err => console.error("Stop error:", err));
     }
 }
 
@@ -3178,60 +3182,27 @@ function processScannedBarcode(barcode) {
     if (drug) {
         displayDrugResult(drug, barcode);
     } else {
-        // Try to find by partial match
-        const similarDrugs = drugsDatabase.filter(d => 
-            d.name.toLowerCase().includes(barcode.slice(-4)) || 
-            d.uses.toLowerCase().includes(barcode.slice(-4))
-        ).slice(0, 3);
-        
-        if (similarDrugs.length > 0) {
-            resultDiv.innerHTML = `
-                <div class="scan-result-card">
-                    <div class="scan-result-header">
-                        <div class="scan-result-icon">
-                            <i class="fas fa-question-circle"></i>
-                        </div>
-                        <div class="scan-result-title">
-                            <h3>❓ Barcode Not Found</h3>
-                            <span class="scan-result-badge">🔢 ${barcode}</span>
-                        </div>
+        resultDiv.innerHTML = `
+            <div class="scan-result-card">
+                <div class="scan-result-header">
+                    <div class="scan-result-icon">
+                        <i class="fas fa-question-circle"></i>
                     </div>
-                    <div class="barcode-info">
-                        <i class="fas fa-barcode"></i> 📌 Scanned: ${barcode}<br>
-                        <small>📋 Not in database. Similar medications:</small>
-                    </div>
-                    <div class="scan-result-actions" style="justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
-                        ${similarDrugs.map(d => `
-                            <button class="med-btn med-btn-outline" onclick="showDrugModal(${d.id})">${d.name}</button>
-                        `).join('')}
-                        <button class="med-btn med-btn-primary" onclick="showManualEntryFromBarcode('${barcode}')">➕ Add Manually</button>
+                    <div class="scan-result-title">
+                        <h3>❌ Barcode Not Found</h3>
+                        <span class="scan-result-badge">🔢 ${barcode}</span>
                     </div>
                 </div>
-            `;
-        } else {
-            resultDiv.innerHTML = `
-                <div class="scan-result-card">
-                    <div class="scan-result-header">
-                        <div class="scan-result-icon">
-                            <i class="fas fa-barcode"></i>
-                        </div>
-                        <div class="scan-result-title">
-                            <h3>❌ Not Found</h3>
-                            <span class="scan-result-badge">${barcode}</span>
-                        </div>
-                    </div>
-                    <div class="barcode-info">
-                        <i class="fas fa-exclamation-triangle"></i> ⚠️ This barcode is not in our database
-                    </div>
-                    <div class="scan-result-actions">
-                        <button class="med-btn med-btn-outline" onclick="document.getElementById('scanResultArea').style.display='none'">Cancel</button>
-                        <button class="med-btn med-btn-primary" onclick="showManualEntryFromBarcode('${barcode}')">➕ Add Manually</button>
-                    </div>
+                <div class="barcode-info">
+                    <i class="fas fa-exclamation-triangle"></i> ⚠️ This barcode is not in our database
                 </div>
-            `;
-        }
+                <div class="scan-result-actions">
+                    <button class="med-btn med-btn-outline" onclick="document.getElementById('scanResultArea').style.display='none'">Cancel</button>
+                    <button class="med-btn med-btn-primary" onclick="showManualEntryFromBarcode('${barcode}')">➕ Add Manually</button>
+                </div>
+            </div>
+        `;
     }
-    
     resultDiv.style.display = 'block';
 }
 
@@ -3269,21 +3240,80 @@ function displayDrugResult(drug, barcode) {
             <div class="barcode-info">
                 <i class="fas fa-barcode"></i> 🔢 GTIN: ${barcode}
             </div>
+            
+            <h4 style="margin: 1rem 0 0.5rem;"><i class="fas fa-clock"></i> ⏰ Set Schedule</h4>
+            <div class="schedule-form" id="scheduleForm_${drug.id}">
+                <div class="schedule-row">
+                    <div class="schedule-time">
+                        <input type="time" id="time1_${drug.id}" value="08:00">
+                    </div>
+                    <div class="schedule-dose">
+                        <input type="text" id="dose1_${drug.id}" placeholder="Dose" value="${drug.dosage.split(' ')[0]}">
+                    </div>
+                </div>
+                <div class="schedule-row">
+                    <div class="schedule-time">
+                        <input type="time" id="time2_${drug.id}" value="13:00">
+                    </div>
+                    <div class="schedule-dose">
+                        <input type="text" id="dose2_${drug.id}" placeholder="Dose" value="${drug.dosage.split(' ')[0]}">
+                    </div>
+                </div>
+                <div class="schedule-row">
+                    <div class="schedule-time">
+                        <input type="time" id="time3_${drug.id}" value="20:00">
+                    </div>
+                    <div class="schedule-dose">
+                        <input type="text" id="dose3_${drug.id}" placeholder="Dose" value="${drug.dosage.split(' ')[0]}">
+                    </div>
+                </div>
+                <button class="add-schedule-btn" onclick="saveWithSchedule('${drug.name}', '${drug.dosage}', ${drug.id})">💾 Save with Schedule</button>
+            </div>
+            
             <div class="scan-result-actions">
                 <button class="med-btn med-btn-outline" onclick="document.getElementById('scanResultArea').style.display='none'">Cancel</button>
-                <button class="med-btn med-btn-primary" onclick="saveScannedMedication('${drug.name}', '${drug.dosage}')">➕ Add to My Meds</button>
                 <button class="med-btn med-btn-secondary" onclick="showDrugModal(${drug.id})">📖 View Details</button>
             </div>
         </div>
     `;
 }
 
-function showManualEntryFromBarcode(barcode) {
-    document.querySelector('.med-tab-btn[data-tab="manual"]').click();
-    const instructionsField = document.getElementById('manualInstructions');
-    if (instructionsField) {
-        instructionsField.value = `📸 Scanned from barcode: ${barcode}`;
+function saveWithSchedule(name, dosage, drugId) {
+    const schedules = [];
+    for (let i = 1; i <= 3; i++) {
+        const timeInput = document.getElementById(`time${i}_${drugId}`);
+        const doseInput = document.getElementById(`dose${i}_${drugId}`);
+        if (timeInput && timeInput.value) {
+            schedules.push({
+                time: timeInput.value,
+                dosage: doseInput ? doseInput.value : dosage.split(' ')[0]
+            });
+        }
     }
+    
+    const newMed = {
+        id: Date.now().toString(),
+        name: name,
+        dosage: dosage,
+        schedules: schedules,
+        instructions: 'Take as prescribed',
+        dateAdded: new Date().toISOString(),
+        source: 'scanner'
+    };
+    
+    myMedications.unshift(newMed);
+    localStorage.setItem('helios_my_medications', JSON.stringify(myMedications));
+    renderMyMedications();
+    renderReminders();
+    document.getElementById('scanResultArea').style.display = 'none';
+    showNotification(`✅ ${name} added with ${schedules.length} daily reminders!`, 'success');
+    document.querySelector('.med-tab-btn[data-tab="my-meds"]').click();
+    updateTodayRemindersCount();
+}
+
+function showManualEntryFromBarcode(barcode) {
+    document.getElementById('manualBarcodeInput').value = barcode;
+    document.querySelector('.scanner-mode-btn[data-mode="manual"]').click();
     document.getElementById('scanResultArea').style.display = 'none';
 }
 
@@ -3297,27 +3327,7 @@ function searchByManualBarcode() {
     processScannedBarcode(barcode);
 }
 
-function saveScannedMedication(name, dosage) {
-    const newMed = {
-        id: Date.now().toString(),
-        name: name,
-        dosage: dosage,
-        frequency: 'Once daily',
-        time: 'Morning',
-        instructions: 'Take as prescribed',
-        dateAdded: new Date().toISOString(),
-        source: 'scanner'
-    };
-    
-    myMedications.unshift(newMed);
-    localStorage.setItem('helios_my_medications', JSON.stringify(myMedications));
-    renderMyMedications();
-    document.getElementById('scanResultArea').style.display = 'none';
-    showNotification(`✅ ${name} added to your medications!`, 'success');
-    document.querySelector('.med-tab-btn[data-tab="my-meds"]').click();
-}
-
-// ========== UI FUNCTIONS ==========
+// ==================== UI FUNCTIONS ====================
 function renderDrugDatabase() {
     const searchTerm = document.getElementById('drugSearchInput')?.value.toLowerCase() || '';
     const categoryFilter = document.getElementById('categoryFilter')?.value || 'all';
@@ -3341,12 +3351,12 @@ function renderDrugDatabase() {
     grid.innerHTML = filtered.map(drug => `
         <div class="drug-card" onclick="showDrugModal(${drug.id})">
             <div class="drug-card-header">
-                <span class="drug-name">${drug.name}</span>
+                <span class="drug-name">💊 ${drug.name}</span>
                 <span class="drug-category">${drug.category}</span>
             </div>
             <div class="drug-info">${drug.uses.substring(0, 80)}${drug.uses.length > 80 ? '...' : ''}</div>
             <div class="drug-details">
-                <span class="drug-detail">💊 ${drug.dosage}</span>
+                <span class="drug-detail">⚖️ ${drug.dosage}</span>
             </div>
         </div>
     `).join('');
@@ -3354,41 +3364,63 @@ function renderDrugDatabase() {
     document.getElementById('drugsDBCount').innerText = filtered.length;
 }
 
-window.showDrugModal = function(drugId) {
+function showDrugModal(drugId) {
     const drug = drugsDatabase.find(d => d.id === drugId);
     if (!drug) return;
     currentDrugModal = drug;
     
+    let modal = document.getElementById('drugModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'drugModal';
+        modal.className = 'drug-modal hidden';
+        modal.innerHTML = `
+            <div class="drug-modal-content">
+                <button class="drug-modal-close" id="closeDrugModal">&times;</button>
+                <div class="drug-modal-icon"><i class="fas fa-capsules"></i></div>
+                <div class="drug-modal-title" id="modalDrugName"></div>
+                <div class="drug-modal-section"><h4>📋 Basic Information</h4><p><strong>Category:</strong> <span id="modalCategory"></span></p><p><strong>Dosage:</strong> <span id="modalDosage"></span></p><p><strong>Uses:</strong> <span id="modalUses"></span></p></div>
+                <div class="drug-modal-section"><h4>⚠️ Side Effects</h4><p id="modalSideEffects"></p></div>
+                <div class="drug-modal-section"><h4>🛡️ Warnings</h4><p id="modalWarnings"></p></div>
+                <div class="drug-modal-section"><h4>💡 Advice</h4><p id="modalAdvice"></p></div>
+                <button class="med-btn med-btn-primary" id="addToMedsFromModal" style="width:100%">➕ Add to My Medications</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        document.getElementById('closeDrugModal')?.addEventListener('click', () => document.getElementById('drugModal').classList.add('hidden'));
+        document.getElementById('drugModal')?.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('drugModal')) document.getElementById('drugModal').classList.add('hidden');
+        });
+        document.getElementById('addToMedsFromModal')?.addEventListener('click', () => {
+            if (currentDrugModal) {
+                const newMed = {
+                    id: Date.now().toString(),
+                    name: currentDrugModal.name,
+                    dosage: currentDrugModal.dosage,
+                    schedules: [],
+                    instructions: currentDrugModal.advice,
+                    dateAdded: new Date().toISOString(),
+                    source: 'database'
+                };
+                myMedications.unshift(newMed);
+                localStorage.setItem('helios_my_medications', JSON.stringify(myMedications));
+                renderMyMedications();
+                showNotification(`✅ ${currentDrugModal.name} added!`, 'success');
+                document.getElementById('drugModal').classList.add('hidden');
+            }
+        });
+    }
+    
     document.getElementById('modalDrugName').innerText = drug.name;
-    document.getElementById('modalCategory').innerHTML = `<span class="drug-category">${drug.category}</span>`;
-    document.getElementById('modalDosage').innerText = drug.dosage;
-    document.getElementById('modalUses').innerText = drug.uses;
-    document.getElementById('modalSideEffects').innerText = drug.sideEffects;
-    document.getElementById('modalWarnings').innerText = drug.warnings;
-    document.getElementById('modalAdvice').innerText = drug.advice;
+    document.getElementById('modalCategory').innerHTML = drug.category;
+    document.getElementById('modalDosage').innerHTML = drug.dosage;
+    document.getElementById('modalUses').innerHTML = drug.uses;
+    document.getElementById('modalSideEffects').innerHTML = drug.sideEffects;
+    document.getElementById('modalWarnings').innerHTML = drug.warnings;
+    document.getElementById('modalAdvice').innerHTML = drug.advice;
     
     document.getElementById('drugModal').classList.remove('hidden');
-};
-
-document.getElementById('addToMyMedsBtn')?.addEventListener('click', () => {
-    if (currentDrugModal) {
-        const newMed = {
-            id: Date.now().toString(),
-            name: currentDrugModal.name,
-            dosage: currentDrugModal.dosage,
-            frequency: 'Once daily',
-            time: 'Morning',
-            instructions: currentDrugModal.advice,
-            dateAdded: new Date().toISOString(),
-            source: 'database'
-        };
-        myMedications.unshift(newMed);
-        localStorage.setItem('helios_my_medications', JSON.stringify(myMedications));
-        renderMyMedications();
-        showNotification(`✅ ${currentDrugModal.name} added to your medications!`, 'success');
-        document.getElementById('drugModal').classList.add('hidden');
-    }
-});
+}
 
 function renderMyMedications() {
     const searchTerm = document.getElementById('myMedsSearch')?.value.toLowerCase() || '';
@@ -3398,7 +3430,7 @@ function renderMyMedications() {
     if (!container) return;
     
     if (filtered.length === 0) {
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-capsules"></i><p>📋 No medications added yet. Scan or search database to add.</p></div>';
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-capsules"></i><p>📋 No medications added yet.</p></div>';
         document.getElementById('totalMedsCount').innerText = '0';
         return;
     }
@@ -3408,45 +3440,172 @@ function renderMyMedications() {
             <div class="my-med-info">
                 <div class="my-med-icon"><i class="fas fa-pills" style="color:#10b981;"></i></div>
                 <div>
-                    <div class="my-med-name">${med.name}</div>
-                    <div class="my-med-dosage">${med.dosage} • ${med.frequency} • ${med.time}</div>
-                    ${med.instructions ? `<div style="font-size:0.65rem; color:var(--text-secondary); margin-top:2px;">📝 ${med.instructions.substring(0, 50)}</div>` : ''}
+                    <div class="my-med-name">💊 ${med.name}</div>
+                    <div class="my-med-dosage">⚖️ ${med.dosage}</div>
+                    ${med.schedules && med.schedules.length > 0 ? `
+                        <div class="my-med-schedule">
+                            ${med.schedules.map(s => `<span class="schedule-tag">⏰ ${s.time} - ${s.dosage}</span>`).join('')}
+                        </div>
+                    ` : '<div class="my-med-schedule"><span class="schedule-tag">⏰ No schedule set</span></div>'}
                 </div>
             </div>
             <div class="my-med-actions">
-                <button class="action-btn" onclick="addReminderFromMedication('${med.id}')" title="Add Reminder"><i class="fas fa-bell" style="color:#f59e0b;"></i></button>
+                <button class="action-btn" onclick="editSchedule('${med.id}')" title="Edit Schedule"><i class="fas fa-edit" style="color:#3b82f6;"></i></button>
                 <button class="action-btn" onclick="deleteMedication('${med.id}')" title="Delete"><i class="fas fa-trash-alt" style="color:#ef4444;"></i></button>
             </div>
         </div>
     `).join('');
     
     document.getElementById('totalMedsCount').innerText = filtered.length;
+    updateTodayRemindersCount();
 }
 
-window.deleteMedication = function(id) {
+function editSchedule(medId) {
+    const med = myMedications.find(m => m.id === medId);
+    if (!med) return;
+    
+    const schedulesHtml = med.schedules && med.schedules.length > 0 
+        ? med.schedules.map((s, idx) => `
+            <div class="schedule-row">
+                <div class="schedule-time"><input type="time" value="${s.time}" class="edit-time-${medId}"></div>
+                <div class="schedule-dose"><input type="text" value="${s.dosage}" placeholder="Dose" class="edit-dose-${medId}"></div>
+                <button class="med-btn-danger" style="padding: 5px 10px;" onclick="removeScheduleRow(this)">❌</button>
+            </div>
+        `).join('')
+        : `<div class="schedule-row"><div class="schedule-time"><input type="time" value="08:00" class="edit-time-${medId}"></div><div class="schedule-dose"><input type="text" value="${med.dosage.split(' ')[0]}" placeholder="Dose" class="edit-dose-${medId}"></div></div>`;
+    
+    const modalHtml = `
+        <div id="scheduleEditModal" class="reminder-modal">
+            <div class="reminder-modal-content">
+                <h3>✏️ Edit Schedule: ${med.name}</h3>
+                <div id="scheduleEditContainer">${schedulesHtml}</div>
+                <button class="med-btn-outline" style="margin-top: 10px;" onclick="addScheduleRow('${medId}')">➕ Add Time</button>
+                <div class="scan-result-actions" style="margin-top: 20px;">
+                    <button class="med-btn-outline" onclick="closeScheduleModal()">Cancel</button>
+                    <button class="med-btn-primary" onclick="saveSchedule('${medId}')">💾 Save</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function addScheduleRow(medId) {
+    const container = document.getElementById('scheduleEditContainer');
+    const row = document.createElement('div');
+    row.className = 'schedule-row';
+    row.innerHTML = `
+        <div class="schedule-time"><input type="time" value="12:00" class="edit-time-${medId}"></div>
+        <div class="schedule-dose"><input type="text" placeholder="Dose" class="edit-dose-${medId}"></div>
+        <button class="med-btn-danger" style="padding: 5px 10px;" onclick="this.parentElement.remove()">❌</button>
+    `;
+    container.appendChild(row);
+}
+
+function removeScheduleRow(btn) {
+    btn.parentElement.remove();
+}
+
+function closeScheduleModal() {
+    const modal = document.getElementById('scheduleEditModal');
+    if (modal) modal.remove();
+}
+
+function saveSchedule(medId) {
+    const times = document.querySelectorAll(`.edit-time-${medId}`);
+    const doses = document.querySelectorAll(`.edit-dose-${medId}`);
+    const schedules = [];
+    
+    for (let i = 0; i < times.length; i++) {
+        if (times[i].value) {
+            schedules.push({
+                time: times[i].value,
+                dosage: doses[i] ? doses[i].value : 'As prescribed'
+            });
+        }
+    }
+    
+    const medIndex = myMedications.findIndex(m => m.id === medId);
+    if (medIndex !== -1) {
+        myMedications[medIndex].schedules = schedules;
+        localStorage.setItem('helios_my_medications', JSON.stringify(myMedications));
+        renderMyMedications();
+        renderReminders();
+        showNotification(`✅ Schedule updated for ${myMedications[medIndex].name}`, 'success');
+    }
+    
+    closeScheduleModal();
+}
+
+function deleteMedication(id) {
     if (confirm('❓ Are you sure you want to remove this medication?')) {
         myMedications = myMedications.filter(med => med.id !== id);
         localStorage.setItem('helios_my_medications', JSON.stringify(myMedications));
         renderMyMedications();
+        renderReminders();
+        updateTodayRemindersCount();
         showNotification('🗑️ Medication removed', 'info');
     }
-};
+}
 
-window.addReminderFromMedication = function(id) {
-    const med = myMedications.find(m => m.id === id);
-    if (med && typeof addReminder === 'function') {
-        addReminder(med.name, med.time === 'Morning' ? '08:00' : med.time === 'Afternoon' ? '13:00' : med.time === 'Evening' ? '19:00' : '21:00', med.dosage);
-        showNotification(`🔔 Reminder added for ${med.name}`, 'success');
-    } else {
-        showNotification('❌ Could not add reminder', 'error');
+function renderReminders() {
+    const container = document.getElementById('remindersList');
+    if (!container) return;
+    
+    const allReminders = [];
+    myMedications.forEach(med => {
+        if (med.schedules && med.schedules.length > 0) {
+            med.schedules.forEach(schedule => {
+                allReminders.push({
+                    medName: med.name,
+                    time: schedule.time,
+                    dosage: schedule.dosage,
+                    medId: med.id
+                });
+            });
+        }
+    });
+    
+    allReminders.sort((a, b) => a.time.localeCompare(b.time));
+    
+    if (allReminders.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><p>No reminders set. Add medication with schedule to see reminders here.</p></div>';
+        return;
     }
-};
+    
+    container.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+            ${allReminders.map(r => `
+                <div class="my-med-item" style="border-left: 4px solid #f59e0b;">
+                    <div class="my-med-info">
+                        <div class="my-med-icon"><i class="fas fa-bell" style="color:#f59e0b;"></i></div>
+                        <div>
+                            <div class="my-med-name">💊 ${r.medName}</div>
+                            <div class="my-med-dosage">⏰ ${r.time} | ⚖️ ${r.dosage}</div>
+                        </div>
+                    </div>
+                    <div class="my-med-actions">
+                        <button class="action-btn" onclick="editSchedule('${r.medId}')" title="Edit"><i class="fas fa-edit" style="color:#3b82f6;"></i></button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
 
+function updateTodayRemindersCount() {
+    let count = 0;
+    myMedications.forEach(med => {
+        if (med.schedules) count += med.schedules.length;
+    });
+    document.getElementById('todayRemindersCount').innerText = count;
+}
+
+// Manual save
 document.getElementById('saveManualMedBtn')?.addEventListener('click', () => {
     const name = document.getElementById('manualMedName')?.value.trim();
     const dosage = document.getElementById('manualDosage')?.value.trim();
-    const time = document.getElementById('manualTime')?.value;
-    const frequency = document.getElementById('manualFrequency')?.value;
     const instructions = document.getElementById('manualInstructions')?.value.trim();
     
     if (!name) {
@@ -3458,8 +3617,7 @@ document.getElementById('saveManualMedBtn')?.addEventListener('click', () => {
         id: Date.now().toString(),
         name: name,
         dosage: dosage || 'As prescribed',
-        frequency: frequency,
-        time: time,
+        schedules: [],
         instructions: instructions || 'Take as directed',
         dateAdded: new Date().toISOString(),
         source: 'manual'
@@ -3477,17 +3635,12 @@ document.getElementById('saveManualMedBtn')?.addEventListener('click', () => {
     document.querySelector('.med-tab-btn[data-tab="my-meds"]').click();
 });
 
-// ========== EVENT LISTENERS ==========
+// ==================== EVENT LISTENERS ====================
 document.getElementById('startScanBtn')?.addEventListener('click', startRealScanner);
 document.getElementById('stopScanBtn')?.addEventListener('click', stopRealScanner);
 document.getElementById('searchBarcodeBtn')?.addEventListener('click', searchByManualBarcode);
 document.getElementById('manualBarcodeInput')?.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') searchByManualBarcode();
-});
-
-document.getElementById('closeDrugModal')?.addEventListener('click', () => document.getElementById('drugModal').classList.add('hidden'));
-document.getElementById('drugModal')?.addEventListener('click', (e) => {
-    if (e.target === document.getElementById('drugModal')) document.getElementById('drugModal').classList.add('hidden');
 });
 
 // Tab switching
@@ -3501,6 +3654,7 @@ document.querySelectorAll('.med-tab-btn').forEach(btn => {
         
         if (tab === 'database') renderDrugDatabase();
         if (tab === 'my-meds') renderMyMedications();
+        if (tab === 'reminders') renderReminders();
         if (tab === 'scanner' && scannerActive) stopRealScanner();
     });
 });
@@ -3515,7 +3669,6 @@ document.querySelectorAll('.scanner-mode-btn').forEach(btn => {
         if (mode === 'camera') {
             document.getElementById('cameraScanMode').style.display = 'block';
             document.getElementById('manualScanMode').style.display = 'none';
-            if (scannerActive) stopRealScanner();
         } else {
             document.getElementById('cameraScanMode').style.display = 'none';
             document.getElementById('manualScanMode').style.display = 'block';
@@ -3532,6 +3685,8 @@ document.getElementById('myMedsSearch')?.addEventListener('input', renderMyMedic
 // Initial render
 renderDrugDatabase();
 renderMyMedications();
+renderReminders();
+updateTodayRemindersCount();
 
 // Add sidebar menu item
 function addMedicationsMenuItem() {
@@ -3555,6 +3710,7 @@ function addMedicationsMenuItem() {
         if (medPage) medPage.classList.add('active');
         renderDrugDatabase();
         renderMyMedications();
+        renderReminders();
         if (scannerActive) stopRealScanner();
     });
     
@@ -3563,8 +3719,9 @@ function addMedicationsMenuItem() {
 
 setTimeout(addMedicationsMenuItem, 1000);
 
-console.log('✅ Professional QR/Barcode Scanner System initialized!');
-console.log('📷 Features: Real camera scanner, barcode & QR code support, 50+ drugs database');
+console.log('✅ Professional Medications System Ready!');
+console.log('📷 Camera scanner works!');
+console.log('⏰ Reminders work automatically!');
 </script>
         </main>
     </div>
